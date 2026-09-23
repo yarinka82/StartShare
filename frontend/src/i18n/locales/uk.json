@@ -1,0 +1,252 @@
+{
+  "home": {
+    "welcome": "Вітаємо",
+    "description": "Реєстр об'єднання — члени, засновники та фінансові надходження в одному місці.",
+    "membersTitle": "Члени",
+    "membersDescription": "Переглянути список членів, засновників та їхні картки.",
+    "openRegistry": "Відкрити реєстр"
+  },
+  "nav": {
+    "home": "Головна",
+    "members": "Реєстр членів",
+    "cashDesk": "Каса та надходження",
+    "financeAnalytics": "Фінансовий огляд та аналітика",
+    "financeCharts": "Графіки та тренди",
+    "settings": "Налаштування"
+  },
+  "common": {
+    "all": "Всi",
+    "dateFrom": "Від",
+    "dateTo": "До",
+    "export": "Експорт",
+    "exportCSV": "Експорт у CSV (Excel)",
+    "exportPDF": "Експорт у PDF",
+    "yes": "Так",
+    "no": "Ні",
+    "refresh": "Оновити",
+    "save": "Зберегти",
+    "saving": "Збереження...",
+    "cancel": "Скасувати",
+    "create": "Створити",
+    "creating": "Створення...",
+    "back": "Назад",
+    "edit": "Редагувати",
+    "view": "Переглянути",
+    "delete": "Видалити",
+    "deleting": "Видалення...",
+    "actions": "Дії",
+    "clearFilters": "Очистити фільтри",
+    "loading": "Завантаження...",
+    "exportSuccess": "Файл CSV успішно завантажено",
+    "exportError": "Помилка експорту у CSV",
+    "printReady": "Вікно друку PDF відкрито",
+    "popupBlocked": "Дозвольте спливаючі вікна для друку PDF"
+  },
+  "members": {
+    "delete": "Видалити",
+    "deleteConfirmTitle": "Видалити члена?",
+    "deleteConfirmText": "Ви впевнені, що хочете видалити {{name}}? Цю дію неможливо скасувати.",
+    "deleteError": "Не вдалося видалити члена.",
+    "title": "Члени клубу",
+    "addMember": "Додати члена",
+    "editMember": "Редагувати члена",
+    "memberSince": "Член з",
+    "personalInfo": "Особиста інформація",
+    "firstName": "Ім'я",
+    "lastName": "Прізвище",
+    "fullName": "Повне ім'я",
+    "email": "Email",
+    "phone": "Телефон",
+    "birthDate": "Дата народження",
+    "joinedDate": "Дата вступу",
+    "address": "Адреса",
+    "status": "Статус",
+    "notes": "Примітки",
+    "statusActive": "Активний",
+    "statusInactive": "Неактивний",
+    "founder": "Засновник",
+    "isFounder": "Засновник",
+    "notFounder": "Не засновник",
+    "founderDescription": "Брав участь у засновницьких зборах",
+    "notFounderDescription": "Звичайний член клубу",
+    "showFoundersOnly": "Показати тільки засновників",
+    "searchPlaceholder": "Пошук за ім'ям, email, телефоном...",
+    "noMembers": "Немає членів",
+    "totalMembers": "Всього членів",
+    "showing": "Показано",
+    "payments": "Платежі",
+    "noPayments": "Немає платежів",
+    "registryTitle": "Реєстр членів",
+    "totalRecords": "{{count}} записів",
+    "onlyFounders": "тільки засновники",
+    "all": "Усі",
+    "founders": "Засновники",
+    "loadError": "Не вдалося завантажити список: {{error}}",
+    "emptyTitle": "Тут поки що порожньо",
+    "emptyDescription": "Додайте першого члена об'єднання, щоб почати реєстр.",
+    "founderTooltip": "Засновник об'єднання",
+    "updateSuccess": "Учасника оновлено",
+    "createSuccess": "Учасника створено",
+    "saveError": "Помилка збереження"
+  },
+  "settings": {
+    "title": "Налаштування",
+    "subtitle": "Обліковий запис та користувачі",
+    "you": "Ви",
+    "changePassword": "Змінити пароль",
+    "currentPassword": "Поточний пароль",
+    "newPassword": "Новий пароль",
+    "confirmNewPassword": "Підтвердіть новий пароль",
+    "passwordMismatch": "Новий пароль та підтвердження не збігаються.",
+    "passwordUpdated": "Пароль успішно оновлено.",
+    "passwordChangeError": "Не вдалося змінити пароль.",
+    "systemUsers": "Користувачі системи",
+    "addUser": "Додати користувача",
+    "newUser": "Новий користувач",
+    "username": "Ім'я користувача",
+    "email": "Email",
+    "password": "Пароль",
+    "role": "Роль",
+    "status": "Статус",
+    "admin": "Адміністратор",
+    "user": "Користувач",
+    "active": "Активний",
+    "inactive": "Неактивний",
+    "adminLabel": "Адміністратор (може керувати користувачами)",
+    "unexpectedResponse": "Неочікувана відповідь від сервера.",
+    "loadUsersError": "Не вдалося завантажити користувачів.",
+    "createUserError": "Не вдалося створити користувача.",
+    "updateUserError": "Не вдалося оновити користувача.",
+    "deleteUserError": "Не вдалося видалити користувача.",
+    "deleteUserTitle": "Видалити користувача?",
+    "deleteUserConfirm": "Ви впевнені, що хочете видалити користувача \"{{username}}\"? Цю дію неможливо скасувати.",
+    "editUser": "Редагувати користувача",
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "cannotDeleteSelf": "Не можна видалити себе",
+    "cannotEditSelfRole": "Не можна змінювати роль самого себе"
+  },
+  "login": {
+    "brandTitle": "Реєстр об'єднання",
+    "brandSubtitle": "Члени, внески та надходження — в одному місці.",
+    "title": "Вхід",
+    "subtitle": "Увійдіть, щоб продовжити роботу з реєстром.",
+    "usernameLabel": "Ім'я користувача",
+    "passwordLabel": "Пароль",
+    "showPassword": "Показати пароль",
+    "hidePassword": "Приховати пароль",
+    "submit": "Увійти",
+    "submitting": "Вхід...",
+    "errorGeneric": "Не вдалося увійти."
+  },
+  "payments": {
+    "title": {
+      "history": "Історія платежів"
+    },
+    "actions": {
+      "add": "Додати платіж"
+    },
+    "types": {
+      "membership_fee": "Членський внесок",
+      "donation": "Благодійний внесок",
+      "sponsorship": "Спонсорська підтримка",
+      "event": "Внесок за захід",
+      "grant": "Грант",
+      "other": "Інше"
+    },
+    "statuses": {
+      "paid": "Оплачено",
+      "owed": "Заборгованість",
+      "pending": "В очікуванні",
+      "cancelled": "Скасовано",
+      "refunded": "Повернено"
+    },
+    "empty": "Платежів ще немає",
+    "fields": {
+      "date": "Дата",
+      "type": "Тип",
+      "period": "Період",
+      "amount": "Сума",
+      "status": "Статус",
+      "sourceName": "Джерело",
+      "comment": "Коментар"
+    },
+    "summary": {
+      "totalPaid": "Оплачено",
+      "totalOwed": "Заборговано"
+    },
+    "dialogs": {
+      "addTitle": "Новий платіж",
+      "confirmDeleteTitle": "Видалити платіж?",
+      "confirmDeleteText": "Ви впевнені, що хочете видалити цей платіж на суму",
+      "editTitle": "Редагувати платіж",
+      "confirmDelete": "Видалити цей платіж?"
+    },
+    "validation": {
+      "amountRequired": "Вкажіть суму більше нуля"
+    },
+    "messages": {
+      "loadError": "Помилка завантаження платежів",
+      "createSuccess": "Платіж успішно додано",
+      "updateSuccess": "Платіж успішно оновлено",
+      "saveError": "Помилка збереження платежу",
+      "deleteSuccess": "Платіж успішно видалено",
+      "deleteError": "Не вдалося видалити платіж"
+    }
+  },
+  "cashDesk": {
+    "title": "Каса та журнал надходжень",
+    "subtitle": "Фінансовий облік",
+    "addIncome": "Додати надходження",
+    "addFirstIncome": "Додати перший платіж",
+    "totalTransactions": "Всього операцій",
+    "payerOrSource": "Платник / Джерело",
+    "searchPlaceholder": "Пошук за платником, джерелом, періодом...",
+    "emptyTitle": "Надходжень не знайдено",
+    "loadError": "Помилка завантаження каси",
+    "fields": {
+      "selectMember": "Член організації *",
+      "searchMemberPlaceholder": "Почніть вводити прізвище...",
+      "sourcePlaceholder": "Наприклад: Фонд Відродження, Анонімний донат"
+    },
+    "validation": {
+      "memberRequired": "Оберіть члена організації для членського внеску",
+      "sourceRequired": "Вкажіть назву джерела або фонду"
+    },
+    "dialog": {
+      "addTitle": "Нове фінансове надходження",
+      "editTitle": "Редагувати надходження"
+    }
+  },
+  "financeOverview": {
+    "title": "Фінансовий огляд",
+    "totalPaid": "Отримано (оплачено)",
+    "totalOwed": "Заборгованість",
+    "monthlyDynamics": "Динаміка по місяцях",
+    "subtitle": "Фінансова звітність та аналіз",
+    "today": "Поточний",
+    "yearSuffix": "рік",
+    "empty": "Немає фінансових операцій за цей період",
+    "totalIncomes": "Всього отримано",
+    "monthCol": "Місяць",
+    "dateCol": "Дата",
+    "totalPaidCol": "Всього сплачено",
+    "totalOwedCol": "Борг",
+    "loadError": "Не вдалося завантажити аналітику",
+    "modes": {
+      "month": "Місяць",
+      "quarter": "Квартал",
+      "year": "Рік"
+    }
+  },
+  "financeCharts": {
+    "title": "Динаміка та графіки",
+    "subtitle": "Візуалізація та тренди",
+    "totalPaid": "Отримано (оплачено)",
+    "totalOwed": "Заборгованість",
+    "chartTitle": "Динаміка надходжень",
+    "loadError": "Не вдалося завантажити графіки"
+}
+
+
+}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Члени</h1>
+
+<a href="{% url 'member-add' %}" class="btn btn-primary mb-3">+ Додати члена</a>
+
+<form method="get" class="mb-3 d-flex gap-2">
+    <select name="status" class="form-select" style="width:auto">
+        <option value="">Всі статуси</option>
+        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Активний</option>
+        <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Неактивний</option>
+    </select>
+    <label class="form-check-label d-flex align-items-center gap-1">
+        <input type="checkbox" name="is_founder" value="true"
+               {% if request.GET.is_founder == 'true' %}checked{% endif %}
+               onchange="this.form.submit()">
+        Тільки засновники
+    </label>
+    <button type="submit" class="btn btn-secondary">Фільтр</button>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Прізвище</th>
+            <th>Ім'я</th>
+            <th>Email</th>
+            <th>Телефон</th>
+            <th>Дата вступу</th>
+            <th>Статус</th>
+            <th>Засновник</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for member in members %}
+        <tr>
+            <td><a href="{% url 'member-detail' member.pk %}">{{ member.last_name }}</a></td>
+            <td>{{ member.first_name }}</td>
+            <td>{{ member.email }}</td>
+            <td>{{ member.phone }}</td>
+            <td>{{ member.join_date }}</td>
+            <td>{{ member.get_status_display }}</td>
+            <td>{% if member.is_founder %}✓{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">Немає членів.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

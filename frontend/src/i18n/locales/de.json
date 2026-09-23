@@ -1,0 +1,255 @@
+{
+  "home": {
+    "welcome": "Willkommen",
+    "description": "Vereinsregister — Mitglieder, Gründer und finanzielle Einnahmen an einem Ort.",
+    "membersTitle": "Mitglieder",
+    "membersDescription": "Liste der Mitglieder, Gründer und deren Karten anzeigen.",
+    "openRegistry": "Register öffnen"
+  },
+  "nav": {
+    "home": "Übersicht",
+    "members": "Mitgliederverzeichnis",
+    "cashDesk": "Kasse & Einnahmen",
+    "financeAnalytics": "Finanzanalyse & Berichte",
+    "financeCharts": "Diagramme & Trends",
+    "settings": "Einstellungen"
+  },
+  "common": {
+    "all": "Alle",
+    "dateFrom": "Von",
+    "dateTo": "Bis",
+    "export": "Exportieren",
+    "exportCSV": "Export als CSV (Excel)",
+    "exportPDF": "Export als PDF",
+    "yes": "Ja",
+    "no": "Nein",
+    "refresh": "Aktualisieren",
+    "save": "Speichern",
+    "saving": "Speichern...",
+    "cancel": "Abbrechen",
+    "create": "Erstellen",
+    "creating": "Erstellen...",
+    "back": "Zurück",
+    "edit": "Bearbeiten",
+    "view": "Ansehen",
+    "delete": "Löschen",
+    "deleting": "Löschen...",
+    "actions": "Aktionen",
+    "clearFilters": "Filter löschen",
+    "loading": "Laden...",
+    "exportSuccess": "CSV-Datei erfolgreich exportiert",
+    "exportError": "Fehler beim CSV-Export",
+    "printReady": "PDF-Druckfenster geöffnet",
+    "popupBlocked": "Bitte Pop-ups für den PDF-Druck erlauben"
+  },
+  "members": {
+    "delete": "Löschen",
+    "deleteConfirmTitle": "Mitglied löschen?",
+    "deleteConfirmText": "Sind Sie sicher, dass Sie {{name}} löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteError": "Mitglied konnte nicht gelöscht werden.",
+    "title": "Vereinsmitglieder",
+    "addMember": "Mitglied hinzufügen",
+    "editMember": "Mitglied bearbeiten",
+    "memberSince": "Mitglied seit",
+    "personalInfo": "Persönliche Informationen",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "fullName": "Vollständiger Name",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "birthDate": "Geburtsdatum",
+    "joinedDate": "Beitrittsdatum",
+    "address": "Adresse",
+    "status": "Status",
+    "notes": "Notizen",
+    "statusActive": "Aktiv",
+    "statusInactive": "Inaktiv",
+    "founder": "Gründer",
+    "isFounder": "Gründer",
+    "notFounder": "Kein Gründer",
+    "founderDescription": "Hat an der Gründungsversammlung teilgenommen",
+    "notFounderDescription": "Reguläres Vereinsmitglied",
+    "showFoundersOnly": "Nur Gründer anzeigen",
+    "searchPlaceholder": "Suche nach Name, E-Mail, Telefon...",
+    "noMembers": "Keine Mitglieder",
+    "totalMembers": "Mitglieder insgesamt",
+    "showing": "Angezeigt",
+    "payments": "Zahlungen",
+    "noPayments": "Keine Zahlungen",
+    "registryTitle": "Mitgliederverzeichnis",
+    "totalRecords": "{{count}} Einträge",
+    "onlyFounders": "nur Gründer",
+    "all": "Alle",
+    "founders": "Gründer",
+    "loadError": "Fehler beim Laden der Liste: {{error}}",
+    "emptyTitle": "Noch leer",
+    "emptyDescription": "Fügen Sie das erste Mitglied hinzu, um das Verzeichnis zu starten.",
+    "founderTooltip": "Gründer des Vereins",
+    "updateSuccess": "Mitglied aktualisiert",
+    "createSuccess": "Mitglied erstellt",
+    "saveError": "Fehler beim Speichern"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "subtitle": "Konto und Benutzer",
+    "you": "Sie",
+    "changePassword": "Passwort ändern",
+    "currentPassword": "Aktuelles Passwort",
+    "newPassword": "Neues Passwort",
+    "confirmNewPassword": "Neues Passwort bestätigen",
+    "passwordMismatch": "Das neue Passwort und die Bestätigung stimmen nicht überein.",
+    "passwordUpdated": "Passwort erfolgreich aktualisiert.",
+    "passwordChangeError": "Passwort konnte nicht geändert werden.",
+    "systemUsers": "Systembenutzer",
+    "addUser": "Benutzer hinzufügen",
+    "newUser": "Neuer Benutzer",
+    "username": "Benutzername",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "role": "Rolle",
+    "status": "Status",
+    "admin": "Administrator",
+    "user": "Benutzer",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "adminLabel": "Administrator (kann Benutzer verwalten)",
+    "unexpectedResponse": "Unerwartete Antwort vom Server.",
+    "loadUsersError": "Benutzer konnten nicht geladen werden.",
+    "createUserError": "Benutzer konnte nicht erstellt werden.",
+    "updateUserError": "Benutzer konnte nicht aktualisiert werden.",
+    "deleteUserError": "Benutzer konnte nicht gelöscht werden.",
+    "deleteUserTitle": "Benutzer löschen?",
+    "deleteUserConfirm": "Sind Sie sicher, dass Sie den Benutzer \"{{username}}\" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "editUser": "Benutzer bearbeiten",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "cannotDeleteSelf": "Sie können sich nicht selbst löschen",
+    "cannotEditSelfRole": "Sie können Ihre eigene Rolle nicht ändern"
+  },
+  "login": {
+    "brandTitle": "Vereinsregister",
+    "brandSubtitle": "Mitglieder, Beiträge und Einnahmen an einem Ort.",
+    "title": "Anmelden",
+    "subtitle": "Melden Sie sich an, um mit dem Register zu arbeiten.",
+    "usernameLabel": "Benutzername",
+    "passwordLabel": "Passwort",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort ausblenden",
+    "submit": "Anmelden",
+    "submitting": "Anmeldung...",
+    "errorGeneric": "Anmeldung fehlgeschlagen."
+  },
+  "payments": {
+    "types": {
+      "membership_fee": "Mitgliedsbeitrag",
+      "donation": "Spende",
+      "sponsorship": "Sponsoring",
+      "event": "Veranstaltungsgebühr",
+      "grant": "Zuschuss / Förderung",
+      "other": "Sonstiges"
+    },
+    "statuses": {
+      "paid": "Bezahlt",
+      "owed": "Ausstehend",
+      "pending": "Ausstehend",
+      "cancelled": "Storniert",
+      "refunded": "Erstattet"
+    },
+    "title": {
+      "history": "Zahlungshistorie"
+    },
+    "actions": {
+      "add": "Zahlung hinzufügen"
+    },
+    "empty": "Noch keine Zahlungen vorhanden",
+    "fields": {
+      "date": "Datum",
+      "type": "Typ",
+      "period": "Zeitraum",
+      "amount": "Betrag",
+      "status": "Status",
+      "sourceName": "Quelle",
+      "comment": "Kommentar"
+    },
+    "summary": {
+      "totalPaid": "Bezahlt",
+      "totalOwed": "Ausstehend"
+    },
+    "dialogs": {
+      "addTitle": "Neue Zahlung",
+      "editTitle": "Zahlung bearbeiten",
+      "confirmDelete": "Möchten Sie diese Zahlung wirklich löschen?",
+      "confirmDeleteTitle": "Zahlung löschen?",
+      "confirmDeleteText": "Sind Sie sicher, dass Sie diese Zahlung in Höhe von löschen möchten:"
+    },
+    "validation": {
+      "amountRequired": "Bitte geben Sie einen Betrag größer als null ein"
+    },
+    "messages": {
+      "loadError": "Fehler beim Laden der Zahlungen",
+      "createSuccess": "Zahlung erfolgreich hinzugefügt",
+      "updateSuccess": "Zahlung erfolgreich aktualisiert",
+      "saveError": "Fehler beim Speichern der Zahlung",
+      "deleteSuccess": "Zahlung erfolgreich gelöscht",
+      "deleteError": "Zahlung konnte nicht gelöscht werden"
+    }
+  },
+  "cashDesk": {
+    "title": "Kasse & Einnahmenjournal",
+    "subtitle": "Finanzbuchhaltung",
+    "addIncome": "Einnahme hinzufügen",
+    "addFirstIncome": "Erste Zahlung hinzufügen",
+    "totalTransactions": "Gesamttransaktionen",
+    "payerOrSource": "Zahler / Quelle",
+    "searchPlaceholder": "Suche nach Zahler, Quelle, Zeitraum...",
+    "emptyTitle": "Keine Einnahmen gefunden",
+    "loadError": "Fehler beim Laden der Kassendaten",
+    "fields": {
+      "selectMember": "Mitglied der Organisation *",
+      "searchMemberPlaceholder": "Name eingeben...",
+      "sourcePlaceholder": "Z.B.: Renaissance-Stiftung, Spende"
+    },
+    "validation": {
+      "memberRequired": "Bitte wählen Sie ein Mitglied für den Beitrag aus",
+      "sourceRequired": "Bitte geben Sie die Quelle oder Organisation an"
+    },
+    "dialog": {
+      "addTitle": "Neue Einnahme",
+      "editTitle": "Einnahme bearbeiten"
+    }
+  },
+  "financeOverview": {
+    "totalPaid": "Erhalten (bezahlt)",
+    "monthlyDynamics": "Monatliche Entwicklung",
+    "loadError": "Finanzübersicht konnte nicht geladen werden",
+    "title": "Finanzanalyse & Berichte",
+    "subtitle": "Finanzberichterstattung und Aufschlüsselung",
+    "today": "Aktuell",
+    "yearSuffix": "Jahr",
+    "empty": "Keine Transaktionen im ausgewählten Zeitraum",
+    "totalIncomes": "Gesamteinnahmen",
+    "totalOwed": "Ausstehende Beträge",
+    "monthCol": "Monat",
+    "dateCol": "Datum",
+    "totalPaidCol": "Bezahlt Gesamt",
+    "totalOwedCol": "Rückstand",
+    "modes": {
+      "month": "Monat",
+      "quarter": "Quartal",
+      "year": "Jahr"
+    }
+  },
+  "financeCharts": {
+  "title": "Finanzdiagramme & Trends",
+    "subtitle": "Visualisierung und Einnahmentrends",
+    "totalPaid": "Erhalten (bezahlt)",
+    "totalOwed": "Ausstehend",
+    "chartTitle": "Einnahmendynamik",
+    "loadError": "Diagramme konnten nicht geladen werden"
+}
+
+
+
+
+
+}

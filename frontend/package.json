@@ -1,0 +1,33 @@
+{
+  "name": "crm-verien-frontend",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite ",
+    "dev:docker": "vite --mode docker",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^9.4.0",
+    "@mui/material": "^9.4.0",
+    "@mui/x-date-pickers": "^9.12.0",
+    "axios": "^1.7.2",
+    "dayjs": "^1.11.23",
+    "i18next": "^26.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-i18next": "^17.0.12",
+    "react-router-dom": "^6.26.1",
+    "recharts": "^3.10.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.2"
+  }
+}

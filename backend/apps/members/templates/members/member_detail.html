@@ -1,0 +1,18 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ member.last_name }} {{ member.first_name }}</h1>
+
+<p>Email: {{ member.email }}</p>
+<p>Телефон: {{ member.phone }}</p>
+<p>Дата вступу: {{ member.join_date }}</p>
+<p>Статус: {{ member.get_status_display }}</p>
+<p>Засновник: {% if member.is_founder %}Так{% else %}Ні{% endif %}</p>
+
+<a href="{% url 'member-edit' member.pk %}" class="btn btn-secondary">Редагувати</a>
+
+<h2 class="mt-4">Історія платежів</h2>
+<!-- TODO: підключити після готовності модуля payments -->
+<p><em>Буде додано, коли з'явиться модель Payment.</em></p>
+
+{% endblock %}
