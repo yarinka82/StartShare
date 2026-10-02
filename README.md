@@ -185,6 +185,25 @@ The investor confirms such adjustments explicitly. Hidden score-based weighting 
 
 ## System architecture
 
+### Architecture overview
+
+```text
+React
+   │
+   │ REST API
+   ▼
+Django + DRF
+   │
+   ├── PostgreSQL
+   ├── Redis
+   ├── Celery
+   ├── Object Storage
+   ├── Email provider
+   └── AI Provider
+```
+
+The platform uses a React frontend that communicates with a Django + DRF backend through a REST API. The backend implements the business logic for matchmaking, profile workflows, consent handling, and user management. Data persistence is handled primarily by PostgreSQL, while Redis supports caching, session storage, and asynchronous job coordination. Celery runs background tasks such as email sending, periodic digests, and AI-powered content generation. Uploaded files and generated assets are stored in an S3-compatible object store. External services such as the email provider and the AI provider are integrated through the backend to keep the frontend decoupled from infrastructure details.
+
 ### Backend
 
 - Python 3.12+
@@ -220,11 +239,16 @@ StartShare/
 │   │   ├── wsgi.py
 │   │   └── asgi.py
 │   ├── apps/                             # domain-driven Django apps
-│   │   ├── startups/                     # startup profiles and teaser logic
+│   │   ├── accounts/                     # authentication, users, roles, profiles
+│   │   ├── startups/                     # startup profiles, teaser logic, approvals
 │   │   ├── investors/                    # investor profiles and mandates
-│   │   ├── matching/                     # matching logic and introduction states
-│   │   ├── events/                       # event logging
-│   │   └── core/                         # shared models, mixins, utilities
+│   │   ├── matching/                     # rule-based matching and recommendation logic
+│   │   ├── introductions/               # introduction flow, consent and disclosure states
+│   │   ├── ai/                           # AI generation, prompt orchestration, content review
+│   │   ├── notifications/                # email, digest, in-app notifications
+│   │   ├── analytics/                    # event logging, funnel metrics, reporting
+│   │   ├── common/                       # shared utilities, base models, mixins
+│   │   └── ...
 │   ├── manage.py
 │   ├── requirements/
 │   │   ├── base.txt
