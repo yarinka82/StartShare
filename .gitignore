@@ -21,3 +21,9 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+.venv/
+__pycache__/
+*.pyc
+db.sqlite3
+.env
+.idea/
