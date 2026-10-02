@@ -1,62 +1,29 @@
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { ButtonGroup, Button } from '@mui/material';
+import { LANGUAGES } from "../i18n";
 
-const languages = [
-  { code: 'uk', label: 'УКР' },
-  { code: 'de', label: 'DE' },
-  { code: 'en', label: 'EN' },
-];
-
-const LanguageSwitcher: React.FC = () => {
-  const { i18n } = useTranslation();
-
-  const changeLanguage = (lang: string) => {
-    i18n.changeLanguage(lang);
-    localStorage.setItem('lang', lang);
-  };
-
+/** `onDark` = white text for the blue app bar; set to false on light backgrounds. */
+export default function LanguageSwitcher({ onDark = true }: { onDark?: boolean }) {
+  const { i18n, t } = useTranslation();
   return (
-    <ButtonGroup
-      variant="outlined"
+    <ToggleButtonGroup
       size="small"
-      aria-label="Мова інтерфейсу"
-      sx={{
-        borderRadius: '8px',
-        overflow: 'hidden',
-        '& .MuiButtonGroup-grouped': {
-          borderColor: 'divider',
-        },
-      }}
+      exclusive
+      value={i18n.resolvedLanguage}
+      onChange={(_, code: string | null) => code && i18n.changeLanguage(code)}
+      aria-label={t("nav.language")}
+      sx={
+        onDark
+          ? { bgcolor: "rgba(255,255,255,0.12)", "& .MuiToggleButton-root": { color: "inherit", px: 1.2, py: 0.3 } }
+          : { "& .MuiToggleButton-root": { px: 1.2, py: 0.3 } }
+      }
     >
-      {languages.map((lang) => {
-        const active = i18n.language === lang.code;
-        return (
-          <Button
-            key={lang.code}
-            onClick={() => changeLanguage(lang.code)}
-            aria-pressed={active}
-            sx={{
-              px: 1.75,
-              py: 0.5,
-              fontFamily: '"IBM Plex Mono", monospace',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              letterSpacing: '0.04em',
-              color: active ? 'primary.contrastText' : 'text.secondary',
-              bgcolor: active ? 'primary.main' : 'transparent',
-              '&:hover': {
-                bgcolor: active ? 'primary.dark' : 'rgba(47, 111, 94, 0.08)',
-              },
-            }}
-          >
-            {lang.label}
-          </Button>
-        );
-      })}
-    </ButtonGroup>
+      {LANGUAGES.map((l) => (
+        <ToggleButton key={l.code} value={l.code}>
+          {l.label}
+        </ToggleButton>
+      ))}
+    </ToggleButtonGroup>
   );
-};
-
-export default LanguageSwitcher;
+}

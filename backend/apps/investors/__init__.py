@@ -1,0 +1,1 @@
+# InvestorProfile, критерии (mandate)

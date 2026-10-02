@@ -1,252 +1,209 @@
 {
-  "home": {
-    "welcome": "Вітаємо",
-    "description": "Реєстр об'єднання — члени, засновники та фінансові надходження в одному місці.",
-    "membersTitle": "Члени",
-    "membersDescription": "Переглянути список членів, засновників та їхні картки.",
-    "openRegistry": "Відкрити реєстр"
+  "app": {
+    "name": "Start Share"
   },
   "nav": {
-    "home": "Головна",
-    "members": "Реєстр членів",
-    "cashDesk": "Каса та надходження",
-    "financeAnalytics": "Фінансовий огляд та аналітика",
-    "financeCharts": "Графіки та тренди",
-    "settings": "Налаштування"
+    "logout": "Вийти",
+    "language": "Мова"
   },
   "common": {
-    "all": "Всi",
-    "dateFrom": "Від",
-    "dateTo": "До",
-    "export": "Експорт",
-    "exportCSV": "Експорт у CSV (Excel)",
-    "exportPDF": "Експорт у PDF",
-    "yes": "Так",
-    "no": "Ні",
-    "refresh": "Оновити",
-    "save": "Зберегти",
-    "saving": "Збереження...",
-    "cancel": "Скасувати",
-    "create": "Створити",
-    "creating": "Створення...",
-    "back": "Назад",
-    "edit": "Редагувати",
-    "view": "Переглянути",
-    "delete": "Видалити",
-    "deleting": "Видалення...",
-    "actions": "Дії",
-    "clearFilters": "Очистити фільтри",
-    "loading": "Завантаження...",
-    "exportSuccess": "Файл CSV успішно завантажено",
-    "exportError": "Помилка експорту у CSV",
-    "printReady": "Вікно друку PDF відкрито",
-    "popupBlocked": "Дозвольте спливаючі вікна для друку PDF"
-  },
-  "members": {
-    "delete": "Видалити",
-    "deleteConfirmTitle": "Видалити члена?",
-    "deleteConfirmText": "Ви впевнені, що хочете видалити {{name}}? Цю дію неможливо скасувати.",
-    "deleteError": "Не вдалося видалити члена.",
-    "title": "Члени клубу",
-    "addMember": "Додати члена",
-    "editMember": "Редагувати члена",
-    "memberSince": "Член з",
-    "personalInfo": "Особиста інформація",
-    "firstName": "Ім'я",
-    "lastName": "Прізвище",
-    "fullName": "Повне ім'я",
-    "email": "Email",
-    "phone": "Телефон",
-    "birthDate": "Дата народження",
-    "joinedDate": "Дата вступу",
-    "address": "Адреса",
-    "status": "Статус",
-    "notes": "Примітки",
-    "statusActive": "Активний",
-    "statusInactive": "Неактивний",
-    "founder": "Засновник",
-    "isFounder": "Засновник",
-    "notFounder": "Не засновник",
-    "founderDescription": "Брав участь у засновницьких зборах",
-    "notFounderDescription": "Звичайний член клубу",
-    "showFoundersOnly": "Показати тільки засновників",
-    "searchPlaceholder": "Пошук за ім'ям, email, телефоном...",
-    "noMembers": "Немає членів",
-    "totalMembers": "Всього членів",
-    "showing": "Показано",
-    "payments": "Платежі",
-    "noPayments": "Немає платежів",
-    "registryTitle": "Реєстр членів",
-    "totalRecords": "{{count}} записів",
-    "onlyFounders": "тільки засновники",
-    "all": "Усі",
-    "founders": "Засновники",
-    "loadError": "Не вдалося завантажити список: {{error}}",
-    "emptyTitle": "Тут поки що порожньо",
-    "emptyDescription": "Додайте першого члена об'єднання, щоб почати реєстр.",
-    "founderTooltip": "Засновник об'єднання",
-    "updateSuccess": "Учасника оновлено",
-    "createSuccess": "Учасника створено",
-    "saveError": "Помилка збереження"
-  },
-  "settings": {
-    "title": "Налаштування",
-    "subtitle": "Обліковий запис та користувачі",
-    "you": "Ви",
-    "changePassword": "Змінити пароль",
-    "currentPassword": "Поточний пароль",
-    "newPassword": "Новий пароль",
-    "confirmNewPassword": "Підтвердіть новий пароль",
-    "passwordMismatch": "Новий пароль та підтвердження не збігаються.",
-    "passwordUpdated": "Пароль успішно оновлено.",
-    "passwordChangeError": "Не вдалося змінити пароль.",
-    "systemUsers": "Користувачі системи",
-    "addUser": "Додати користувача",
-    "newUser": "Новий користувач",
-    "username": "Ім'я користувача",
-    "email": "Email",
+    "email": "E-mail",
     "password": "Пароль",
-    "role": "Роль",
-    "status": "Статус",
-    "admin": "Адміністратор",
-    "user": "Користувач",
-    "active": "Активний",
-    "inactive": "Неактивний",
-    "adminLabel": "Адміністратор (може керувати користувачами)",
-    "unexpectedResponse": "Неочікувана відповідь від сервера.",
-    "loadUsersError": "Не вдалося завантажити користувачів.",
-    "createUserError": "Не вдалося створити користувача.",
-    "updateUserError": "Не вдалося оновити користувача.",
-    "deleteUserError": "Не вдалося видалити користувача.",
-    "deleteUserTitle": "Видалити користувача?",
-    "deleteUserConfirm": "Ви впевнені, що хочете видалити користувача \"{{username}}\"? Цю дію неможливо скасувати.",
-    "editUser": "Редагувати користувача",
-    "edit": "Редагувати",
+    "cancel": "Скасувати",
     "delete": "Видалити",
-    "cannotDeleteSelf": "Не можна видалити себе",
-    "cannotEditSelfRole": "Не можна змінювати роль самого себе"
+    "backToLogin": "Назад до входу",
+    "eur": "EUR",
+    "showPassword": "Показати пароль",
+    "hidePassword": "Сховати пароль"
+  },
+  "roles": {
+    "startup": "Стартап",
+    "investor": "Інвестор"
+  },
+  "register": {
+    "title": "Створити акаунт",
+    "iAm": "Я реєструюсь як",
+    "passwordHelper": "Щонайменше 8 символів.",
+    "agb": "Я приймаю <link>Загальні умови (AGB)</link>.",
+    "datenschutz": "Я ознайомився/лась із <link>Політикою конфіденційності (Datenschutzerklärung)</link>.",
+    "submit": "Зареєструватися",
+    "haveAccount": "Вже є акаунт? Увійти",
+    "doneTitle": "Перевірте пошту",
+    "doneText": "Якщо цю адресу можна зареєструвати, ми надіслали на неї посилання для підтвердження. Підтвердіть e-mail, перш ніж входити.",
+    "confirmPassword": "Повторіть пароль",
+    "passwordMismatch": "Паролі не збігаються."
   },
   "login": {
-    "brandTitle": "Реєстр об'єднання",
-    "brandSubtitle": "Члени, внески та надходження — в одному місці.",
     "title": "Вхід",
-    "subtitle": "Увійдіть, щоб продовжити роботу з реєстром.",
-    "usernameLabel": "Ім'я користувача",
-    "passwordLabel": "Пароль",
-    "showPassword": "Показати пароль",
-    "hidePassword": "Приховати пароль",
     "submit": "Увійти",
-    "submitting": "Вхід...",
-    "errorGeneric": "Не вдалося увійти."
+    "forgot": "Забули пароль?",
+    "noAccount": "Ще немає акаунта? Зареєструватися",
+    "notVerified": "Спочатку підтвердіть e-mail. Посилання чекає у вашій пошті.",
+    "resend": "Надіслати посилання ще раз",
+    "resent": "Якщо ця адреса чекає на підтвердження, ми надіслали нове посилання."
   },
-  "payments": {
-    "title": {
-      "history": "Історія платежів"
+  "verify": {
+    "verifying": "Підтверджуємо ваш e-mail…",
+    "success": "E-mail підтверджено. Тепер можна увійти.",
+    "failed": "Посилання недійсне або термін його дії минув. Увійдіть, щоб запросити нове."
+  },
+  "forgot": {
+    "title": "Скидання пароля",
+    "text": "Введіть e-mail, і ми надішлемо вам посилання.",
+    "submit": "Надіслати посилання",
+    "done": "Якщо для цієї адреси існує акаунт, ми надіслали посилання."
+  },
+  "reset": {
+    "title": "Новий пароль",
+    "newPassword": "Новий пароль",
+    "submit": "Зберегти пароль",
+    "done": "Пароль змінено. Тепер можна увійти."
+  },
+  "legal": {
+    "agb": "Загальні умови (AGB)",
+    "datenschutz": "Політика конфіденційності (Datenschutzerklärung)",
+    "placeholder": "Юридичний текст надасть юрист, і його буде додано тут.",
+    "openInNewTab": "Відкрити в новій вкладці",
+    "close": "Закрити",
+    "impressum": "Вихідні дані (Impressum)",
+    "back": "Назад"
+  },
+  "investor": {
+    "title": "Вітаємо",
+    "text": "Ваш акаунт інвестора створено. Критерії відбору та щотижневі тизери з'являться в наступному релізі."
+  },
+  "profile": {
+    "title": "Профіль стартапу",
+    "intro": "Заповніть профіль і завантажте Pitch Deck. Усе автоматично зберігається як чернетка.",
+    "status": {
+      "DRAFT": "Чернетка",
+      "LIVE": "Опубліковано",
+      "PAUSED": "На паузі",
+      "REMOVED": "Видалено"
     },
-    "actions": {
-      "add": "Додати платіж"
+    "saving": "Зберігаємо…",
+    "saved": "Збережено",
+    "saveError": "Не вдалося зберегти",
+    "sections": {
+      "basics": "Основне",
+      "metrics": "Метрики",
+      "deck": "Pitch Deck"
     },
-    "types": {
-      "membership_fee": "Членський внесок",
-      "donation": "Благодійний внесок",
-      "sponsorship": "Спонсорська підтримка",
-      "event": "Внесок за захід",
-      "grant": "Грант",
+    "fields": {
+      "company_name": "Назва компанії",
+      "sector": "Сектор",
+      "stage": "Стадія",
+      "country": "Країна",
+      "amount_sought": "Сума, яку шукаєте",
+      "mrr": "MRR (щомісячний регулярний дохід)",
+      "growth_percent": "Зростання",
+      "growth_period": "Період зростання",
+      "team_size": "Розмір команди",
+      "deck": "Pitch Deck",
+      "business_model": "Модель бізнесу"
+    },
+    "companyHelper": "Лише для внутрішнього використання. Інвесторам не показується.",
+    "optional": "необов'язково",
+    "growthPeriods": {
+      "mom": "Місяць до місяця",
+      "yoy": "Рік до року"
+    },
+    "missing": "Для повного профілю ще бракує:",
+    "complete": "Профіль заповнено. Наступні кроки (тизер і публікація) з'являться в наступному релізі."
+  },
+  "deck": {
+    "dropHere": "Перетягніть PDF сюди або",
+    "choose": "оберіть файл",
+    "hint": "Лише PDF, до {{max}} МБ",
+    "uploading": "Завантаження…",
+    "replace": "Замінити",
+    "download": "Завантажити",
+    "remove": "Видалити",
+    "removeTitle": "Видалити Pitch Deck?",
+    "removeText": "Файл буде видалено назавжди.",
+    "uploaded": "Завантажено {{date}}"
+  },
+  "dict": {
+    "sectors": {
+      "fintech": "FinTech",
+      "insurtech": "InsurTech",
+      "healthtech-medtech": "HealthTech і MedTech",
+      "biotech": "BioTech",
+      "edtech": "EdTech",
+      "proptech-contech": "PropTech і ConTech",
+      "climatetech-energy": "ClimateTech і енергетика",
+      "mobility-logistics": "Мобільність і логістика",
+      "foodtech-agritech": "FoodTech і AgriTech",
+      "ecommerce-retailtech": "E-Commerce і RetailTech",
+      "hr-tech": "HR Tech",
+      "legaltech-regtech": "LegalTech і RegTech",
+      "cybersecurity": "Кібербезпека",
+      "ai-data": "AI і дані",
+      "enterprise-software": "Корпоративне ПЗ",
+      "deeptech-hardware": "DeepTech і Hardware",
+      "industrie-4-0": "Industrie 4.0",
+      "media-entertainment-gaming": "Медіа, розваги, ігри",
+      "travel-hospitality": "Туризм і гостинність",
       "other": "Інше"
     },
-    "statuses": {
-      "paid": "Оплачено",
-      "owed": "Заборгованість",
-      "pending": "В очікуванні",
-      "cancelled": "Скасовано",
-      "refunded": "Повернено"
+    "countries": {
+      "de": "Німеччина",
+      "at": "Австрія",
+      "ch": "Швейцарія",
+      "nl": "Нідерланди",
+      "fr": "Франція",
+      "pl": "Польща",
+      "ua": "Україна",
+      "other": "Інше"
     },
-    "empty": "Платежів ще немає",
-    "fields": {
-      "date": "Дата",
-      "type": "Тип",
-      "period": "Період",
-      "amount": "Сума",
-      "status": "Статус",
-      "sourceName": "Джерело",
-      "comment": "Коментар"
+    "stages": {
+      "pre-seed": "Pre-Seed",
+      "seed": "Seed",
+      "series-a": "Series A",
+      "series-b": "Series B",
+      "series-c-plus": "Series C і пізніше"
     },
-    "summary": {
-      "totalPaid": "Оплачено",
-      "totalOwed": "Заборговано"
-    },
-    "dialogs": {
-      "addTitle": "Новий платіж",
-      "confirmDeleteTitle": "Видалити платіж?",
-      "confirmDeleteText": "Ви впевнені, що хочете видалити цей платіж на суму",
-      "editTitle": "Редагувати платіж",
-      "confirmDelete": "Видалити цей платіж?"
-    },
-    "validation": {
-      "amountRequired": "Вкажіть суму більше нуля"
-    },
-    "messages": {
-      "loadError": "Помилка завантаження платежів",
-      "createSuccess": "Платіж успішно додано",
-      "updateSuccess": "Платіж успішно оновлено",
-      "saveError": "Помилка збереження платежу",
-      "deleteSuccess": "Платіж успішно видалено",
-      "deleteError": "Не вдалося видалити платіж"
+    "businessModels": {
+      "saas-subscription": "SaaS і підписка",
+      "marketplace-platform": "Маркетплейс і платформа",
+      "ecommerce-d2c": "E-Commerce і D2C",
+      "hardware-sales": "Продаж обладнання",
+      "licensing": "Ліцензування",
+      "services": "Послуги",
+      "transaction-fee": "Транзакційна модель",
+      "other": "Інше"
     }
   },
-  "cashDesk": {
-    "title": "Каса та журнал надходжень",
-    "subtitle": "Фінансовий облік",
-    "addIncome": "Додати надходження",
-    "addFirstIncome": "Додати перший платіж",
-    "totalTransactions": "Всього операцій",
-    "payerOrSource": "Платник / Джерело",
-    "searchPlaceholder": "Пошук за платником, джерелом, періодом...",
-    "emptyTitle": "Надходжень не знайдено",
-    "loadError": "Помилка завантаження каси",
-    "fields": {
-      "selectMember": "Член організації *",
-      "searchMemberPlaceholder": "Почніть вводити прізвище...",
-      "sourcePlaceholder": "Наприклад: Фонд Відродження, Анонімний донат"
-    },
-    "validation": {
-      "memberRequired": "Оберіть члена організації для членського внеску",
-      "sourceRequired": "Вкажіть назву джерела або фонду"
-    },
-    "dialog": {
-      "addTitle": "Нове фінансове надходження",
-      "editTitle": "Редагувати надходження"
-    }
+  "errors": {
+    "generic": "Щось пішло не так. Спробуйте ще раз.",
+    "network": "Немає з'єднання із сервером.",
+    "throttled": "Забагато спроб. Спробуйте пізніше.",
+    "accept_agb_required": "Прийміть Загальні умови (AGB).",
+    "accept_datenschutz_required": "Підтвердьте, що ознайомились із Політикою конфіденційності.",
+    "growth_period_required": "Оберіть період зростання.",
+    "deck_empty": "Файл порожній.",
+    "deck_too_large": "Файл більший за {{max}} МБ.",
+    "deck_not_pdf": "Приймаються лише файли PDF.",
+    "deck_password_protected": "PDF захищено паролем. Завантажте файл без захисту.",
+    "deck_corrupted": "PDF пошкоджено, його неможливо прочитати.",
+    "invalid_credentials": "Невірний e-mail або пароль.",
+    "email_not_verified": "Спочатку підтвердіть e-mail.",
+    "invalid_or_expired_token": "Посилання недійсне або термін його дії минув."
   },
-  "financeOverview": {
-    "title": "Фінансовий огляд",
-    "totalPaid": "Отримано (оплачено)",
-    "totalOwed": "Заборгованість",
-    "monthlyDynamics": "Динаміка по місяцях",
-    "subtitle": "Фінансова звітність та аналіз",
-    "today": "Поточний",
-    "yearSuffix": "рік",
-    "empty": "Немає фінансових операцій за цей період",
-    "totalIncomes": "Всього отримано",
-    "monthCol": "Місяць",
-    "dateCol": "Дата",
-    "totalPaidCol": "Всього сплачено",
-    "totalOwedCol": "Борг",
-    "loadError": "Не вдалося завантажити аналітику",
-    "modes": {
-      "month": "Місяць",
-      "quarter": "Квартал",
-      "year": "Рік"
-    }
+  "footer": {
+    "agb": "Умови (AGB)",
+    "datenschutz": "Конфіденційність",
+    "impressum": "Impressum"
   },
-  "financeCharts": {
-    "title": "Динаміка та графіки",
-    "subtitle": "Візуалізація та тренди",
-    "totalPaid": "Отримано (оплачено)",
-    "totalOwed": "Заборгованість",
-    "chartTitle": "Динаміка надходжень",
-    "loadError": "Не вдалося завантажити графіки"
-}
-
+    "authPromo": {
+    "badge": "Регульована B2B-платформа",
+    "marketTag": "B2B Німеччина",
+    "heroTitle": "Дискретне знайомство стартапів та інвесторів.",
+    "heroSubtitle": "ШІ готує сліпий тизер без імен та брендів. Контакти відкриваються лише за взаємною згодою сторін.",
+    "featureDsa": "DSA-compliant (ст. 16)",
+    "featureB2B": "Лише B2B інвестори",
+    "featureServers": "Сервери у Франкфурті",
+    "copyright": "Start Share Platform. Усі права захищено."
+  }
 
 }

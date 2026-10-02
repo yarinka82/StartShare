@@ -1,254 +1,209 @@
 {
-  "home": {
-    "welcome": "Welcome",
-    "description": "Association registry — members, founders and financial contributions in one place.",
-    "membersTitle": "Members",
-    "membersDescription": "View the list of members, founders and their cards.",
-    "openRegistry": "Open registry"
+  "app": {
+    "name": "Start Share"
   },
   "nav": {
-    "home": "Dashboard",
-    "members": "Members Registry",
-    "cashDesk": "Cash Desk & Incomes",
-    "financeAnalytics": "Financial Analytics",
-    "financeCharts": "Charts & Trends",
-    "settings": "Settings"
+    "logout": "Log out",
+    "language": "Language"
   },
   "common": {
-    "all": "All",
-    "refresh": "Refresh",
-    "dateFrom": "From",
-    "dateTo": "To",
-    "export": "Export",
-    "exportCSV": "Export to CSV (Excel)",
-    "exportPDF": "Export to PDF",
-    "yes": "Yes",
-    "no": "No",
-    "save": "Save",
-    "saving": "Saving...",
-    "cancel": "Cancel",
-    "create": "Create",
-    "creating": "Creating...",
-    "back": "Back",
-    "edit": "Edit",
-    "view": "View",
-    "delete": "Delete",
-    "deleting": "Deleting...",
-    "actions": "Actions",
-    "clearFilters": "Clear filters",
-    "loading": "Loading...",
-    "exportSuccess": "CSV file successfully exported",
-    "exportError": "Failed to export CSV file",
-    "printReady": "PDF print window opened",
-    "popupBlocked": "Please allow pop-ups for PDF printing"
-  },
-  "members": {
-    "delete": "Delete",
-    "deleteConfirmTitle": "Delete Member?",
-    "deleteConfirmText": "Are you sure you want to delete {{name}}? This action cannot be undone.",
-    "deleteError": "Failed to delete member.",
-    "title": "Club Members",
-    "addMember": "Add Member",
-    "editMember": "Edit Member",
-    "memberSince": "Member since",
-    "personalInfo": "Personal Information",
-    "firstName": "First Name",
-    "lastName": "Last Name",
-    "fullName": "Full Name",
-    "email": "Email",
-    "phone": "Phone",
-    "birthDate": "Date of Birth",
-    "joinedDate": "Join Date",
-    "address": "Address",
-    "status": "Status",
-    "notes": "Notes",
-    "statusActive": "Active",
-    "statusInactive": "Inactive",
-    "founder": "Founder",
-    "isFounder": "Founder",
-    "notFounder": "Not Founder",
-    "founderDescription": "Participated in the founding meeting",
-    "notFounderDescription": "Regular club member",
-    "showFoundersOnly": "Show only founders",
-    "searchPlaceholder": "Search by name, email, phone...",
-    "noMembers": "No members",
-    "totalMembers": "Total members",
-    "showing": "Showing",
-    "payments": "Payments",
-    "noPayments": "No payments",
-    "registryTitle": "Member Registry",
-    "totalRecords": "{{count}} records",
-    "onlyFounders": "only founders",
-    "all": "All",
-    "founders": "Founders",
-    "loadError": "Failed to load list: {{error}}",
-    "emptyTitle": "It's empty here",
-    "emptyDescription": "Add the first member to start the registry.",
-    "founderTooltip": "Association Founder",
-    "updateSuccess": "Member updated",
-    "createSuccess": "Member created",
-    "saveError": "Save error"
-  },
-  "settings": {
-    "title": "Settings",
-    "subtitle": "Account & Users",
-    "you": "You",
-    "changePassword": "Change Password",
-    "currentPassword": "Current Password",
-    "newPassword": "New Password",
-    "confirmNewPassword": "Confirm New Password",
-    "passwordMismatch": "New password and confirmation do not match.",
-    "passwordUpdated": "Password updated successfully.",
-    "passwordChangeError": "Failed to change password.",
-    "systemUsers": "System Users",
-    "addUser": "Add User",
-    "newUser": "New User",
-    "username": "Username",
-    "email": "Email",
+    "email": "E-mail",
     "password": "Password",
-    "role": "Role",
-    "status": "Status",
-    "admin": "Administrator",
-    "user": "User",
-    "active": "Active",
-    "inactive": "Inactive",
-    "adminLabel": "Administrator (can manage users)",
-    "unexpectedResponse": "Unexpected response from server.",
-    "loadUsersError": "Failed to load users.",
-    "createUserError": "Failed to create user.",
-    "updateUserError": "Failed to update user.",
-    "deleteUserError": "Failed to delete user.",
-    "deleteUserTitle": "Delete User?",
-    "deleteUserConfirm": "Are you sure you want to delete user \"{{username}}\"? This action cannot be undone.",
-    "editUser": "Edit User",
-    "edit": "Edit",
+    "cancel": "Cancel",
     "delete": "Delete",
-    "cannotDeleteSelf": "Cannot delete yourself",
-    "cannotEditSelfRole": "Cannot edit your own role"
+    "backToLogin": "Back to login",
+    "eur": "EUR",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "roles": {
+    "startup": "Startup",
+    "investor": "Investor"
+  },
+  "register": {
+    "title": "Create account",
+    "iAm": "I am registering as",
+    "passwordHelper": "At least 8 characters.",
+    "agb": "I accept the <link>Terms and Conditions (AGB)</link>.",
+    "datenschutz": "I have taken note of the <link>Privacy Policy (Datenschutzerklärung)</link>.",
+    "submit": "Register",
+    "haveAccount": "Already have an account? Log in",
+    "doneTitle": "Check your inbox",
+    "doneText": "If this address can be registered, we have sent a confirmation link to it. Please confirm your e-mail before logging in.",
+    "confirmPassword": "Repeat password",
+    "passwordMismatch": "The passwords do not match."
   },
   "login": {
-    "brandTitle": "Association Registry",
-    "brandSubtitle": "Members, contributions and revenues in one place.",
-    "title": "Login",
-    "subtitle": "Log in to continue working with the registry.",
-    "usernameLabel": "Username",
-    "passwordLabel": "Password",
-    "showPassword": "Show password",
-    "hidePassword": "Hide password",
-    "submit": "Login",
-    "submitting": "Logging in...",
-    "errorGeneric": "Login failed."
+    "title": "Log in",
+    "submit": "Log in",
+    "forgot": "Forgot password?",
+    "noAccount": "No account yet? Register",
+    "notVerified": "Please confirm your e-mail first. Check your inbox for the link.",
+    "resend": "Send the link again",
+    "resent": "If this address is waiting for confirmation, a new link has been sent."
   },
-  "payments": {
-    "types": {
-      "membership_fee": "Membership Fee",
-      "donation": "Donation",
-      "sponsorship": "Sponsorship",
-      "event": "Event Fee",
-      "grant": "Grant",
+  "verify": {
+    "verifying": "Confirming your e-mail…",
+    "success": "Your e-mail is confirmed. You can log in now.",
+    "failed": "This link is invalid or has expired. Log in to request a new one."
+  },
+  "forgot": {
+    "title": "Reset password",
+    "text": "Enter your e-mail and we will send you a link.",
+    "submit": "Send link",
+    "done": "If an account exists for this address, a link has been sent."
+  },
+  "reset": {
+    "title": "Set a new password",
+    "newPassword": "New password",
+    "submit": "Save password",
+    "done": "Your password has been changed. You can log in now."
+  },
+  "legal": {
+    "agb": "Terms and Conditions (AGB)",
+    "datenschutz": "Privacy Policy (Datenschutzerklärung)",
+    "placeholder": "The legal text will be provided by legal counsel and added here.",
+    "openInNewTab": "Open in new tab",
+    "close": "Close",
+    "impressum": "Legal Notice (Impressum)",
+    "back": "Back"
+  },
+  "investor": {
+    "title": "Welcome",
+    "text": "Your investor account is ready. Mandate settings and weekly teasers will follow in the next release."
+  },
+  "profile": {
+    "title": "Startup profile",
+    "intro": "Fill in your profile and upload your pitch deck. Everything is saved automatically as a draft.",
+    "status": {
+      "DRAFT": "Draft",
+      "LIVE": "Live",
+      "PAUSED": "Paused",
+      "REMOVED": "Removed"
+    },
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveError": "Could not save",
+    "sections": {
+      "basics": "Basics",
+      "metrics": "Metrics",
+      "deck": "Pitch deck"
+    },
+    "fields": {
+      "company_name": "Company name",
+      "sector": "Sector",
+      "stage": "Stage",
+      "country": "Country",
+      "amount_sought": "Amount sought",
+      "mrr": "MRR (monthly recurring revenue)",
+      "growth_percent": "Growth",
+      "growth_period": "Growth period",
+      "team_size": "Team size",
+      "deck": "Pitch deck",
+      "business_model": "Business model"
+    },
+    "companyHelper": "Internal only. Never shown to investors.",
+    "optional": "optional",
+    "growthPeriods": {
+      "mom": "Month over month",
+      "yoy": "Year over year"
+    },
+    "missing": "Still missing for a complete profile:",
+    "complete": "Your profile is complete. The next steps (teaser and publication) follow in a later release."
+  },
+  "deck": {
+    "dropHere": "Drag a PDF here or",
+    "choose": "choose a file",
+    "hint": "PDF only, up to {{max}} MB",
+    "uploading": "Uploading…",
+    "replace": "Replace",
+    "download": "Download",
+    "remove": "Remove",
+    "removeTitle": "Remove pitch deck?",
+    "removeText": "The file will be deleted permanently.",
+    "uploaded": "Uploaded {{date}}"
+  },
+  "dict": {
+    "sectors": {
+      "fintech": "FinTech",
+      "insurtech": "InsurTech",
+      "healthtech-medtech": "HealthTech & MedTech",
+      "biotech": "BioTech",
+      "edtech": "EdTech",
+      "proptech-contech": "PropTech & ConTech",
+      "climatetech-energy": "ClimateTech & Energy",
+      "mobility-logistics": "Mobility & Logistics",
+      "foodtech-agritech": "FoodTech & AgriTech",
+      "ecommerce-retailtech": "E-Commerce & RetailTech",
+      "hr-tech": "HR Tech",
+      "legaltech-regtech": "LegalTech & RegTech",
+      "cybersecurity": "Cybersecurity",
+      "ai-data": "AI & Data",
+      "enterprise-software": "Enterprise Software",
+      "deeptech-hardware": "DeepTech & Hardware",
+      "industrie-4-0": "Industry 4.0",
+      "media-entertainment-gaming": "Media, Entertainment & Gaming",
+      "travel-hospitality": "Travel & Hospitality",
       "other": "Other"
     },
-    "statuses": {
-      "paid": "Paid",
-      "owed": "Owed",
-      "pending": "Pending",
-      "cancelled": "Cancelled",
-      "refunded": "Refunded"
+    "countries": {
+      "de": "Germany",
+      "at": "Austria",
+      "ch": "Switzerland",
+      "nl": "Netherlands",
+      "fr": "France",
+      "pl": "Poland",
+      "ua": "Ukraine",
+      "other": "Other"
     },
-    "title": {
-      "history": "Payment History"
+    "stages": {
+      "pre-seed": "Pre-Seed",
+      "seed": "Seed",
+      "series-a": "Series A",
+      "series-b": "Series B",
+      "series-c-plus": "Series C and later"
     },
-    "actions": {
-      "add": "Add Payment"
-    },
-    "empty": "No payments yet",
-    "fields": {
-      "date": "Date",
-      "type": "Type",
-      "period": "Period",
-      "amount": "Amount",
-      "status": "Status",
-      "sourceName": "Source",
-      "comment": "Comment"
-    },
-    "summary": {
-      "totalPaid": "Total Paid",
-      "totalOwed": "Total Owed"
-    },
-    "dialogs": {
-      "addTitle": "New Payment",
-      "editTitle": "Edit Payment",
-      "confirmDelete": "Are you sure you want to delete this payment?",
-      "confirmDeleteTitle": "Delete Payment?",
-      "confirmDeleteText": "Are you sure you want to delete this payment of"
-    },
-    "validation": {
-      "amountRequired": "Please enter an amount greater than zero"
-    },
-    "messages": {
-      "loadError": "Failed to load payments",
-      "createSuccess": "Payment successfully added",
-      "updateSuccess": "Payment successfully updated",
-      "saveError": "Failed to save payment",
-      "deleteSuccess": "Payment successfully deleted",
-      "deleteError": "Failed to delete payment"
+    "businessModels": {
+      "saas-subscription": "SaaS & Subscription",
+      "marketplace-platform": "Marketplace & Platform",
+      "ecommerce-d2c": "E-Commerce & D2C",
+      "hardware-sales": "Hardware Sales",
+      "licensing": "Licensing",
+      "services": "Services",
+      "transaction-fee": "Transaction Model",
+      "other": "Other"
     }
   },
-  "cashDesk": {
-    "title": "Cash Desk & Incomes",
-    "subtitle": "Financial Accounting",
-    "addIncome": "Add Income",
-    "addFirstIncome": "Add First Payment",
-    "totalTransactions": "Total Transactions",
-    "payerOrSource": "Payer / Source",
-    "searchPlaceholder": "Search by payer, source, period...",
-    "emptyTitle": "No incomes found",
-    "loadError": "Failed to load cash desk data",
-    "fields": {
-      "selectMember": "Organization Member *",
-      "searchMemberPlaceholder": "Start typing member name...",
-      "sourcePlaceholder": "E.g.: Renaissance Foundation, Anonymous Donation"
-    },
-    "validation": {
-      "memberRequired": "Please select a member for membership fee",
-      "sourceRequired": "Please specify source or donor name"
-    },
-    "dialog": {
-      "addTitle": "New Financial Income",
-      "editTitle": "Edit Income"
-    }
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "No connection to the server.",
+    "throttled": "Too many attempts. Please try again later.",
+    "accept_agb_required": "Please accept the Terms and Conditions.",
+    "accept_datenschutz_required": "Please confirm that you have taken note of the Privacy Policy.",
+    "growth_period_required": "Please choose a growth period.",
+    "deck_empty": "The file is empty.",
+    "deck_too_large": "The file is larger than {{max}} MB.",
+    "deck_not_pdf": "Only PDF files are accepted.",
+    "deck_password_protected": "The PDF is password-protected. Please upload an unprotected file.",
+    "deck_corrupted": "The PDF is damaged and cannot be read.",
+    "invalid_credentials": "E-mail or password is incorrect.",
+    "email_not_verified": "Please confirm your e-mail first.",
+    "invalid_or_expired_token": "This link is invalid or has expired."
   },
-  "financeOverview": {
-    "title": "Financial Overview",
-    "totalPaid": "Received (Paid)",
-    "totalOwed": "Total Owed",
-    "monthlyDynamics": "Monthly Dynamics",
-    "subtitle": "Financial Reporting & Analytics",
-    "today": "Current",
-    "yearSuffix": "year",
-    "empty": "No transactions found for this period",
-    "totalIncomes": "Total Received",
-    "monthCol": "Month",
-    "dateCol": "Date",
-    "totalPaidCol": "Total Paid",
-    "totalOwedCol": "Owed",
-    "loadError": "Failed to load analytics",
-    "modes": {
-      "month": "Month",
-      "quarter": "Quarter",
-      "year": "Year"
-    }
+  "footer": {
+    "agb": "Terms (AGB)",
+    "datenschutz": "Privacy Policy",
+    "impressum": "Legal Notice"
   },
-  "financeCharts": {
-    "title": "Dynamics & Charts",
-    "subtitle": "Visualization & Trends",
-    "totalPaid": "Total Received",
-    "totalOwed": "Total Owed",
-    "chartTitle": "Revenue Dynamics",
-    "loadError": "Failed to load charts"
+   "authPromo": {
+    "badge": "Regulated B2B Intro Engine",
+    "marketTag": "B2B Germany",
+    "heroTitle": "Discrete matching of startups and investors.",
+    "heroSubtitle": "AI creates a blind teaser without names or brands. Contact details are only shared upon mutual consent.",
+    "featureDsa": "DSA-compliant (Art. 16)",
+    "featureB2B": "Verified B2B investors only",
+    "featureServers": "Hosted in Frankfurt (EU)",
+    "copyright": "Start Share Platform. All rights reserved."
+  }
+
 }
-}
-
-
-
-

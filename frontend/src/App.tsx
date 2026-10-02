@@ -1,56 +1,36 @@
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { AuthProvider } from './context/AuthContext';
-import { MainLayout } from './layouts';
-import Notifier from '@/components/Notifier';
-import { Home, Login, MemberList, MemberDetail, MemberForm, Settings, FinanceOverview, FinanceChartsPage, CashDeskPage } from './pages';
+import { HomeRedirect, PublicOnly, RequireRole } from "./auth/guards";
+import Layout from "./components/Layout";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import InvestorHomePage from "./pages/InvestorHomePage";
+import LegalPage from "./pages/LegalPage";
+import LoginPage from "./pages/LoginPage";
+import ProfilePage from "./pages/ProfilePage";
+import RegisterPage from "./pages/RegisterPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 
-import ProtectedRoute from './ProtectedRoute';
-
-function App() {
+export default function App() {
   return (
-    <AuthProvider>
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <BrowserRouter
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true,
-        }}
-      >
-        <>
-        <Notifier />
-          <Routes>
-            {/* Публичные маршруты */}
-            <Route path="/login" element={<Login />} />
+    <Routes>
+      {/* Signed-out screens: full-screen split layout (FormCard), no app bar / container / footer around it */}
+      <Route element={<Outlet />}>
+        <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
+        <Route path="/register" element={<PublicOnly><RegisterPage /></PublicOnly>} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+      </Route>
 
-            {/* Защищенные маршруты */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <MainLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="/home" replace />} />
-              <Route path="home" element={<Home />} />
-              <Route path="members" element={<MemberList />} />
-              <Route path="members/add" element={<MemberForm />} />
-              <Route path="members/:id" element={<MemberDetail />} />
-              <Route path="members/:id/edit" element={<MemberForm />} />
-              <Route path="cashdesk" element={<CashDeskPage />} />
-              <Route path="finance" element={<FinanceOverview />} />
-              <Route path="charts" element={<FinanceChartsPage />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-          </Routes>
-        </>
-      </BrowserRouter>
-    </LocalizationProvider>
-    </AuthProvider>
+      {/* Everything else keeps the app chrome */}
+      <Route element={<Layout />}>
+        <Route path="/" element={<HomeRedirect />} />
+        <Route path="/legal/:doc" element={<LegalPage />} />
+        <Route path="/profile" element={<RequireRole role="startup"><ProfilePage /></RequireRole>} />
+        <Route path="/investor" element={<RequireRole role="investor"><InvestorHomePage /></RequireRole>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
+    </Routes>
   );
 }
-
-export default App;

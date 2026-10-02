@@ -1,255 +1,208 @@
 {
-  "home": {
-    "welcome": "Willkommen",
-    "description": "Vereinsregister — Mitglieder, Gründer und finanzielle Einnahmen an einem Ort.",
-    "membersTitle": "Mitglieder",
-    "membersDescription": "Liste der Mitglieder, Gründer und deren Karten anzeigen.",
-    "openRegistry": "Register öffnen"
+  "app": {
+    "name": "Start Share"
   },
   "nav": {
-    "home": "Übersicht",
-    "members": "Mitgliederverzeichnis",
-    "cashDesk": "Kasse & Einnahmen",
-    "financeAnalytics": "Finanzanalyse & Berichte",
-    "financeCharts": "Diagramme & Trends",
-    "settings": "Einstellungen"
+    "logout": "Abmelden",
+    "language": "Sprache"
   },
   "common": {
-    "all": "Alle",
-    "dateFrom": "Von",
-    "dateTo": "Bis",
-    "export": "Exportieren",
-    "exportCSV": "Export als CSV (Excel)",
-    "exportPDF": "Export als PDF",
-    "yes": "Ja",
-    "no": "Nein",
-    "refresh": "Aktualisieren",
-    "save": "Speichern",
-    "saving": "Speichern...",
-    "cancel": "Abbrechen",
-    "create": "Erstellen",
-    "creating": "Erstellen...",
-    "back": "Zurück",
-    "edit": "Bearbeiten",
-    "view": "Ansehen",
-    "delete": "Löschen",
-    "deleting": "Löschen...",
-    "actions": "Aktionen",
-    "clearFilters": "Filter löschen",
-    "loading": "Laden...",
-    "exportSuccess": "CSV-Datei erfolgreich exportiert",
-    "exportError": "Fehler beim CSV-Export",
-    "printReady": "PDF-Druckfenster geöffnet",
-    "popupBlocked": "Bitte Pop-ups für den PDF-Druck erlauben"
-  },
-  "members": {
-    "delete": "Löschen",
-    "deleteConfirmTitle": "Mitglied löschen?",
-    "deleteConfirmText": "Sind Sie sicher, dass Sie {{name}} löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
-    "deleteError": "Mitglied konnte nicht gelöscht werden.",
-    "title": "Vereinsmitglieder",
-    "addMember": "Mitglied hinzufügen",
-    "editMember": "Mitglied bearbeiten",
-    "memberSince": "Mitglied seit",
-    "personalInfo": "Persönliche Informationen",
-    "firstName": "Vorname",
-    "lastName": "Nachname",
-    "fullName": "Vollständiger Name",
-    "email": "E-Mail",
-    "phone": "Telefon",
-    "birthDate": "Geburtsdatum",
-    "joinedDate": "Beitrittsdatum",
-    "address": "Adresse",
-    "status": "Status",
-    "notes": "Notizen",
-    "statusActive": "Aktiv",
-    "statusInactive": "Inaktiv",
-    "founder": "Gründer",
-    "isFounder": "Gründer",
-    "notFounder": "Kein Gründer",
-    "founderDescription": "Hat an der Gründungsversammlung teilgenommen",
-    "notFounderDescription": "Reguläres Vereinsmitglied",
-    "showFoundersOnly": "Nur Gründer anzeigen",
-    "searchPlaceholder": "Suche nach Name, E-Mail, Telefon...",
-    "noMembers": "Keine Mitglieder",
-    "totalMembers": "Mitglieder insgesamt",
-    "showing": "Angezeigt",
-    "payments": "Zahlungen",
-    "noPayments": "Keine Zahlungen",
-    "registryTitle": "Mitgliederverzeichnis",
-    "totalRecords": "{{count}} Einträge",
-    "onlyFounders": "nur Gründer",
-    "all": "Alle",
-    "founders": "Gründer",
-    "loadError": "Fehler beim Laden der Liste: {{error}}",
-    "emptyTitle": "Noch leer",
-    "emptyDescription": "Fügen Sie das erste Mitglied hinzu, um das Verzeichnis zu starten.",
-    "founderTooltip": "Gründer des Vereins",
-    "updateSuccess": "Mitglied aktualisiert",
-    "createSuccess": "Mitglied erstellt",
-    "saveError": "Fehler beim Speichern"
-  },
-  "settings": {
-    "title": "Einstellungen",
-    "subtitle": "Konto und Benutzer",
-    "you": "Sie",
-    "changePassword": "Passwort ändern",
-    "currentPassword": "Aktuelles Passwort",
-    "newPassword": "Neues Passwort",
-    "confirmNewPassword": "Neues Passwort bestätigen",
-    "passwordMismatch": "Das neue Passwort und die Bestätigung stimmen nicht überein.",
-    "passwordUpdated": "Passwort erfolgreich aktualisiert.",
-    "passwordChangeError": "Passwort konnte nicht geändert werden.",
-    "systemUsers": "Systembenutzer",
-    "addUser": "Benutzer hinzufügen",
-    "newUser": "Neuer Benutzer",
-    "username": "Benutzername",
     "email": "E-Mail",
     "password": "Passwort",
-    "role": "Rolle",
-    "status": "Status",
-    "admin": "Administrator",
-    "user": "Benutzer",
-    "active": "Aktiv",
-    "inactive": "Inaktiv",
-    "adminLabel": "Administrator (kann Benutzer verwalten)",
-    "unexpectedResponse": "Unerwartete Antwort vom Server.",
-    "loadUsersError": "Benutzer konnten nicht geladen werden.",
-    "createUserError": "Benutzer konnte nicht erstellt werden.",
-    "updateUserError": "Benutzer konnte nicht aktualisiert werden.",
-    "deleteUserError": "Benutzer konnte nicht gelöscht werden.",
-    "deleteUserTitle": "Benutzer löschen?",
-    "deleteUserConfirm": "Sind Sie sicher, dass Sie den Benutzer \"{{username}}\" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
-    "editUser": "Benutzer bearbeiten",
-    "edit": "Bearbeiten",
+    "cancel": "Abbrechen",
     "delete": "Löschen",
-    "cannotDeleteSelf": "Sie können sich nicht selbst löschen",
-    "cannotEditSelfRole": "Sie können Ihre eigene Rolle nicht ändern"
+    "backToLogin": "Zurück zur Anmeldung",
+    "eur": "EUR",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen"
+  },
+  "roles": {
+    "startup": "Startup",
+    "investor": "Investor"
+  },
+  "register": {
+    "title": "Konto erstellen",
+    "iAm": "Ich registriere mich als",
+    "passwordHelper": "Mindestens 8 Zeichen.",
+    "agb": "Ich akzeptiere die <link>Allgemeinen Geschäftsbedingungen (AGB)</link>.",
+    "datenschutz": "Ich habe die <link>Datenschutzerklärung</link> zur Kenntnis genommen.",
+    "submit": "Registrieren",
+    "haveAccount": "Bereits ein Konto? Anmelden",
+    "doneTitle": "Bitte prüfen Sie Ihr Postfach",
+    "doneText": "Falls diese Adresse registriert werden kann, haben wir einen Bestätigungslink gesendet. Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich anmelden.",
+    "confirmPassword": "Passwort wiederholen",
+    "passwordMismatch": "Die Passwörter stimmen nicht überein."
   },
   "login": {
-    "brandTitle": "Vereinsregister",
-    "brandSubtitle": "Mitglieder, Beiträge und Einnahmen an einem Ort.",
     "title": "Anmelden",
-    "subtitle": "Melden Sie sich an, um mit dem Register zu arbeiten.",
-    "usernameLabel": "Benutzername",
-    "passwordLabel": "Passwort",
-    "showPassword": "Passwort anzeigen",
-    "hidePassword": "Passwort ausblenden",
     "submit": "Anmelden",
-    "submitting": "Anmeldung...",
-    "errorGeneric": "Anmeldung fehlgeschlagen."
+    "forgot": "Passwort vergessen?",
+    "noAccount": "Noch kein Konto? Registrieren",
+    "notVerified": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Den Link finden Sie in Ihrem Postfach.",
+    "resend": "Link erneut senden",
+    "resent": "Falls diese Adresse noch auf die Bestätigung wartet, wurde ein neuer Link gesendet."
   },
-  "payments": {
-    "types": {
-      "membership_fee": "Mitgliedsbeitrag",
-      "donation": "Spende",
-      "sponsorship": "Sponsoring",
-      "event": "Veranstaltungsgebühr",
-      "grant": "Zuschuss / Förderung",
+  "verify": {
+    "verifying": "Ihre E-Mail-Adresse wird bestätigt …",
+    "success": "Ihre E-Mail-Adresse ist bestätigt. Sie können sich jetzt anmelden.",
+    "failed": "Dieser Link ist ungültig oder abgelaufen. Melden Sie sich an, um einen neuen anzufordern."
+  },
+  "forgot": {
+    "title": "Passwort zurücksetzen",
+    "text": "Geben Sie Ihre E-Mail-Adresse ein, wir senden Ihnen einen Link.",
+    "submit": "Link senden",
+    "done": "Falls zu dieser Adresse ein Konto existiert, wurde ein Link gesendet."
+  },
+  "reset": {
+    "title": "Neues Passwort festlegen",
+    "newPassword": "Neues Passwort",
+    "submit": "Passwort speichern",
+    "done": "Ihr Passwort wurde geändert. Sie können sich jetzt anmelden."
+  },
+  "legal": {
+    "impressum": "Impressum",
+    "agb": "Allgemeine Geschäftsbedingungen (AGB)",
+    "datenschutz": "Datenschutzerklärung",
+    "placeholder": "Der Rechtstext wird von der Rechtsberatung bereitgestellt und hier eingefügt.",
+    "openInNewTab": "In neuem Tab öffnen",
+    "close": "Schließen",
+    "back": "Zurück"
+  },
+  "investor": {
+    "title": "Willkommen",
+    "text": "Ihr Investor-Konto ist eingerichtet. Mandatskriterien und wöchentliche Teaser folgen im nächsten Release."
+  },
+  "profile": {
+    "title": "Startup-Profil",
+    "intro": "Füllen Sie Ihr Profil aus und laden Sie Ihr Pitch Deck hoch. Alles wird automatisch als Entwurf gespeichert.",
+    "status": {
+      "DRAFT": "Entwurf",
+      "LIVE": "Live",
+      "PAUSED": "Pausiert",
+      "REMOVED": "Entfernt"
+    },
+    "saving": "Speichert …",
+    "saved": "Gespeichert",
+    "saveError": "Speichern nicht möglich",
+    "sections": {
+      "basics": "Grunddaten",
+      "metrics": "Kennzahlen",
+      "deck": "Pitch Deck"
+    },
+    "fields": {
+      "company_name": "Firmenname",
+      "sector": "Branche",
+      "stage": "Phase",
+      "country": "Land",
+      "amount_sought": "Gesuchte Summe",
+      "mrr": "MRR (monatlich wiederkehrender Umsatz)",
+      "growth_percent": "Wachstum",
+      "growth_period": "Wachstumszeitraum",
+      "team_size": "Teamgröße",
+      "deck": "Pitch Deck",
+      "business_model": "Geschäftsmodell"
+    },
+    "companyHelper": "Nur intern sichtbar. Wird Investoren nie angezeigt.",
+    "optional": "optional",
+    "growthPeriods": {
+      "mom": "Monat zu Monat",
+      "yoy": "Jahr zu Jahr"
+    },
+    "missing": "Für ein vollständiges Profil fehlt noch:",
+    "complete": "Ihr Profil ist vollständig. Die nächsten Schritte (Teaser und Veröffentlichung) folgen in einem späteren Release."
+  },
+  "deck": {
+    "dropHere": "PDF hierher ziehen oder",
+    "choose": "Datei auswählen",
+    "hint": "Nur PDF, bis zu {{max}} MB",
+    "uploading": "Wird hochgeladen …",
+    "replace": "Ersetzen",
+    "download": "Herunterladen",
+    "remove": "Entfernen",
+    "removeTitle": "Pitch Deck entfernen?",
+    "removeText": "Die Datei wird dauerhaft gelöscht.",
+    "uploaded": "Hochgeladen am {{date}}"
+  },
+  "dict": {
+    "sectors": {
+      "fintech": "FinTech",
+      "insurtech": "InsurTech",
+      "healthtech-medtech": "HealthTech & MedTech",
+      "biotech": "BioTech",
+      "edtech": "EdTech",
+      "proptech-contech": "PropTech & ConTech",
+      "climatetech-energy": "ClimateTech & Energie",
+      "mobility-logistics": "Mobilität & Logistik",
+      "foodtech-agritech": "FoodTech & AgriTech",
+      "ecommerce-retailtech": "E-Commerce & RetailTech",
+      "hr-tech": "HR Tech",
+      "legaltech-regtech": "LegalTech & RegTech",
+      "cybersecurity": "Cybersecurity",
+      "ai-data": "KI & Daten",
+      "enterprise-software": "Enterprise Software",
+      "deeptech-hardware": "DeepTech & Hardware",
+      "industrie-4-0": "Industrie 4.0",
+      "media-entertainment-gaming": "Medien, Entertainment & Gaming",
+      "travel-hospitality": "Reisen & Gastgewerbe",
       "other": "Sonstiges"
     },
-    "statuses": {
-      "paid": "Bezahlt",
-      "owed": "Ausstehend",
-      "pending": "Ausstehend",
-      "cancelled": "Storniert",
-      "refunded": "Erstattet"
+    "countries": {
+      "de": "Deutschland",
+      "at": "Österreich",
+      "ch": "Schweiz",
+      "nl": "Niederlande",
+      "fr": "Frankreich",
+      "pl": "Polen",
+      "ua": "Ukraine",
+      "other": "Sonstiges"
     },
-    "title": {
-      "history": "Zahlungshistorie"
+    "stages": {
+      "pre-seed": "Pre-Seed",
+      "seed": "Seed",
+      "series-a": "Series A",
+      "series-b": "Series B",
+      "series-c-plus": "Series C und später"
     },
-    "actions": {
-      "add": "Zahlung hinzufügen"
-    },
-    "empty": "Noch keine Zahlungen vorhanden",
-    "fields": {
-      "date": "Datum",
-      "type": "Typ",
-      "period": "Zeitraum",
-      "amount": "Betrag",
-      "status": "Status",
-      "sourceName": "Quelle",
-      "comment": "Kommentar"
-    },
-    "summary": {
-      "totalPaid": "Bezahlt",
-      "totalOwed": "Ausstehend"
-    },
-    "dialogs": {
-      "addTitle": "Neue Zahlung",
-      "editTitle": "Zahlung bearbeiten",
-      "confirmDelete": "Möchten Sie diese Zahlung wirklich löschen?",
-      "confirmDeleteTitle": "Zahlung löschen?",
-      "confirmDeleteText": "Sind Sie sicher, dass Sie diese Zahlung in Höhe von löschen möchten:"
-    },
-    "validation": {
-      "amountRequired": "Bitte geben Sie einen Betrag größer als null ein"
-    },
-    "messages": {
-      "loadError": "Fehler beim Laden der Zahlungen",
-      "createSuccess": "Zahlung erfolgreich hinzugefügt",
-      "updateSuccess": "Zahlung erfolgreich aktualisiert",
-      "saveError": "Fehler beim Speichern der Zahlung",
-      "deleteSuccess": "Zahlung erfolgreich gelöscht",
-      "deleteError": "Zahlung konnte nicht gelöscht werden"
+    "businessModels": {
+      "saas-subscription": "SaaS & Abo-Modell",
+      "marketplace-platform": "Marktplatz & Plattform",
+      "ecommerce-d2c": "E-Commerce & D2C",
+      "hardware-sales": "Hardware-Verkauf",
+      "licensing": "Lizenzmodell",
+      "services": "Dienstleistung",
+      "transaction-fee": "Transaktionsmodell",
+      "other": "Sonstiges"
     }
   },
-  "cashDesk": {
-    "title": "Kasse & Einnahmenjournal",
-    "subtitle": "Finanzbuchhaltung",
-    "addIncome": "Einnahme hinzufügen",
-    "addFirstIncome": "Erste Zahlung hinzufügen",
-    "totalTransactions": "Gesamttransaktionen",
-    "payerOrSource": "Zahler / Quelle",
-    "searchPlaceholder": "Suche nach Zahler, Quelle, Zeitraum...",
-    "emptyTitle": "Keine Einnahmen gefunden",
-    "loadError": "Fehler beim Laden der Kassendaten",
-    "fields": {
-      "selectMember": "Mitglied der Organisation *",
-      "searchMemberPlaceholder": "Name eingeben...",
-      "sourcePlaceholder": "Z.B.: Renaissance-Stiftung, Spende"
-    },
-    "validation": {
-      "memberRequired": "Bitte wählen Sie ein Mitglied für den Beitrag aus",
-      "sourceRequired": "Bitte geben Sie die Quelle oder Organisation an"
-    },
-    "dialog": {
-      "addTitle": "Neue Einnahme",
-      "editTitle": "Einnahme bearbeiten"
-    }
+  "errors": {
+    "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+    "network": "Keine Verbindung zum Server.",
+    "throttled": "Zu viele Versuche. Bitte versuchen Sie es später erneut.",
+    "accept_agb_required": "Bitte akzeptieren Sie die AGB.",
+    "accept_datenschutz_required": "Bitte bestätigen Sie, dass Sie die Datenschutzerklärung zur Kenntnis genommen haben.",
+    "growth_period_required": "Bitte wählen Sie einen Wachstumszeitraum.",
+    "deck_empty": "Die Datei ist leer.",
+    "deck_too_large": "Die Datei ist größer als {{max}} MB.",
+    "deck_not_pdf": "Es werden nur PDF-Dateien akzeptiert.",
+    "deck_password_protected": "Das PDF ist passwortgeschützt. Bitte laden Sie eine ungeschützte Datei hoch.",
+    "deck_corrupted": "Das PDF ist beschädigt und kann nicht gelesen werden.",
+    "invalid_credentials": "E-Mail oder Passwort ist falsch.",
+    "email_not_verified": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.",
+    "invalid_or_expired_token": "Dieser Link ist ungültig oder abgelaufen."
   },
-  "financeOverview": {
-    "totalPaid": "Erhalten (bezahlt)",
-    "monthlyDynamics": "Monatliche Entwicklung",
-    "loadError": "Finanzübersicht konnte nicht geladen werden",
-    "title": "Finanzanalyse & Berichte",
-    "subtitle": "Finanzberichterstattung und Aufschlüsselung",
-    "today": "Aktuell",
-    "yearSuffix": "Jahr",
-    "empty": "Keine Transaktionen im ausgewählten Zeitraum",
-    "totalIncomes": "Gesamteinnahmen",
-    "totalOwed": "Ausstehende Beträge",
-    "monthCol": "Monat",
-    "dateCol": "Datum",
-    "totalPaidCol": "Bezahlt Gesamt",
-    "totalOwedCol": "Rückstand",
-    "modes": {
-      "month": "Monat",
-      "quarter": "Quartal",
-      "year": "Jahr"
-    }
+  "footer": {
+    "agb": "AGB",
+    "datenschutz": "Datenschutz",
+    "impressum": "Impressum"
   },
-  "financeCharts": {
-  "title": "Finanzdiagramme & Trends",
-    "subtitle": "Visualisierung und Einnahmentrends",
-    "totalPaid": "Erhalten (bezahlt)",
-    "totalOwed": "Ausstehend",
-    "chartTitle": "Einnahmendynamik",
-    "loadError": "Diagramme konnten nicht geladen werden"
-}
-
-
-
-
-
+    "authPromo": {
+    "badge": "Regulierte B2B-Matching-Plattform",
+    "marketTag": "B2B Deutschland",
+    "heroTitle": "Diskrete Vernetzung von Startups und Investoren.",
+    "heroSubtitle": "KI erstellt einen Blind-Teaser ohne Namen und Marken. Kontaktdaten werden nur bei beidseitigem Einverständnis freigegeben.",
+    "featureDsa": "DSA-konform (Art. 16)",
+    "featureB2B": "Ausschließlich B2B-Investoren",
+    "featureServers": "Serverstandort Frankfurt",
+    "copyright": "Start Share Plattform. Alle Rechte vorbehalten."
+  }
 }
