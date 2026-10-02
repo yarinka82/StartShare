@@ -1,0 +1,209 @@
+{
+  "app": {
+    "name": "Start Share"
+  },
+  "nav": {
+    "logout": "Вийти",
+    "language": "Мова"
+  },
+  "common": {
+    "email": "E-mail",
+    "password": "Пароль",
+    "cancel": "Скасувати",
+    "delete": "Видалити",
+    "backToLogin": "Назад до входу",
+    "eur": "EUR",
+    "showPassword": "Показати пароль",
+    "hidePassword": "Сховати пароль"
+  },
+  "roles": {
+    "startup": "Стартап",
+    "investor": "Інвестор"
+  },
+  "register": {
+    "title": "Створити акаунт",
+    "iAm": "Я реєструюсь як",
+    "passwordHelper": "Щонайменше 8 символів.",
+    "agb": "Я приймаю <link>Загальні умови (AGB)</link>.",
+    "datenschutz": "Я ознайомився/лась із <link>Політикою конфіденційності (Datenschutzerklärung)</link>.",
+    "submit": "Зареєструватися",
+    "haveAccount": "Вже є акаунт? Увійти",
+    "doneTitle": "Перевірте пошту",
+    "doneText": "Якщо цю адресу можна зареєструвати, ми надіслали на неї посилання для підтвердження. Підтвердіть e-mail, перш ніж входити.",
+    "confirmPassword": "Повторіть пароль",
+    "passwordMismatch": "Паролі не збігаються."
+  },
+  "login": {
+    "title": "Вхід",
+    "submit": "Увійти",
+    "forgot": "Забули пароль?",
+    "noAccount": "Ще немає акаунта? Зареєструватися",
+    "notVerified": "Спочатку підтвердіть e-mail. Посилання чекає у вашій пошті.",
+    "resend": "Надіслати посилання ще раз",
+    "resent": "Якщо ця адреса чекає на підтвердження, ми надіслали нове посилання."
+  },
+  "verify": {
+    "verifying": "Підтверджуємо ваш e-mail…",
+    "success": "E-mail підтверджено. Тепер можна увійти.",
+    "failed": "Посилання недійсне або термін його дії минув. Увійдіть, щоб запросити нове."
+  },
+  "forgot": {
+    "title": "Скидання пароля",
+    "text": "Введіть e-mail, і ми надішлемо вам посилання.",
+    "submit": "Надіслати посилання",
+    "done": "Якщо для цієї адреси існує акаунт, ми надіслали посилання."
+  },
+  "reset": {
+    "title": "Новий пароль",
+    "newPassword": "Новий пароль",
+    "submit": "Зберегти пароль",
+    "done": "Пароль змінено. Тепер можна увійти."
+  },
+  "legal": {
+    "agb": "Загальні умови (AGB)",
+    "datenschutz": "Політика конфіденційності (Datenschutzerklärung)",
+    "placeholder": "Юридичний текст надасть юрист, і його буде додано тут.",
+    "openInNewTab": "Відкрити в новій вкладці",
+    "close": "Закрити",
+    "impressum": "Вихідні дані (Impressum)",
+    "back": "Назад"
+  },
+  "investor": {
+    "title": "Вітаємо",
+    "text": "Ваш акаунт інвестора створено. Критерії відбору та щотижневі тизери з'являться в наступному релізі."
+  },
+  "profile": {
+    "title": "Профіль стартапу",
+    "intro": "Заповніть профіль і завантажте Pitch Deck. Усе автоматично зберігається як чернетка.",
+    "status": {
+      "DRAFT": "Чернетка",
+      "LIVE": "Опубліковано",
+      "PAUSED": "На паузі",
+      "REMOVED": "Видалено"
+    },
+    "saving": "Зберігаємо…",
+    "saved": "Збережено",
+    "saveError": "Не вдалося зберегти",
+    "sections": {
+      "basics": "Основне",
+      "metrics": "Метрики",
+      "deck": "Pitch Deck"
+    },
+    "fields": {
+      "company_name": "Назва компанії",
+      "sector": "Сектор",
+      "stage": "Стадія",
+      "country": "Країна",
+      "amount_sought": "Сума, яку шукаєте",
+      "mrr": "MRR (щомісячний регулярний дохід)",
+      "growth_percent": "Зростання",
+      "growth_period": "Період зростання",
+      "team_size": "Розмір команди",
+      "deck": "Pitch Deck",
+      "business_model": "Модель бізнесу"
+    },
+    "companyHelper": "Лише для внутрішнього використання. Інвесторам не показується.",
+    "optional": "необов'язково",
+    "growthPeriods": {
+      "mom": "Місяць до місяця",
+      "yoy": "Рік до року"
+    },
+    "missing": "Для повного профілю ще бракує:",
+    "complete": "Профіль заповнено. Наступні кроки (тизер і публікація) з'являться в наступному релізі."
+  },
+  "deck": {
+    "dropHere": "Перетягніть PDF сюди або",
+    "choose": "оберіть файл",
+    "hint": "Лише PDF, до {{max}} МБ",
+    "uploading": "Завантаження…",
+    "replace": "Замінити",
+    "download": "Завантажити",
+    "remove": "Видалити",
+    "removeTitle": "Видалити Pitch Deck?",
+    "removeText": "Файл буде видалено назавжди.",
+    "uploaded": "Завантажено {{date}}"
+  },
+  "dict": {
+    "sectors": {
+      "fintech": "FinTech",
+      "insurtech": "InsurTech",
+      "healthtech-medtech": "HealthTech і MedTech",
+      "biotech": "BioTech",
+      "edtech": "EdTech",
+      "proptech-contech": "PropTech і ConTech",
+      "climatetech-energy": "ClimateTech і енергетика",
+      "mobility-logistics": "Мобільність і логістика",
+      "foodtech-agritech": "FoodTech і AgriTech",
+      "ecommerce-retailtech": "E-Commerce і RetailTech",
+      "hr-tech": "HR Tech",
+      "legaltech-regtech": "LegalTech і RegTech",
+      "cybersecurity": "Кібербезпека",
+      "ai-data": "AI і дані",
+      "enterprise-software": "Корпоративне ПЗ",
+      "deeptech-hardware": "DeepTech і Hardware",
+      "industrie-4-0": "Industrie 4.0",
+      "media-entertainment-gaming": "Медіа, розваги, ігри",
+      "travel-hospitality": "Туризм і гостинність",
+      "other": "Інше"
+    },
+    "countries": {
+      "de": "Німеччина",
+      "at": "Австрія",
+      "ch": "Швейцарія",
+      "nl": "Нідерланди",
+      "fr": "Франція",
+      "pl": "Польща",
+      "ua": "Україна",
+      "other": "Інше"
+    },
+    "stages": {
+      "pre-seed": "Pre-Seed",
+      "seed": "Seed",
+      "series-a": "Series A",
+      "series-b": "Series B",
+      "series-c-plus": "Series C і пізніше"
+    },
+    "businessModels": {
+      "saas-subscription": "SaaS і підписка",
+      "marketplace-platform": "Маркетплейс і платформа",
+      "ecommerce-d2c": "E-Commerce і D2C",
+      "hardware-sales": "Продаж обладнання",
+      "licensing": "Ліцензування",
+      "services": "Послуги",
+      "transaction-fee": "Транзакційна модель",
+      "other": "Інше"
+    }
+  },
+  "errors": {
+    "generic": "Щось пішло не так. Спробуйте ще раз.",
+    "network": "Немає з'єднання із сервером.",
+    "throttled": "Забагато спроб. Спробуйте пізніше.",
+    "accept_agb_required": "Прийміть Загальні умови (AGB).",
+    "accept_datenschutz_required": "Підтвердьте, що ознайомились із Політикою конфіденційності.",
+    "growth_period_required": "Оберіть період зростання.",
+    "deck_empty": "Файл порожній.",
+    "deck_too_large": "Файл більший за {{max}} МБ.",
+    "deck_not_pdf": "Приймаються лише файли PDF.",
+    "deck_password_protected": "PDF захищено паролем. Завантажте файл без захисту.",
+    "deck_corrupted": "PDF пошкоджено, його неможливо прочитати.",
+    "invalid_credentials": "Невірний e-mail або пароль.",
+    "email_not_verified": "Спочатку підтвердіть e-mail.",
+    "invalid_or_expired_token": "Посилання недійсне або термін його дії минув."
+  },
+  "footer": {
+    "agb": "Умови (AGB)",
+    "datenschutz": "Конфіденційність",
+    "impressum": "Impressum"
+  },
+    "authPromo": {
+    "badge": "Регульована B2B-платформа",
+    "marketTag": "B2B Німеччина",
+    "heroTitle": "Дискретне знайомство стартапів та інвесторів.",
+    "heroSubtitle": "ШІ готує сліпий тизер без імен та брендів. Контакти відкриваються лише за взаємною згодою сторін.",
+    "featureDsa": "DSA-compliant (ст. 16)",
+    "featureB2B": "Лише B2B інвестори",
+    "featureServers": "Сервери у Франкфурті",
+    "copyright": "Start Share Platform. Усі права захищено."
+  }
+
+}

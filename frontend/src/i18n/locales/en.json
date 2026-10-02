@@ -1,0 +1,209 @@
+{
+  "app": {
+    "name": "Start Share"
+  },
+  "nav": {
+    "logout": "Log out",
+    "language": "Language"
+  },
+  "common": {
+    "email": "E-mail",
+    "password": "Password",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "backToLogin": "Back to login",
+    "eur": "EUR",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "roles": {
+    "startup": "Startup",
+    "investor": "Investor"
+  },
+  "register": {
+    "title": "Create account",
+    "iAm": "I am registering as",
+    "passwordHelper": "At least 8 characters.",
+    "agb": "I accept the <link>Terms and Conditions (AGB)</link>.",
+    "datenschutz": "I have taken note of the <link>Privacy Policy (Datenschutzerklärung)</link>.",
+    "submit": "Register",
+    "haveAccount": "Already have an account? Log in",
+    "doneTitle": "Check your inbox",
+    "doneText": "If this address can be registered, we have sent a confirmation link to it. Please confirm your e-mail before logging in.",
+    "confirmPassword": "Repeat password",
+    "passwordMismatch": "The passwords do not match."
+  },
+  "login": {
+    "title": "Log in",
+    "submit": "Log in",
+    "forgot": "Forgot password?",
+    "noAccount": "No account yet? Register",
+    "notVerified": "Please confirm your e-mail first. Check your inbox for the link.",
+    "resend": "Send the link again",
+    "resent": "If this address is waiting for confirmation, a new link has been sent."
+  },
+  "verify": {
+    "verifying": "Confirming your e-mail…",
+    "success": "Your e-mail is confirmed. You can log in now.",
+    "failed": "This link is invalid or has expired. Log in to request a new one."
+  },
+  "forgot": {
+    "title": "Reset password",
+    "text": "Enter your e-mail and we will send you a link.",
+    "submit": "Send link",
+    "done": "If an account exists for this address, a link has been sent."
+  },
+  "reset": {
+    "title": "Set a new password",
+    "newPassword": "New password",
+    "submit": "Save password",
+    "done": "Your password has been changed. You can log in now."
+  },
+  "legal": {
+    "agb": "Terms and Conditions (AGB)",
+    "datenschutz": "Privacy Policy (Datenschutzerklärung)",
+    "placeholder": "The legal text will be provided by legal counsel and added here.",
+    "openInNewTab": "Open in new tab",
+    "close": "Close",
+    "impressum": "Legal Notice (Impressum)",
+    "back": "Back"
+  },
+  "investor": {
+    "title": "Welcome",
+    "text": "Your investor account is ready. Mandate settings and weekly teasers will follow in the next release."
+  },
+  "profile": {
+    "title": "Startup profile",
+    "intro": "Fill in your profile and upload your pitch deck. Everything is saved automatically as a draft.",
+    "status": {
+      "DRAFT": "Draft",
+      "LIVE": "Live",
+      "PAUSED": "Paused",
+      "REMOVED": "Removed"
+    },
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveError": "Could not save",
+    "sections": {
+      "basics": "Basics",
+      "metrics": "Metrics",
+      "deck": "Pitch deck"
+    },
+    "fields": {
+      "company_name": "Company name",
+      "sector": "Sector",
+      "stage": "Stage",
+      "country": "Country",
+      "amount_sought": "Amount sought",
+      "mrr": "MRR (monthly recurring revenue)",
+      "growth_percent": "Growth",
+      "growth_period": "Growth period",
+      "team_size": "Team size",
+      "deck": "Pitch deck",
+      "business_model": "Business model"
+    },
+    "companyHelper": "Internal only. Never shown to investors.",
+    "optional": "optional",
+    "growthPeriods": {
+      "mom": "Month over month",
+      "yoy": "Year over year"
+    },
+    "missing": "Still missing for a complete profile:",
+    "complete": "Your profile is complete. The next steps (teaser and publication) follow in a later release."
+  },
+  "deck": {
+    "dropHere": "Drag a PDF here or",
+    "choose": "choose a file",
+    "hint": "PDF only, up to {{max}} MB",
+    "uploading": "Uploading…",
+    "replace": "Replace",
+    "download": "Download",
+    "remove": "Remove",
+    "removeTitle": "Remove pitch deck?",
+    "removeText": "The file will be deleted permanently.",
+    "uploaded": "Uploaded {{date}}"
+  },
+  "dict": {
+    "sectors": {
+      "fintech": "FinTech",
+      "insurtech": "InsurTech",
+      "healthtech-medtech": "HealthTech & MedTech",
+      "biotech": "BioTech",
+      "edtech": "EdTech",
+      "proptech-contech": "PropTech & ConTech",
+      "climatetech-energy": "ClimateTech & Energy",
+      "mobility-logistics": "Mobility & Logistics",
+      "foodtech-agritech": "FoodTech & AgriTech",
+      "ecommerce-retailtech": "E-Commerce & RetailTech",
+      "hr-tech": "HR Tech",
+      "legaltech-regtech": "LegalTech & RegTech",
+      "cybersecurity": "Cybersecurity",
+      "ai-data": "AI & Data",
+      "enterprise-software": "Enterprise Software",
+      "deeptech-hardware": "DeepTech & Hardware",
+      "industrie-4-0": "Industry 4.0",
+      "media-entertainment-gaming": "Media, Entertainment & Gaming",
+      "travel-hospitality": "Travel & Hospitality",
+      "other": "Other"
+    },
+    "countries": {
+      "de": "Germany",
+      "at": "Austria",
+      "ch": "Switzerland",
+      "nl": "Netherlands",
+      "fr": "France",
+      "pl": "Poland",
+      "ua": "Ukraine",
+      "other": "Other"
+    },
+    "stages": {
+      "pre-seed": "Pre-Seed",
+      "seed": "Seed",
+      "series-a": "Series A",
+      "series-b": "Series B",
+      "series-c-plus": "Series C and later"
+    },
+    "businessModels": {
+      "saas-subscription": "SaaS & Subscription",
+      "marketplace-platform": "Marketplace & Platform",
+      "ecommerce-d2c": "E-Commerce & D2C",
+      "hardware-sales": "Hardware Sales",
+      "licensing": "Licensing",
+      "services": "Services",
+      "transaction-fee": "Transaction Model",
+      "other": "Other"
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "No connection to the server.",
+    "throttled": "Too many attempts. Please try again later.",
+    "accept_agb_required": "Please accept the Terms and Conditions.",
+    "accept_datenschutz_required": "Please confirm that you have taken note of the Privacy Policy.",
+    "growth_period_required": "Please choose a growth period.",
+    "deck_empty": "The file is empty.",
+    "deck_too_large": "The file is larger than {{max}} MB.",
+    "deck_not_pdf": "Only PDF files are accepted.",
+    "deck_password_protected": "The PDF is password-protected. Please upload an unprotected file.",
+    "deck_corrupted": "The PDF is damaged and cannot be read.",
+    "invalid_credentials": "E-mail or password is incorrect.",
+    "email_not_verified": "Please confirm your e-mail first.",
+    "invalid_or_expired_token": "This link is invalid or has expired."
+  },
+  "footer": {
+    "agb": "Terms (AGB)",
+    "datenschutz": "Privacy Policy",
+    "impressum": "Legal Notice"
+  },
+   "authPromo": {
+    "badge": "Regulated B2B Intro Engine",
+    "marketTag": "B2B Germany",
+    "heroTitle": "Discrete matching of startups and investors.",
+    "heroSubtitle": "AI creates a blind teaser without names or brands. Contact details are only shared upon mutual consent.",
+    "featureDsa": "DSA-compliant (Art. 16)",
+    "featureB2B": "Verified B2B investors only",
+    "featureServers": "Hosted in Frankfurt (EU)",
+    "copyright": "Start Share Platform. All rights reserved."
+  }
+
+}

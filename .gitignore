@@ -1,3 +1,8 @@
+
+
+# БД
+*.sqlite3
+*.db
 ### AL ###
 #Template for AL projects for Dynamics 365 Business Central
 #launch.json folder
@@ -25,5 +30,67 @@ TestResults.xml
 __pycache__/
 *.pyc
 db.sqlite3
+
+# Переменные окружения
 .env
+.env.local
+.env.*.local
+.env.dev
+.env.main
+.env.docker
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Django
+local_settings.py
+media/
+staticfiles/
+static/
+dump_*.sql
+backend/private_media/
+# IDE
 .idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+*.iml
+
+# Виртуальное окружение
+.venv/
+venv/
+env/
+ENV/
+
+
+
+# Node.js
+frontend/node_modules/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Coverage
+coverage/
+.nyc_output/
