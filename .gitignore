@@ -94,3 +94,5 @@ build/
 # Coverage
 coverage/
 .nyc_output/
+
+identifier.sqlite
