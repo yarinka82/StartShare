@@ -33,7 +33,7 @@ media/
 staticfiles/
 static/
 dump_*.sql
-
+backend/private_media/
 # IDE
 .idea/
 .vscode/
