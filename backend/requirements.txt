@@ -14,3 +14,6 @@ django-stubs==6.1.0
 django-stubs-ext==6.1.0
 djangorestframework-stubs==3.18.1
 types-PyYAML==6.0.12.20260815
+celery[redis]>=5.4
+redis>=5.0
+django-celery-beat>=2.6

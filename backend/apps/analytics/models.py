@@ -9,7 +9,8 @@ class EventName(models.TextChoices):
     STATUS_CONFIRMED = "status_confirmed", "Investor confirmed professional status (text C)"
     MANDATE_SAVED = "mandate_saved", "Investor saved the mandate for the first time"
     MANDATE_CHANGED = "mandate_changed", "Investor changed the mandate"
-
+    DECK_UPLOADED = "deck_uploaded", "Startup uploaded a pitch deck"
+    AI_DRAFT_CREATED = "ai_draft_created", "AI finished the teaser draft"
 
 class Event(models.Model):
     """Append-only product analytics log.

@@ -24,8 +24,14 @@ class StartupProfile(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
     sector = models.CharField(max_length=30, choices=Sector.choices)
     stage = models.CharField(max_length=30, choices=Stage.choices)
+    business_model = models.CharField(max_length=40, blank=True, default="")
     country = models.CharField(max_length=2)  # ISO-код, список стран фронт хранит сам
-    amount_seeking = models.DecimalField(max_digits=12, decimal_places=2)
+    amount_seeking = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
     mrr = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     growth_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     team_size = models.PositiveIntegerField()

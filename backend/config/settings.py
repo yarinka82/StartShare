@@ -3,6 +3,10 @@ import sys
 import tempfile
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-insecure-key-change-me")
@@ -16,11 +20,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_celery_beat",
     "rest_framework",
     "apps.accounts",
+    "apps.startups",
     "apps.profiles",
     "apps.investors",
     "apps.analytics",
+    "apps.documents",
 ]
 
 MIDDLEWARE = [
@@ -99,6 +106,23 @@ REST_FRAMEWORK = {
     },
 }
 
+CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+CELERY_TASK_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_ACKS_LATE = True              # задача не теряется, если воркер упал посреди обработки
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1     # задачи долгие (вызов ШІ), без «захвата» очереди про запас
+CELERY_TASK_TIME_LIMIT = 300              # жёсткий лимит, подберите по реальному времени обработки
+CELERY_TASK_SOFT_TIME_LIMIT = 270
+
+CELERY_BEAT_SCHEDULE = {
+    "purge-expired-decks": {"task": "apps.documents.tasks.purge_expired_decks", "schedule": 15 * 60},
+    "requeue-stuck-jobs": {"task": "apps.documents.tasks.requeue_stuck_jobs", "schedule": 5 * 60},
+}
+
+TEASER_MAX_RETRIES = 2                    # число повторов вызова ШІ (шаг 7); решает backend
+
+
+
 # --- E-mail ---
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@example.com")
@@ -120,4 +144,6 @@ DECK_MAX_BYTES = int(os.environ.get("DECK_MAX_MB", "20")) * 1024 * 1024
 # Also set client_max_body_size (nginx) a bit above DECK_MAX_BYTES.
 
 if "test" in sys.argv:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
     PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]  # fast tests only
