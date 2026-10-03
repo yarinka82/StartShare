@@ -51,3 +51,16 @@ class BusinessModel(models.TextChoices):
     SERVICES = "services", "Dienstleistung"
     TRANSACTION_FEE = "transaction-fee", "Transaktionsmodell"
     OTHER = "other", "Sonstiges"
+
+
+class Region(models.TextChoices):
+    """Investor mandate: where the investor is willing to invest (HARD filter, compared with the startup country).
+
+    PLACEHOLDER: the BA document does not define regions yet. The list has to be agreed together with the
+    country list. Matching (later) needs a region -> countries mapping; add it next to this class.
+    """
+
+    DACH = "dach", "DACH (Deutschland, Österreich, Schweiz)"
+    EU = "eu", "EU"
+    EUROPE = "europe", "Europa"
+    WORLDWIDE = "worldwide", "Weltweit"

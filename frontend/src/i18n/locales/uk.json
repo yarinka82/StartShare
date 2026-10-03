@@ -123,57 +123,7 @@
     "removeText": "Файл буде видалено назавжди.",
     "uploaded": "Завантажено {{date}}"
   },
-  "dict": {
-    "sectors": {
-      "fintech": "FinTech",
-      "insurtech": "InsurTech",
-      "healthtech-medtech": "HealthTech і MedTech",
-      "biotech": "BioTech",
-      "edtech": "EdTech",
-      "proptech-contech": "PropTech і ConTech",
-      "climatetech-energy": "ClimateTech і енергетика",
-      "mobility-logistics": "Мобільність і логістика",
-      "foodtech-agritech": "FoodTech і AgriTech",
-      "ecommerce-retailtech": "E-Commerce і RetailTech",
-      "hr-tech": "HR Tech",
-      "legaltech-regtech": "LegalTech і RegTech",
-      "cybersecurity": "Кібербезпека",
-      "ai-data": "AI і дані",
-      "enterprise-software": "Корпоративне ПЗ",
-      "deeptech-hardware": "DeepTech і Hardware",
-      "industrie-4-0": "Industrie 4.0",
-      "media-entertainment-gaming": "Медіа, розваги, ігри",
-      "travel-hospitality": "Туризм і гостинність",
-      "other": "Інше"
-    },
-    "countries": {
-      "de": "Німеччина",
-      "at": "Австрія",
-      "ch": "Швейцарія",
-      "nl": "Нідерланди",
-      "fr": "Франція",
-      "pl": "Польща",
-      "ua": "Україна",
-      "other": "Інше"
-    },
-    "stages": {
-      "pre-seed": "Pre-Seed",
-      "seed": "Seed",
-      "series-a": "Series A",
-      "series-b": "Series B",
-      "series-c-plus": "Series C і пізніше"
-    },
-    "businessModels": {
-      "saas-subscription": "SaaS і підписка",
-      "marketplace-platform": "Маркетплейс і платформа",
-      "ecommerce-d2c": "E-Commerce і D2C",
-      "hardware-sales": "Продаж обладнання",
-      "licensing": "Ліцензування",
-      "services": "Послуги",
-      "transaction-fee": "Транзакційна модель",
-      "other": "Інше"
-    }
-  },
+
   "errors": {
     "generic": "Щось пішло не так. Спробуйте ще раз.",
     "network": "Немає з'єднання із сервером.",
@@ -204,6 +154,72 @@
     "featureB2B": "Лише B2B інвестори",
     "featureServers": "Сервери у Франкфурті",
     "copyright": "Start Share Platform. Усі права захищено."
-  }
+  },
+   "investor": {
+    "selectAll": "Вибрати все",
+    "clear": "Очистити",
 
+    "status": {
+      "title": "Підтвердження статусу інвестора",
+      "intro": "Будь ласка, підтвердіть, що ви дієте як професійний інвестор, щоб продовжити.",
+      "translationNote": "Неофіційний переклад для ознайомлення",
+      "translation": "Я дію як професійний інвестор або бізнес-ангел у межах своєї підприємницької діяльності, а не як споживач.",
+      "continue": "Перейти до мандату"
+    },
+    "mandate": {
+      "title": "Інвестиційний мандат",
+      "intro": "Налаштуйте ваші критерії відбору. Ви отримуватимете лише анонімні тизери, які точно відповідають вашому мандату.",
+      "hard": "Жорсткі фільтри (Обов'язкові критерії)",
+      "soft": "М'які переваги",
+      "sectors": "Галузі та сектори",
+      "stages": "Стадії фінансування",
+      "regions": "Цільові регіони",
+      "ticket": "Розмір чека",
+      "ticketMin": "Мін. чек",
+      "ticketMax": "Макс. чек",
+      "ticketHint": "Суми в EUR. Стартапи поза цим діапазоном автоматично відсіюватимуться.",
+      "businessModels": "Бажані моделі бізнесу",
+      "businessModelsHint": "Використовуються для сортування та пріоритезації угод у щотижневому дайджесті.",
+      "save": "Зберегти мандат",
+      "saved": "Інвестиційний мандат успішно збережено",
+      "lastSaved": "Востаннє збережено: {{date}}"
+    }
+  },
+  "dict": {
+    "sectors": {
+      "B2B_SAAS": "B2B SaaS / Enterprise",
+      "FINTECH": "FinTech / InsurTech",
+      "HEALTHTECH": "HealthTech / MedTech",
+      "AI_DATA": "ШІ та Data-інфраструктура",
+      "CLIMATETECH": "ClimateTech / CleanTech",
+      "ECOMMERCE": "E-Commerce / D2C",
+      "INDUSTRIAL": "Industrial Tech / Hardware",
+      "CYBERSECURITY": "Кібербезпека",
+      "PROPTECH": "PropTech / Нерухомість",
+      "OTHER": "Інше"
+    },
+    "stages": {
+      "pre-seed": "Pre-Seed (< 500 тис. €)",
+      "seed": "Seed (500 тис. € – 2 млн €)",
+      "series-a": "Series A (2 млн € – 5 млн €)",
+      "series-b": "Series B (5 млн € – 15 млн €)",
+      "series-c-plus": "Series C+ (> 15 млн €)"
+    },
+    "regions": {
+      "DACH": "DACH (Німеччина, Австрія, Швейцарія)",
+      "DE_ONLY": "Лише Німеччина",
+      "EU_WIDE": "Європейський Союз",
+      "GLOBAL": "Глобально / Remote"
+    },
+    "businessModels": {
+      "SUBSCRIPTION": "Підписка / SaaS",
+      "TRANSACTIONAL": "Транзакційна / Маркетплейс",
+      "USAGE_BASED": "За використання (API / Usage)",
+      "HARDWARE": "Hardware / Ліцензії",
+      "HYBRID": "Гібридна / Інше"
+    }
+  }
 }
+
+
+

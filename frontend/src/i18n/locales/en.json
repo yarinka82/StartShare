@@ -123,57 +123,7 @@
     "removeText": "The file will be deleted permanently.",
     "uploaded": "Uploaded {{date}}"
   },
-  "dict": {
-    "sectors": {
-      "fintech": "FinTech",
-      "insurtech": "InsurTech",
-      "healthtech-medtech": "HealthTech & MedTech",
-      "biotech": "BioTech",
-      "edtech": "EdTech",
-      "proptech-contech": "PropTech & ConTech",
-      "climatetech-energy": "ClimateTech & Energy",
-      "mobility-logistics": "Mobility & Logistics",
-      "foodtech-agritech": "FoodTech & AgriTech",
-      "ecommerce-retailtech": "E-Commerce & RetailTech",
-      "hr-tech": "HR Tech",
-      "legaltech-regtech": "LegalTech & RegTech",
-      "cybersecurity": "Cybersecurity",
-      "ai-data": "AI & Data",
-      "enterprise-software": "Enterprise Software",
-      "deeptech-hardware": "DeepTech & Hardware",
-      "industrie-4-0": "Industry 4.0",
-      "media-entertainment-gaming": "Media, Entertainment & Gaming",
-      "travel-hospitality": "Travel & Hospitality",
-      "other": "Other"
-    },
-    "countries": {
-      "de": "Germany",
-      "at": "Austria",
-      "ch": "Switzerland",
-      "nl": "Netherlands",
-      "fr": "France",
-      "pl": "Poland",
-      "ua": "Ukraine",
-      "other": "Other"
-    },
-    "stages": {
-      "pre-seed": "Pre-Seed",
-      "seed": "Seed",
-      "series-a": "Series A",
-      "series-b": "Series B",
-      "series-c-plus": "Series C and later"
-    },
-    "businessModels": {
-      "saas-subscription": "SaaS & Subscription",
-      "marketplace-platform": "Marketplace & Platform",
-      "ecommerce-d2c": "E-Commerce & D2C",
-      "hardware-sales": "Hardware Sales",
-      "licensing": "Licensing",
-      "services": "Services",
-      "transaction-fee": "Transaction Model",
-      "other": "Other"
-    }
-  },
+
   "errors": {
     "generic": "Something went wrong. Please try again.",
     "network": "No connection to the server.",
@@ -204,6 +154,70 @@
     "featureB2B": "Verified B2B investors only",
     "featureServers": "Hosted in Frankfurt (EU)",
     "copyright": "Start Share Platform. All rights reserved."
+  },
+   "investor": {
+    "selectAll": "Select all",
+    "clear": "Clear",
+
+    "status": {
+      "title": "Investor Status Confirmation",
+      "intro": "Please confirm that you act as a professional investor before proceeding.",
+      "translationNote": "Convenience translation (German legal wording prevails)",
+      "translation": "I act as a professional investor or business angel in the course of my business activity and not as a consumer.",
+      "continue": "Continue to Mandate"
+    },
+    "mandate": {
+      "title": "Investment Mandate",
+      "intro": "Define your deal criteria. You will only receive blind teasers matching your exact mandate.",
+      "hard": "Hard Criteria (Strict Filters)",
+      "soft": "Soft Preferences",
+      "sectors": "Industries & Sectors",
+      "stages": "Funding Stages",
+      "regions": "Target Regions",
+      "ticket": "Ticket Size",
+      "ticketMin": "Min. Ticket",
+      "ticketMax": "Max. Ticket",
+      "ticketHint": "Amounts in EUR. Deals outside this range will be filtered out.",
+      "businessModels": "Preferred Business Models",
+      "businessModelsHint": "Used to rank and prioritize the best matching deals in your weekly digest.",
+      "save": "Save Mandate",
+      "saved": "Investment mandate saved successfully",
+      "lastSaved": "Last saved: {{date}}"
+    }
+  },
+  "dict": {
+    "sectors": {
+      "B2B_SAAS": "B2B SaaS / Enterprise",
+      "FINTECH": "FinTech / InsurTech",
+      "HEALTHTECH": "HealthTech / MedTech",
+      "AI_DATA": "AI & Data Infrastructure",
+      "CLIMATETECH": "ClimateTech / CleanTech",
+      "ECOMMERCE": "E-Commerce / D2C",
+      "INDUSTRIAL": "Industrial Tech / Hardware",
+      "CYBERSECURITY": "Cybersecurity",
+      "PROPTECH": "PropTech / Real Estate",
+      "OTHER": "Other"
+    },
+    "stages": {
+      "pre-seed": "Pre-Seed (< €500k)",
+      "seed": "Seed (€500k – €2M)",
+      "series-a": "Series A (€2M – €5M)",
+      "series-b": "Series B (€5M – €15M)",
+      "series-c-plus": "Series C+ (> €15M)"
+    },
+    "regions": {
+      "DACH": "DACH (DE, AT, CH)",
+      "DE_ONLY": "Germany Only",
+      "EU_WIDE": "European Union",
+      "GLOBAL": "Global / Remote"
+    },
+    "businessModels": {
+      "SUBSCRIPTION": "Subscription / SaaS",
+      "TRANSACTIONAL": "Transactional / Marketplace",
+      "USAGE_BASED": "Usage-Based / API",
+      "HARDWARE": "Hardware / License",
+      "HYBRID": "Hybrid / Other"
+    }
   }
 
 }

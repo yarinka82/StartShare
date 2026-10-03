@@ -1,6 +1,8 @@
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlineOutlined";
-import { Alert, Box, Chip, CircularProgress, InputAdornment, MenuItem, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Box, Chip,
+  CircularProgress, InputAdornment, MenuItem, Paper, Snackbar,
+  Stack, TextField, Typography } from "@mui/material";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -66,6 +68,7 @@ export default function ProfilePage() {
   const [meta, setMeta] = useState<Meta | null>(null);
   const [dicts, setDicts] = useState<Dictionaries | null>(null);
   const [loadError, setLoadError] = useState("");
+  const [toastOpen, setToastOpen] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -116,12 +119,14 @@ export default function ProfilePage() {
       const p = await api.patchProfile(payload);
       setMeta({ status: p.status, is_complete: p.is_complete, missing_fields: p.missing_fields, deck: p.deck });
       setSaveState("saved");
+      setToastOpen(true);
     } catch (ex) {
       const parsed = parseError(ex);
       const errs: Record<string, string> = {};
       for (const [f, codes] of Object.entries(parsed.fields)) errs[f] = codes.map((c) => errorText(t, c)).join(" ");
       setFieldErrors((e) => ({ ...e, ...errs }));
       setSaveState("error");
+      setToastOpen(true);
     }
   }, [t]);
 
@@ -256,6 +261,23 @@ export default function ProfilePage() {
       <Section title={t("profile.sections.deck")}>
         <DeckUpload deck={meta.deck as Deck | null} onChanged={refreshMeta} />
       </Section>
+
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={2500}
+        onClose={() => setToastOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          severity={saveState === "error" ? "error" : "success"}
+          onClose={() => setToastOpen(false)}
+          variant="filled"
+          sx={{ boxShadow: 3 }}
+        >
+          {saveState === "error" ? t("profile.saveError") : t("profile.saved")}
+        </Alert>
+      </Snackbar>
+
     </Stack>
   );
 }
