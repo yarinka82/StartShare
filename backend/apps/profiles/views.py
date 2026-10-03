@@ -10,7 +10,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import BusinessModel, Country, Deck, Sector, Stage, StartupProfile
+from .choices import BusinessModel, Sector, Stage
+from .models import Country, Deck, StartupProfile
 from .permissions import IsVerifiedStartup
 from .serializers import (
     DeckSerializer,
@@ -25,21 +26,21 @@ def get_profile(user):
 
 
 class DictionariesView(APIView):
-    """All list values for the profile form in one request."""
+    """All list values for the profile form in one request (all items are {code, name})."""
 
     authentication_classes = []
     permission_classes = [AllowAny]
 
     def get(self, request):
-        def items(model):
-            return DictionaryItemSerializer(model.objects.filter(is_active=True), many=True).data
+        def from_choices(choices):
+            return [{"code": value, "name": label} for value, label in choices.choices]
 
         return Response(
             {
-                "sectors": items(Sector),
-                "stages": items(Stage),
-                "business_models": items(BusinessModel),
-                "countries": items(Country),
+                "sectors": from_choices(Sector),
+                "stages": from_choices(Stage),
+                "business_models": from_choices(BusinessModel),
+                "countries": DictionaryItemSerializer(Country.objects.filter(is_active=True), many=True).data,
                 "growth_periods": [{"code": c, "name": n} for c, n in StartupProfile.GrowthPeriod.choices],
             }
         )

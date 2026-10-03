@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import { api } from "../api/client";
 import { errorText, parseError } from "../api/errors";
-import type { Deck, Dictionaries, DictItem, Profile } from "../api/types";
+import type { Deck, Dictionaries, Option, Profile } from "../api/types";
 import DeckUpload from "../components/DeckUpload";
 
 type Values = {
@@ -18,7 +18,6 @@ type Meta = Pick<Profile, "status" | "is_complete" | "missing_fields" | "deck">;
 type SaveState = "idle" | "saving" | "saved" | "error";
 type DictKind = "sectors" | "stages" | "businessModels" | "countries";
 
-const SELECTS: Name[] = ["sector", "stage", "business_model", "country"];
 const DECIMALS: Name[] = ["amount_sought", "mrr", "growth_percent"];
 const DEBOUNCE_MS = 800;
 
@@ -26,10 +25,10 @@ const trimDecimal = (v: string | null) => (v ?? "").replace(/\.00$/, "").replace
 
 const toValues = (p: Profile): Values => ({
   company_name: p.company_name,
-  sector: p.sector?.toString() ?? "",
-  stage: p.stage?.toString() ?? "",
-  business_model: p.business_model?.toString() ?? "",
-  country: p.country?.toString() ?? "",
+  sector: p.sector,
+  stage: p.stage,
+  business_model: p.business_model,
+  country: p.country ?? "",
   amount_sought: trimDecimal(p.amount_sought),
   mrr: trimDecimal(p.mrr),
   growth_percent: trimDecimal(p.growth_percent),
@@ -39,7 +38,8 @@ const toValues = (p: Profile): Values => ({
 
 /** undefined = value is still being typed (e.g. "-"), do not send yet */
 function serialize(name: Name, v: string): unknown {
-  if (SELECTS.includes(name)) return v === "" ? null : Number(v);
+  if (name === "country") return v === "" ? null : v; // FK list: null = not chosen
+  if (name === "sector" || name === "stage" || name === "business_model") return v; // choices: "" = not chosen
   if (DECIMALS.includes(name)) {
     const s = v.trim().replace(",", ".");
     if (s === "") return null;
@@ -157,21 +157,21 @@ export default function ProfilePage() {
   }
 
   const label = (n: string) => t(`profile.fields.${n}`);
-  const optionName = (kind: DictKind, item: DictItem) => t(`dict.${kind}.${item.code}`, { defaultValue: item.name });
+  const optionName = (kind: DictKind, item: Option) => t(`dict.${kind}.${item.code}`, { defaultValue: item.name });
 
-  const select = (name: Name, items: DictItem[], kind: DictKind, optional = false) => (
+  const select = (name: Name, items: Option[], kind: DictKind, optional = false) => (
     <TextField
       select
       label={label(name) + (optional ? ` (${t("profile.optional")})` : "")}
       // a value that was removed from the approved list is shown as "not chosen"
-      value={items.some((i) => String(i.id) === values[name]) ? values[name] : ""}
+      value={items.some((i) => i.code === values[name]) ? values[name] : ""}
       required={!optional}
       onChange={(e) => change(name, e.target.value)}
       error={!!fieldErrors[name]} helperText={fieldErrors[name]}
     >
       {optional && <MenuItem value=""><em>—</em></MenuItem>}
       {items.map((i) => (
-        <MenuItem key={i.id} value={String(i.id)}>{optionName(kind, i)}</MenuItem>
+        <MenuItem key={i.code} value={i.code}>{optionName(kind, i)}</MenuItem>
       ))}
     </TextField>
   );

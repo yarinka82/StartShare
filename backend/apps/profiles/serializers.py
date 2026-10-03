@@ -1,13 +1,12 @@
 from rest_framework import serializers
 
-from .models import BusinessModel, Country, Deck, Sector, Stage, StartupProfile
+from .models import Country, Deck, StartupProfile
 from .validators import validate_deck_file
 
 REQUIRED_FOR_COMPLETE = ("sector", "stage", "country", "amount_sought", "team_size")
 
 
 class DictionaryItemSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
     code = serializers.CharField()
     name = serializers.CharField()
 
@@ -24,17 +23,10 @@ class DeckUploadSerializer(serializers.Serializer):
 
 
 class StartupProfileSerializer(serializers.ModelSerializer):
-    sector = serializers.PrimaryKeyRelatedField(
-        queryset=Sector.objects.filter(is_active=True), allow_null=True, required=False
-    )
-    stage = serializers.PrimaryKeyRelatedField(
-        queryset=Stage.objects.filter(is_active=True), allow_null=True, required=False
-    )
-    business_model = serializers.PrimaryKeyRelatedField(
-        queryset=BusinessModel.objects.filter(is_active=True), allow_null=True, required=False
-    )
-    country = serializers.PrimaryKeyRelatedField(
-        queryset=Country.objects.filter(is_active=True), allow_null=True, required=False
+    # sector / stage / business_model are model choices: DRF builds a ChoiceField from them
+    # (value = code, "" = not chosen). Country is a DB list, addressed by its code too.
+    country = serializers.SlugRelatedField(
+        slug_field="code", queryset=Country.objects.filter(is_active=True), allow_null=True, required=False
     )
     amount_sought = serializers.DecimalField(
         max_digits=14, decimal_places=2, min_value=1, max_value=1_000_000_000,
@@ -78,7 +70,9 @@ class StartupProfileSerializer(serializers.ModelSerializer):
             value = getattr(obj, field)
             if value in (None, ""):
                 return True
-            # a value that was removed from the approved list counts as not chosen
+            choices = obj._meta.get_field(field).choices
+            if choices:  # a value that is no longer in the approved list counts as not chosen
+                return value not in dict(choices)
             return getattr(value, "is_active", True) is False
 
         missing = [f for f in REQUIRED_FOR_COMPLETE if is_missing(f)]

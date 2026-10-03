@@ -6,6 +6,8 @@ from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
+from .choices import BusinessModel, Sector, Stage
+
 
 def get_private_storage():
     """Deck files live outside MEDIA_ROOT and are never served directly."""
@@ -17,7 +19,7 @@ def deck_upload_path(instance, filename):
 
 
 class Dictionary(models.Model):
-    """Base for list values (editable in Django admin, served via /api/dictionaries/)."""
+    """Base for list values kept in the DB (editable in Django admin). Only countries for now."""
 
     code = models.SlugField(max_length=40, unique=True)
     name = models.CharField(max_length=100)
@@ -30,18 +32,6 @@ class Dictionary(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class Sector(Dictionary):
-    pass
-
-
-class Stage(Dictionary):
-    pass
-
-
-class BusinessModel(Dictionary):
-    """Soft matching criterion (not a hard filter)."""
 
 
 class Country(Dictionary):
@@ -65,11 +55,11 @@ class StartupProfile(models.Model):
     )
     # Internal only, never shown on the blind teaser. (Open question: keep this field?)
     company_name = models.CharField(max_length=200, blank=True)
-    sector = models.ForeignKey(Sector, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
-    stage = models.ForeignKey(Stage, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
-    business_model = models.ForeignKey(
-        BusinessModel, null=True, blank=True, on_delete=models.PROTECT, related_name="+"
-    )
+    # Empty string = "not chosen yet": a DRAFT is saved field by field, so these cannot be required here.
+    # Completeness is checked in the serializer (missing_fields).
+    sector = models.CharField(max_length=40, choices=Sector.choices, blank=True, default="")
+    stage = models.CharField(max_length=20, choices=Stage.choices, blank=True, default="")
+    business_model = models.CharField(max_length=30, choices=BusinessModel.choices, blank=True, default="")
     country = models.ForeignKey(Country, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
     amount_sought = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)  # EUR
     mrr = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)  # EUR

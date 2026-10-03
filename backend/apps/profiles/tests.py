@@ -10,7 +10,8 @@ from pypdf import PdfWriter
 from rest_framework.test import APIClient, APITestCase
 
 from apps.accounts.models import User
-from apps.profiles.models import BusinessModel, Country, Deck, Sector, Stage
+from apps.profiles.choices import BusinessModel, Sector, Stage
+from apps.profiles.models import Country, Deck, StartupProfile
 
 
 def make_pdf(password=None, pages=1):
@@ -42,46 +43,23 @@ class ProfileTests(APITestCase):
         self.user = make_user()
         self.client.force_authenticate(self.user)
 
-    def test_dictionaries_public(self):
+    def test_approved_lists_have_the_agreed_sizes(self):
+        self.assertEqual(len(Sector.choices), 20)
+        self.assertEqual(len(Stage.choices), 5)
+        self.assertEqual(len(BusinessModel.choices), 8)
         r = APIClient().get("/api/dictionaries/")
         self.assertEqual(r.status_code, 200)
-        self.assertTrue(r.data["sectors"] and r.data["stages"] and r.data["countries"])
-
-    def test_approved_dictionary_sizes(self):
-        self.assertEqual(Sector.objects.filter(is_active=True).count(), 20)
-        self.assertEqual(Stage.objects.filter(is_active=True).count(), 5)
-        self.assertEqual(BusinessModel.objects.filter(is_active=True).count(), 8)
-        r = APIClient().get("/api/dictionaries/")
+        self.assertEqual(len(r.data["sectors"]), 20)
         self.assertEqual(len(r.data["business_models"]), 8)
-        self.assertEqual(r.data["stages"][-1]["code"], "series-c-plus")  # sort order kept
+        self.assertEqual(r.data["stages"][-1], {"code": "series-c-plus", "name": "Series C und später"})
+        self.assertTrue(r.data["countries"])
+        self.assertTrue(all(set(i) == {"code", "name"} for k in ("sectors", "stages", "countries") for i in r.data[k]))
 
-    def test_seed_deactivates_obsolete_values_and_is_idempotent(self):
-        old = Sector.objects.create(code="old-sector", name="Old")
-        call_command("seed_dictionaries", verbosity=0)
-        call_command("seed_dictionaries", verbosity=0)
-        old.refresh_from_db()
-        self.assertFalse(old.is_active)
-        self.assertEqual(Sector.objects.filter(is_active=True).count(), 20)
-        self.assertEqual(Sector.objects.filter(code="fintech").count(), 1)
-
-    def test_value_removed_from_list_counts_as_missing(self):
-        sector = Sector.objects.get(code="fintech")
-        self.client.patch("/api/profile/", {"sector": sector.id}, format="json")
-        self.assertNotIn("sector", self.client.get("/api/profile/").data["missing_fields"])
-        sector.is_active = False
-        sector.save()
-        self.assertIn("sector", self.client.get("/api/profile/").data["missing_fields"])
-
-    def test_business_model_is_optional_but_must_be_active(self):
-        bm = BusinessModel.objects.get(code="licensing")
-        r = self.client.patch("/api/profile/", {"business_model": bm.id}, format="json")
-        self.assertEqual(r.status_code, 200)
-        self.assertEqual(self.client.get("/api/profile/").data["business_model"], bm.id)
-        self.assertNotIn("business_model", self.client.get("/api/profile/").data["missing_fields"])
-        bm.is_active = False
-        bm.save()
-        r = self.client.patch("/api/profile/", {"business_model": bm.id}, format="json")
-        self.assertEqual(r.status_code, 400)
+    def test_choice_codes_are_unique_and_url_safe(self):
+        for choices in (Sector, Stage, BusinessModel):
+            values = [v for v, _ in choices.choices]
+            self.assertEqual(len(values), len(set(values)))
+            self.assertTrue(all(v == v.lower() and " " not in v for v in values))
 
     def test_draft_autosave_and_missing_fields(self):
         r = self.client.get("/api/profile/")
@@ -89,40 +67,70 @@ class ProfileTests(APITestCase):
         self.assertEqual(r.data["status"], "DRAFT")
         self.assertFalse(r.data["is_complete"])
         self.assertIn("deck", r.data["missing_fields"])
+        self.assertEqual(r.data["sector"], "")  # empty draft is fine
 
-        sector = Sector.objects.first().id
-        r = self.client.put("/api/profile/", {"sector": sector, "team_size": 4}, format="json")
+        r = self.client.put("/api/profile/", {"sector": Sector.FINTECH, "team_size": 4}, format="json")
         self.assertEqual(r.status_code, 200)
         r = self.client.get("/api/profile/")
-        self.assertEqual(r.data["sector"], sector)
+        self.assertEqual(r.data["sector"], "fintech")
         self.assertEqual(r.data["team_size"], 4)
         self.assertNotIn("sector", r.data["missing_fields"])
 
     def test_complete_profile(self):
         self.client.patch("/api/profile/", {
-            "sector": Sector.objects.first().id, "stage": Stage.objects.first().id,
-            "country": Country.objects.first().id, "amount_sought": "500000", "team_size": 3,
+            "sector": Sector.AI_DATA, "stage": Stage.SEED, "country": "de",
+            "amount_sought": "500000", "team_size": 3,
             "mrr": "12000", "growth_percent": "15.5", "growth_period": "mom",
         }, format="json")
         self.client.post("/api/profile/deck/", {"file": pdf_upload()}, format="multipart")
         r = self.client.get("/api/profile/")
         self.assertTrue(r.data["is_complete"], r.data["missing_fields"])
+        self.assertEqual(r.data["country"], "de")
+
+    def test_invalid_choice_is_rejected(self):
+        for payload in ({"sector": "not-a-sector"}, {"stage": "series-z"}, {"business_model": "magic"},
+                        {"sector": "FinTech"}):  # label instead of code
+            r = self.client.patch("/api/profile/", payload, format="json")
+            self.assertEqual(r.status_code, 400, payload)
+
+    def test_choice_can_be_cleared(self):
+        self.client.patch("/api/profile/", {"sector": Sector.BIOTECH}, format="json")
+        r = self.client.patch("/api/profile/", {"sector": ""}, format="json")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("sector", r.data["missing_fields"])
 
     def test_validation(self):
         bad = [
             {"amount_sought": "0"}, {"amount_sought": "-5"}, {"team_size": 0},
-            {"mrr": "-1"}, {"sector": 99999}, {"growth_percent": "10"},  # growth without period
+            {"mrr": "-1"}, {"country": "zz"}, {"growth_percent": "10"},  # growth without period
         ]
         for payload in bad:
             r = self.client.patch("/api/profile/", payload, format="json")
             self.assertEqual(r.status_code, 400, payload)
 
-    def test_inactive_dictionary_value_rejected(self):
-        s = Sector.objects.first()
-        s.is_active = False
-        s.save()
-        r = self.client.patch("/api/profile/", {"sector": s.id}, format="json")
+    def test_value_no_longer_in_list_counts_as_missing(self):
+        profile = StartupProfile.objects.create(user=self.user, sector=Sector.FINTECH)
+        self.assertNotIn("sector", self.client.get("/api/profile/").data["missing_fields"])
+        StartupProfile.objects.filter(pk=profile.pk).update(sector="retired-sector")  # legacy value in DB
+        self.assertIn("sector", self.client.get("/api/profile/").data["missing_fields"])
+
+    def test_business_model_is_optional(self):
+        r = self.client.patch("/api/profile/", {"business_model": BusinessModel.LICENSING}, format="json")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.data["business_model"], "licensing")
+        self.assertNotIn("business_model", r.data["missing_fields"])
+        self.assertNotIn("business_model", self.client.get("/api/profile/").data["missing_fields"] )
+
+    def test_inactive_country_rejected(self):
+        c = Country.objects.get(code="fr")
+        c.is_active = False
+        c.save()
+        r = self.client.patch("/api/profile/", {"country": "fr"}, format="json")
         self.assertEqual(r.status_code, 400)
+
+    def test_seed_countries_is_idempotent(self):
+        call_command("seed_dictionaries", verbosity=0)
+        self.assertEqual(Country.objects.filter(code="de").count(), 1)
 
     def test_status_is_read_only(self):
         self.client.patch("/api/profile/", {"status": "LIVE"}, format="json")
