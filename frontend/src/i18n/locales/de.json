@@ -123,57 +123,7 @@
     "removeText": "Die Datei wird dauerhaft gelöscht.",
     "uploaded": "Hochgeladen am {{date}}"
   },
-  "dict": {
-    "sectors": {
-      "fintech": "FinTech",
-      "insurtech": "InsurTech",
-      "healthtech-medtech": "HealthTech & MedTech",
-      "biotech": "BioTech",
-      "edtech": "EdTech",
-      "proptech-contech": "PropTech & ConTech",
-      "climatetech-energy": "ClimateTech & Energie",
-      "mobility-logistics": "Mobilität & Logistik",
-      "foodtech-agritech": "FoodTech & AgriTech",
-      "ecommerce-retailtech": "E-Commerce & RetailTech",
-      "hr-tech": "HR Tech",
-      "legaltech-regtech": "LegalTech & RegTech",
-      "cybersecurity": "Cybersecurity",
-      "ai-data": "KI & Daten",
-      "enterprise-software": "Enterprise Software",
-      "deeptech-hardware": "DeepTech & Hardware",
-      "industrie-4-0": "Industrie 4.0",
-      "media-entertainment-gaming": "Medien, Entertainment & Gaming",
-      "travel-hospitality": "Reisen & Gastgewerbe",
-      "other": "Sonstiges"
-    },
-    "countries": {
-      "de": "Deutschland",
-      "at": "Österreich",
-      "ch": "Schweiz",
-      "nl": "Niederlande",
-      "fr": "Frankreich",
-      "pl": "Polen",
-      "ua": "Ukraine",
-      "other": "Sonstiges"
-    },
-    "stages": {
-      "pre-seed": "Pre-Seed",
-      "seed": "Seed",
-      "series-a": "Series A",
-      "series-b": "Series B",
-      "series-c-plus": "Series C und später"
-    },
-    "businessModels": {
-      "saas-subscription": "SaaS & Abo-Modell",
-      "marketplace-platform": "Marktplatz & Plattform",
-      "ecommerce-d2c": "E-Commerce & D2C",
-      "hardware-sales": "Hardware-Verkauf",
-      "licensing": "Lizenzmodell",
-      "services": "Dienstleistung",
-      "transaction-fee": "Transaktionsmodell",
-      "other": "Sonstiges"
-    }
-  },
+
   "errors": {
     "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "network": "Keine Verbindung zum Server.",
@@ -204,5 +154,70 @@
     "featureB2B": "Ausschließlich B2B-Investoren",
     "featureServers": "Serverstandort Frankfurt",
     "copyright": "Start Share Plattform. Alle Rechte vorbehalten."
+  },
+   "investor":
+   {"selectAll": "Alle auswählen",
+    "clear": "Zurücksetzen" ,
+
+    "status": {
+      "title": "Bestätigung des Investorenstatus",
+      "intro": "Bitte bestätigen Sie vor dem Fortfahren, dass Sie als professioneller Investor handeln.",
+      "translationNote": "",
+      "translation": "",
+      "continue": "Weiter zum Mandat"
+    },
+    "mandate": {
+      "title": "Investitionsmandat",
+      "intro": "Definieren Sie Ihre Suchkriterien. Sie erhalten ausschließlich anonymisierte Teaser, die Ihrem Profil entsprechen.",
+      "hard": "Ausschlusskriterien (Hard Filters)",
+      "soft": "Präferenzen (Soft Filters)",
+      "sectors": "Branchen & Sektoren",
+      "stages": "Finanzierungsphasen",
+      "regions": "Zielregionen",
+      "ticket": "Ticketgröße",
+      "ticketMin": "Min. Ticket",
+      "ticketMax": "Max. Ticket",
+      "ticketHint": "Beträge in EUR. Angebote außerhalb dieser Spanne werden automatisch herausgefiltert.",
+      "businessModels": "Bevorzugte Geschäftsmodelle",
+      "businessModelsHint": "Wird verwendet, um passende Deals in Ihrem wöchentlichen Digest zu priorisieren.",
+      "save": "Mandat speichern",
+      "saved": "Investitionsmandat erfolgreich gespeichert",
+      "lastSaved": "Zuletzt gespeichert: {{date}}"
+    }
+  },
+  "dict": {
+    "sectors": {
+      "B2B_SAAS": "B2B SaaS / Enterprise",
+      "FINTECH": "FinTech / InsurTech",
+      "HEALTHTECH": "HealthTech / MedTech",
+      "AI_DATA": "KI & Dateninfrastruktur",
+      "CLIMATETECH": "ClimateTech / CleanTech",
+      "ECOMMERCE": "E-Commerce / D2C",
+      "INDUSTRIAL": "Industrial Tech / Hardware",
+      "CYBERSECURITY": "Cybersecurity",
+      "PROPTECH": "PropTech / Immobilien",
+      "OTHER": "Sonstiges"
+    },
+    "stages": {
+      "pre-seed": "Pre-Seed (< 500k €)",
+      "seed": "Seed (500k € – 2M €)",
+      "series-a": "Series A (2M € – 5M €)",
+      "series-b": "Series B (5M € – 15M €)",
+      "series-c-plus": "Series C+ (> 15 Mio. €)"
+    },
+    "regions": {
+      "DACH": "DACH (DE, AT, CH)",
+      "DE_ONLY": "Nur Deutschland",
+      "EU_WIDE": "Europäische Union",
+      "GLOBAL": "Global / Remote"
+    },
+    "businessModels": {
+      "SUBSCRIPTION": "Abonnement / SaaS",
+      "TRANSACTIONAL": "Transaktionsbasiert / Marktplatz",
+      "USAGE_BASED": "Nutzungsbasiert (API / Usage)",
+      "HARDWARE": "Hardware / Lizenz",
+      "HYBRID": "Hybrid / Sonstiges"
+    }
   }
+
 }

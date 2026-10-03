@@ -18,6 +18,7 @@ export interface Dictionaries {
   stages: Option[];
   business_models: Option[];
   countries: Option[];
+  regions: Option[];
   growth_periods: Option[];
 }
 
@@ -44,3 +45,22 @@ export interface Profile {
   is_complete: boolean;
   missing_fields: string[];
 }
+
+export interface Mandate {
+  sectors: string[];
+  stages: string[];
+  regions: string[];
+  business_models: string[];
+  ticket_min: string;
+  ticket_max: string;
+  updated_at: string;
+}
+
+export interface InvestorState {
+  status_confirmed: boolean;
+  status_confirmed_at: string | null;
+  mandate: Mandate | null;
+}
+
+/** What the mandate form sends (money as strings, lists as codes). */
+export type MandateInput = Omit<Mandate, "updated_at">;

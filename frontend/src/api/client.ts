@@ -1,5 +1,5 @@
 import i18n from "../i18n";
-import type { Deck, Dictionaries, Profile, User } from "./types";
+import type { Deck, Dictionaries, InvestorState, Mandate, MandateInput, Profile, User } from "./types";
 
 export class ApiError extends Error {
   status: number;
@@ -106,4 +106,8 @@ export const api = {
   uploadDeck,
   deleteDeck: () => request<void>("/api/profile/deck/", "DELETE"),
   deckDownloadUrl: "/api/profile/deck/download/",
+  // investor
+  investorState: () => request<InvestorState>("/api/investor/"),
+  confirmInvestorStatus: () => request<InvestorState>("/api/investor/confirm-status/", "POST", { accept: true }),
+  saveMandate: (data: MandateInput) => request<Mandate>("/api/investor/mandate/", "PUT", data),
 };

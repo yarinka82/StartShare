@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .choices import BusinessModel, Sector, Stage
+from .choices import BusinessModel, Region, Sector, Stage
 from .models import Country, Deck, StartupProfile
 from .permissions import IsVerifiedStartup
 from .serializers import (
@@ -40,6 +40,7 @@ class DictionariesView(APIView):
                 "sectors": from_choices(Sector),
                 "stages": from_choices(Stage),
                 "business_models": from_choices(BusinessModel),
+                "regions": from_choices(Region),
                 "countries": DictionaryItemSerializer(Country.objects.filter(is_active=True), many=True).data,
                 "growth_periods": [{"code": c, "name": n} for c, n in StartupProfile.GrowthPeriod.choices],
             }

@@ -19,6 +19,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "apps.accounts",
     "apps.profiles",
+    "apps.investors",
+    "apps.analytics",
 ]
 
 MIDDLEWARE = [
@@ -64,7 +66,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-        "OPTIONS": {"min_length": 10},
+        "OPTIONS": {"min_length": 8},
     },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
 ]
@@ -107,6 +109,7 @@ EMAIL_VERIFY_MAX_AGE = 48 * 60 * 60  # seconds
 LEGAL_DOCUMENT_VERSIONS = {
     "agb": "2026-10-01",
     "datenschutz": "2026-10-01",
+    "investor-status": "2026-10-01",  # text C
 }
 
 # --- Pitch deck uploads ---
