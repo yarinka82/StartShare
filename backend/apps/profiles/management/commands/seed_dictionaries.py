@@ -20,3 +20,6 @@ class Command(BaseCommand):
                 code=code, defaults={"name": name, "sort_order": order, "is_active": True}
             )
         self.stdout.write(self.style.SUCCESS("Countries seeded"))
+
+
+## python manage.py seed_dictionaries

@@ -65,7 +65,7 @@ class StartupProfile(models.Model):
     mrr = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)  # EUR
     growth_percent = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     growth_period = models.CharField(max_length=3, choices=GrowthPeriod.choices, blank=True)
-    team_size = models.PositiveIntegerField(null=True, blank=True)
+    team_size = models.PositiveIntegerField(default=1, null=True, blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -1,0 +1,113 @@
+
+import pytest
+
+from anonymizer import detect, scan_fields
+from anonymizer.normalize import normalize
+
+
+def cats(text):
+    return [(s.category_id, s.text) for s in detect(text).spans]
+
+
+# --- позитивные кейсы из CSV (example_de / example_en) ---
+@pytest.mark.parametrize("text,cat,found", [
+    ("Kontakt: info@lumora-beispiel.de", "R04", "info@lumora-beispiel.de"),
+    ("Write to hello@sample-startup.io.", "R04", "hello@sample-startup.io"),
+    ("Besuchen Sie www.lumora-beispiel.de", "R05", "www.lumora-beispiel.de"),
+    ("Demo: sample-startup.io/demo", "R05", "sample-startup.io/demo"),
+    ("See https://example.com/path?a=1.", "R05", "https://example.com/path?a=1"),
+    ("Tel. +49 89 1234567", "R06", "+49 89 1234567"),
+    ("Call +44 20 1234 5678 today", "R06", "+44 20 1234 5678"),
+    ("Folgen Sie @lumora_de", "R07", "@lumora_de"),
+    ("linkedin.com/company/sample", "R07", "linkedin.com/company/sample"),
+    ("https://www.linkedin.com/company/sample.", "R07", "https://www.linkedin.com/company/sample"),
+    ("Eingetragen unter HRB 123456", "R18", "HRB 123456"),
+    ("Company No. 12345678", "R18", "Company No. 12345678"),
+    ("Tel 0176 1234567", "N13", "0176 1234567"),
+    ("Tel (089) 1234567", "N13", "(089) 1234567"),
+    ("Tel 089/1234567", "N13", "089/1234567"),
+    ("USt-IdNr. DE123456789", "N07", "DE123456789"),
+    ("IBAN DE89 3704 0044 0532 0130 00 bitte", "N07", "DE89 3704 0044 0532 0130 00"),
+    ("IBAN: DE89370400440532013000", "N07", "DE89370400440532013000"),
+])
+def test_positive(text, cat, found):
+    assert (cat, found) in cats(text)
+
+
+# --- негативные кейсы: не должно ничего находиться ---
+@pytest.mark.parametrize("text", [
+    "z.B. im Bereich KI, d.h. ohne Cloud, e.V. gegründet",
+    "Built with Next.js and React.",
+    "Umsatz 1 200 000 000 Euro, Wachstum 38 %",
+    "1 200 000 000 000 EUR Marktvolumen",
+    "Zeitraum 2024-03-15 bis 2025-01-01",
+    "Version 3.2.1 released on 01.03.2024",
+    "Wir haben 312 Kunden und 47 200 Euro MRR",
+    "IBAN DE00 0000 0000 0000 0000 00",  # невалидная контрольная сумма
+])
+def test_negative(text):
+    assert cats(text) == []
+
+
+# --- обфускация ---
+@pytest.mark.parametrize("text", [
+    "info [at] lumora-beispiel [dot] de",
+    "info (at) lumora-beispiel (dot) de",
+    "info @ lumora-beispiel.de",
+    "info[AT]lumora-beispiel[DOT]de",
+    "info@lumora-\nbeispiel.de",
+])
+def test_obfuscated_email(text):
+    assert any(c == "R04" for c, _ in cats(text))
+
+
+# --- приоритеты и пересечения ---
+def test_email_not_split_into_social_and_domain():
+    assert cats("hello@sample-startup.io") == [("R04", "hello@sample-startup.io")]
+
+
+def test_social_url_is_single_span():
+    assert cats("https://linkedin.com/company/x") == [("R07", "https://linkedin.com/company/x")]
+
+
+def test_register_not_phone():
+    assert [c for c, _ in cats("HRB 1234567890")] == ["R18"]
+
+
+# --- редактирование и координаты ---
+def test_redaction_text():
+    r = detect("Mail info@lumora-beispiel.de oder +49 89 1234567.")
+    assert r.redacted_text == "Mail [REDACTED_EMAIL] oder [REDACTED_PHONE]."
+
+
+def test_spans_point_into_original_text():
+    original = "Kontakt: info [at] lumora-beispiel [dot] de, danke"
+    (sp,) = detect(original).spans
+    assert original[sp.start:sp.end] == sp.text
+    assert sp.text == "info [at] lumora-beispiel [dot] de"
+
+
+def test_spans_with_nbsp_and_ligature():
+    original = "ﬁnal\u00a0Tel:\u00a0+49 89 1234567"
+    (sp,) = detect(original).spans
+    assert original[sp.start:sp.end] == sp.text
+    assert sp.text.endswith("1234567")
+
+
+def test_hyphen_linebreak_joined():
+    assert normalize("Ver-\nbindung").text == "Verbindung"
+
+
+def test_normalize_idempotent_on_clean_text():
+    t = "Einfacher Text ohne Besonderheiten."
+    assert normalize(t).text == t
+
+
+# --- финальная проверка полей тизера ---
+def test_scan_fields():
+    found = scan_fields({
+        "headline": "KI für die Pflege",
+        "problem": "Mehr unter www.lumora-beispiel.de",
+        "empty": "",
+    })
+    assert [(f.field, f.span.category_id) for f in found] == [("problem", "R05")]
