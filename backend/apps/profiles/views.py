@@ -10,15 +10,17 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+
 from .choices import BusinessModel, Region, Sector, Stage
 from .models import Country, Deck, StartupProfile
 from .permissions import IsVerifiedStartup
 from .serializers import (
-    DeckSerializer,
-    DeckUploadSerializer,
+
     DictionaryItemSerializer,
     StartupProfileSerializer,
 )
+from ..analytics.services import can_replace_deck, start_teaser_job
+from ..documents.serializers import DeckSerializer, DeckUploadSerializer
 
 
 def get_profile(user):
@@ -60,22 +62,26 @@ class ProfileView(RetrieveUpdateAPIView):
         return self.partial_update(request, *args, **kwargs)
 
 
+
 class DeckView(APIView):
     permission_classes = [IsVerifiedStartup]
     parser_classes = [MultiPartParser]
-
+    
     def get(self, request):
         deck = getattr(get_profile(request.user), "deck", None)
         if deck is None:
             return Response({"detail": "no_deck"}, status=status.HTTP_404_NOT_FOUND)
         return Response(DeckSerializer(deck).data)
-
+    
     def post(self, request):
         s = DeckUploadSerializer(data=request.data)
         s.is_valid(raise_exception=True)
         upload = s.validated_data["file"]
         profile = get_profile(request.user)
-
+        
+        if not can_replace_deck(profile):  # затверждённый тизер каскадом не теряем
+            return Response({"detail": "teaser_approved"}, status=status.HTTP_409_CONFLICT)
+        
         with transaction.atomic():
             deck = getattr(profile, "deck", None) or Deck(profile=profile)
             old_name = deck.file.name if deck.pk and deck.file else None
@@ -84,16 +90,21 @@ class DeckView(APIView):
             deck.size = upload.size
             deck.status = Deck.Status.OK  # TODO: PENDING until the ClamAV scan finishes
             deck.save()
-            if old_name and old_name != deck.file.name:
-                deck.file.storage.delete(old_name)  # replacing: remove the previous file
+            start_teaser_job(deck, request.user)  # новая задача обработки (при замене старая сбрасывается)
+        if old_name and old_name != deck.file.name:
+            deck.file.storage.delete(old_name)  # replacing: старый файл удаляем уже после коммита
         return Response(DeckSerializer(deck).data, status=status.HTTP_201_CREATED)
-
+    
     def delete(self, request):
-        deck = getattr(get_profile(request.user), "deck", None)
+        profile = get_profile(request.user)
+        deck = getattr(profile, "deck", None)
         if deck is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        deck.delete()  # post_delete signal removes the file
+        if not can_replace_deck(profile):
+            return Response({"detail": "teaser_approved"}, status=status.HTTP_409_CONFLICT)
+        deck.delete()  # post_delete signal removes the file; TeaserJob и Teaser удаляются каскадом
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 class DeckDownloadView(APIView):

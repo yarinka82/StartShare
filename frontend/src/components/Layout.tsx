@@ -39,19 +39,32 @@ export default function Layout() {
       <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 }, position: "relative", zIndex: 1, flexGrow: 1 }}>
         <Outlet />
       </Container>
-      <Box
-        component="footer"
-        sx={{ position: "relative", zIndex: 1, py: 2, textAlign: "center", display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 3 }}
-      >
-        {(["agb", "datenschutz", "impressum"] as const).map((doc) => (
-          <Link
-            key={doc} component={RouterLink} to={`/legal/${doc}`} variant="caption" underline="hover"
-            sx={{ color: signedOut ? "rgba(255,255,255,0.8)" : "text.secondary" }}
-          >
-            {t(`footer.${doc}`)}
-          </Link>
-        ))}
-      </Box>
+        <Box
+          component="footer"
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            py: 2,
+            textAlign: "center",
+            display: "flex",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            gap: 3,
+          }}
+        >
+          {(["agb", "datenschutz", "impressum", "kriterien"] as const).map((doc) => (
+            <Link
+              key={doc}
+              component={RouterLink}
+              to={`/legal/${doc}`}
+              variant="caption"
+              underline="hover"
+              sx={{ color: signedOut ? "rgba(255,255,255,0.8)" : "text.secondary" }}
+            >
+              {t(`footer.${doc}`)}
+            </Link>
+          ))}
+        </Box>
     </Box>
   );
 }

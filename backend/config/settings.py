@@ -121,7 +121,9 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 TEASER_MAX_RETRIES = 2                    # число повторов вызова ШІ (шаг 7); решает backend
-
+TEASER_LLM_PROVIDER = "gemini_free"
+TEASER_GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+TEASER_GEMINI_MODEL = "gemini-3.7-flash"
 
 
 # --- E-mail ---

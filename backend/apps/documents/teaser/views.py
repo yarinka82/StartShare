@@ -1,5 +1,5 @@
 
-"""Редактирование и затверждение тизера. Отдельные APIView, чтобы не открывать PATCH на PitchDeck."""
+"""Редактирование и затверждение тизера. Отдельные APIView, как отдельные эндпоинты поверх profiles.Deck."""
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -11,11 +11,13 @@ from rest_framework.views import APIView
 from apps.analytics.models import EventName
 from apps.analytics.services import track
 
-from ..models import PitchDeck, Teaser, TeaserJob
+from apps.profiles.models import Deck
+
+from ..models import Teaser, TeaserJob
 from .contract import FIELD_NAMES
 from .editing import approval_blockers, refresh_phrases, risky_fields, validate_content
 from .leak_check import terms_from_profile
-from .serializers import TeaserSerializer
+from .serializers import TeaserDraftSerializer, TeaserSerializer
 
 
 class Conflict(APIException):
@@ -25,7 +27,7 @@ class Conflict(APIException):
 
 
 def _teaser_for(request, pk) -> Teaser:
-    deck = get_object_or_404(PitchDeck.objects.filter(startup__user=request.user), pk=pk)
+    deck = get_object_or_404(Deck.objects.filter(profile__user=request.user), pk=pk)
     job = TeaserJob.objects.filter(deck=deck).first()
     if job is None:
         raise NotFound("No teaser job for this deck.")
@@ -37,7 +39,7 @@ def _teaser_for(request, pk) -> Teaser:
 
 
 def _locked(teaser_id) -> Teaser:
-    teaser = Teaser.objects.select_for_update().select_related("job__deck__startup").get(pk=teaser_id)
+    teaser = Teaser.objects.select_for_update().select_related("job__deck__profile").get(pk=teaser_id)
     if teaser.status == Teaser.Status.APPROVED:
         raise Conflict("Teaser is already approved and locked.", code="already_approved")
     return teaser
@@ -84,7 +86,7 @@ class TeaserView(APIView):
                 raise ValidationError({"fields": errors})
             changed = [k for k in patch if new[k] != teaser.content[k]]
             if changed:
-                profile = teaser.job.deck.startup
+                profile = teaser.job.deck.profile
                 teaser.content = new
                 teaser.edited = sorted(set(teaser.edited) | set(changed))
                 teaser.reviewed = [f for f in teaser.reviewed if f not in changed]
@@ -143,3 +145,17 @@ class TeaserApproveView(APIView):
             teaser.save()
         track(EventName.TEASER_APPROVED, user=request.user)
         return _respond(teaser)
+
+
+class DeckDraftView(APIView):
+    """GET /decks/{id}/draft/: статус и чернетка. Фронтенд опрашивает, пока state не станет DRAFT_READY или FAILED."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        deck = get_object_or_404(Deck.objects.filter(profile__user=request.user), pk=pk)  # чужая дека: 404
+        job = TeaserJob.objects.filter(deck=deck).first()
+        if job is None:
+            raise NotFound("No teaser job for this deck.")
+        response = Response(TeaserDraftSerializer(job).data)
+        response["Cache-Control"] = "no-store"  # внутри данные, по которым можно узнать компанию
+        return response

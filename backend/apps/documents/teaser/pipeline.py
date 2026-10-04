@@ -99,9 +99,9 @@ def build_draft(job):
     from django.conf import settings
 
     deck = job.deck
-    if deck.deleted_at or not deck.file:
+    if job.original_deleted_at or not deck.file:
         raise PipelineError("deck_deleted")
-    profile = deck.startup
+    profile = deck.profile
 
     try:
         with deck.file.open("rb") as f:
