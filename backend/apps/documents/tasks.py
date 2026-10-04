@@ -1,4 +1,3 @@
-
 import logging
 from datetime import timedelta
 
@@ -26,7 +25,7 @@ def process_deck(job_id):
         job.started_at = timezone.now()
         job.attempts += 1
         job.save(update_fields=["state", "started_at", "attempts"])
-
+    
     try:
         draft, risk_phrases, cost = build_draft(job)
     except Exception as exc:
@@ -37,7 +36,7 @@ def process_deck(job_id):
         job.error = (str(exc) if code else f"unexpected: {exc}")[:2000]
         job.save(update_fields=["state", "error"])
         return
-
+    
     now = timezone.now()
     job.draft = draft
     job.risk_phrases = risk_phrases

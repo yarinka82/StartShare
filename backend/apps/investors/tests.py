@@ -33,23 +33,23 @@ class InvestorBase(APITestCase):
         self.client.force_authenticate(self.user)
 
     def confirm(self):
-        return self.client.post("/api/investor/confirm-status/", {"accept": True}, format="json")
+        return self.client.post("/api/investors/confirm-status/", {"accept": True}, format="json")
 
 
 class AccessTests(InvestorBase):
     def test_only_verified_investors(self):
         for user in (make_user("s@example.com", role="startup"), make_user("u@example.com", verified=False)):
             c = APIClient(); c.force_authenticate(user)
-            for method, url in (("get", "/api/investor/"), ("post", "/api/investor/confirm-status/"),
-                                ("put", "/api/investor/mandate/")):
+            for method, url in (("get", "/api/investors/"), ("post", "/api/investors/confirm-status/"),
+                                ("put", "/api/investors/mandate/")):
                 self.assertEqual(getattr(c, method)(url, {}, format="json").status_code, 403, (user.email, url))
-        self.assertIn(APIClient().get("/api/investor/").status_code, (401, 403))
+        self.assertIn(APIClient().get("/api/investors/").status_code, (401, 403))
 
     def test_startup_endpoints_are_closed_for_investors(self):
         self.assertEqual(self.client.get("/api/profile/").status_code, 403)
 
     def test_mandate_is_blocked_until_text_c_is_confirmed(self):
-        r = self.client.put("/api/investor/mandate/", MANDATE, format="json")
+        r = self.client.put("/api/investors/mandate/", MANDATE, format="json")
         self.assertEqual(r.status_code, 403)
         self.assertEqual(r.data["detail"], "status_not_confirmed")
         self.assertEqual(Event.objects.filter(name=EventName.MANDATE_SAVED).count(), 0)
@@ -57,16 +57,16 @@ class AccessTests(InvestorBase):
 
 class ConfirmStatusTests(InvestorBase):
     def test_initial_state(self):
-        r = self.client.get("/api/investor/")
+        r = self.client.get("/api/investors/")
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.data, {"status_confirmed": False, "status_confirmed_at": None, "mandate": None})
 
     def test_requires_the_checkbox(self):
         for body in ({"accept": False}, {}):
-            r = self.client.post("/api/investor/confirm-status/", body, format="json")
+            r = self.client.post("/api/investors/confirm-status/", body, format="json")
             self.assertEqual(r.status_code, 400)
         self.assertIn("status_confirmation_required", str(self.client.post(
-            "/api/investor/confirm-status/", {"accept": False}, format="json").data))
+            "/api/investors/confirm-status/", {"accept": False}, format="json").data))
         self.assertEqual(Consent.objects.count(), 0)
         self.assertEqual(Event.objects.count(), 0)
 
@@ -90,7 +90,7 @@ class MandateTests(InvestorBase):
         self.confirm()
 
     def put(self, **over):
-        return self.client.put("/api/investor/mandate/", {**MANDATE, **over}, format="json")
+        return self.client.put("/api/investors/mandate/", {**MANDATE, **over}, format="json")
 
     def test_first_save_emits_mandate_saved_and_state_returns_it(self):
         r = self.put()
@@ -102,7 +102,7 @@ class MandateTests(InvestorBase):
         self.assertEqual(e.user, self.user)
         self.assertEqual(e.properties["ticket_min"], "100000.00")
         self.assertEqual(e.properties["regions"], ["dach"])
-        state = self.client.get("/api/investor/").data
+        state = self.client.get("/api/investors/").data
         self.assertEqual(state["mandate"]["stages"], ["seed", "series-a"])
 
     def test_identical_save_does_not_emit_a_change(self):
@@ -123,13 +123,13 @@ class MandateTests(InvestorBase):
 
     def test_selection_order_and_duplicates_do_not_count_as_change(self):
         self.put(sectors=["ai-data", "fintech", "fintech"])
-        self.assertEqual(self.client.get("/api/investor/").data["mandate"]["sectors"], ["fintech", "ai-data"])
+        self.assertEqual(self.client.get("/api/investors/").data["mandate"]["sectors"], ["fintech", "ai-data"])
         self.put(sectors=["fintech", "ai-data"])
         self.assertEqual(Event.objects.filter(name=EventName.MANDATE_CHANGED).count(), 0)
 
     def test_business_model_is_optional(self):
         body = {k: v for k, v in MANDATE.items() if k != "business_models"}
-        r = self.client.put("/api/investor/mandate/", body, format="json")
+        r = self.client.put("/api/investors/mandate/", body, format="json")
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.data["business_models"], [])
         self.assertEqual(self.put(business_models=[]).status_code, 200)
@@ -161,7 +161,7 @@ class MandateTests(InvestorBase):
                 self.assertLogs("apps.analytics.events", level="ERROR"):
             r = self.put()
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(self.client.get("/api/investor/").data["mandate"]["ticket_min"], "100000.00")
+        self.assertEqual(self.client.get("/api/investors/").data["mandate"]["ticket_min"], "100000.00")
 
     def test_events_contain_no_personal_data(self):
         self.put()

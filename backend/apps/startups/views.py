@@ -3,7 +3,7 @@ from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import StartupProfile
+from apps.profiles.models import StartupProfile
 from .serializers import StartupProfileSerializer
 
 class StartupProfileViewSet(viewsets.ModelViewSet):

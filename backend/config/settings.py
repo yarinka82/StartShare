@@ -82,6 +82,7 @@ PASSWORD_RESET_TIMEOUT = 60 * 60  # 1 hour
 LANGUAGE_CODE = "en"
 LANGUAGES = [("en", "English"), ("de", "Deutsch"), ("uk", "Українська")]
 TIME_ZONE = "Europe/Berlin"
+USE_I18N = True
 USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

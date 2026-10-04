@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from .models import StartupProfile
+from apps.profiles.models import StartupProfile
 
 class StartupProfileSerializer(serializers.ModelSerializer):
     class Meta:
