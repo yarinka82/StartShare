@@ -18,17 +18,11 @@ from rest_framework.views import APIView
 from apps.analytics.events import track
 from apps.analytics.models import EventName
 
-from .emails import read_verify_token, send_password_reset_email, send_verification_email
+
 from .models import Consent
-from .serializers import (
-    LoginSerializer,
-    MeSerializer,
-    PasswordResetConfirmSerializer,
-    PasswordResetRequestSerializer,
-    RegisterSerializer,
-    ResendVerificationSerializer,
-    VerifyEmailSerializer,
-)
+from ..emails import send_verification_email, read_verify_token, send_password_reset_email
+from ..serializers import RegisterSerializer, VerifyEmailSerializer, ResendVerificationSerializer, LoginSerializer, \
+    MeSerializer, PasswordResetRequestSerializer, PasswordResetConfirmSerializer
 
 User = get_user_model()
 
@@ -54,7 +48,8 @@ class RegisterView(PublicPostView):
     throttle_scope = "register"
 
     def post(self, request):
-        s = RegisterSerializer(data=request.data)
+        # Додаємо context={"request": request}, щоб серіалізатор бачив заголовок Accept-Language
+        s = RegisterSerializer(data=request.data, context={"request": request})
         s.is_valid(raise_exception=True)
         data = s.validated_data
 

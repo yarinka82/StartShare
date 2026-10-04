@@ -11,19 +11,12 @@ class EventName(models.TextChoices):
     MANDATE_CHANGED = "mandate_changed", "Investor changed the mandate"
     DECK_UPLOADED = "deck_uploaded", "Startup uploaded a pitch deck"
     AI_DRAFT_CREATED = "ai_draft_created", "AI finished the teaser draft"
+    FIELD_EDITED = "field_edited", "Teaser Field Edited"
+    TEASER_APPROVED = "teaser_approved", "Teaser Approved"
 
 class Event(models.Model):
-    """Append-only product analytics log.
-
-    Privacy: stores the user id only (no e-mail, no names) and the user link is SET_NULL, so deleting an
-    account anonymises its events instead of deleting the statistics. `properties` holds list codes
-    (sector, stage ...) and flags, never free text typed by the user.
-    """
-
     name = models.CharField(max_length=50, choices=EventName.choices, db_index=True)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     properties = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 

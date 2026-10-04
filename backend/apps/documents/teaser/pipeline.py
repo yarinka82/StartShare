@@ -1,16 +1,16 @@
-
 """Пайплайн чернетки тизера (шаги 4-8). run_pipeline() не зависит от Django, build_draft() — обёртка."""
 from dataclasses import dataclass
 from decimal import Decimal
 
 from pydantic import ValidationError
 
-from anonymizer import detect, scan_fields
+from anonymizer import detect
 
 from ..pdf_extract import DeckContent, DeckExtractionError, extract_deck
 from .contract import DraftResponse, check_response, response_schema, valid_phrases
-from .leak_check import ForbiddenTerm, find_leaks, terms_from_profile
+from .leak_check import ForbiddenTerm, terms_from_profile
 from .llm import LLMClient, LLMError, get_client
+from .phrases import final_checks, make_phrase, merge_phrases
 from .prompt import build_system_prompt, build_user_prompt
 
 
@@ -28,15 +28,6 @@ class PipelineResult:
     risk_phrases: list[dict]
     cost_eur: "Decimal | None"
     attempts: int
-
-
-def _phrase(category_id, field, quote, action, reason, source, text):
-    start = text.find(quote)
-    return {
-        "category_id": category_id, "field": field, "quote": quote, "action": action,
-        "reason": reason, "source": source,
-        "start": start if start >= 0 else None, "end": start + len(quote) if start >= 0 else None,
-    }
 
 
 def run_pipeline(content: DeckContent, form: dict, terms: list[ForbiddenTerm],
@@ -89,26 +80,11 @@ def run_pipeline(content: DeckContent, form: dict, terms: list[ForbiddenTerm],
         raise PipelineError("invalid_response", "placeholder left in teaser text")
 
     phrases = [
-        _phrase(rp.category_id, rp.field, rp.quote, CATEGORIES[rp.category_id].action,
-                rp.reason, "llm", fields[rp.field])
+        make_phrase(rp.category_id, rp.field, rp.quote, rp.reason, "llm", fields[rp.field])
         for rp in valid_phrases(resp)
     ]
-
     # Шаг 8: финальные проверки regex и внутренних данных формы
-    for f in scan_fields(fields):
-        sp = f.span
-        phrases.append(_phrase(sp.category_id, f.field, sp.text, CATEGORIES[sp.category_id].action,
-                               "pattern match", "regex", fields[f.field]))
-    for lk in find_leaks(fields, terms):
-        phrases.append(_phrase(lk.category_id, lk.field, lk.text, CATEGORIES[lk.category_id].action,
-                               lk.reason, "leak", fields[lk.field]))
-
-    seen, unique = set(), []
-    for p in phrases:
-        key = (p["field"], p["quote"])
-        if key not in seen:
-            seen.add(key)
-            unique.append(p)
+    unique = merge_phrases(phrases, final_checks(fields, terms))
 
     draft = {
         "teaser": fields,
@@ -136,11 +112,7 @@ def build_draft(job):
     form = {
         "sector": profile.get_sector_display() if profile.sector else "",
         "stage": profile.get_stage_display() if profile.stage else "",
-        "business_model": (
-            profile.get_business_model_display()
-            if hasattr(profile, "get_business_model_display") and getattr(profile, "business_model", None)
-            else getattr(profile, "business_model", "")
-        ),
+        "business_model": profile.get_business_model_display() if profile.business_model else "",
     }
     result = run_pipeline(
         content, form, terms_from_profile(profile), get_client(),

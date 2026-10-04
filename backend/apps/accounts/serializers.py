@@ -1,4 +1,7 @@
 from django.contrib.auth.password_validation import validate_password as run_password_validators
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.utils import translation
+from django.utils.translation import ngettext
 from rest_framework import serializers
 
 from .models import Role
@@ -19,7 +22,41 @@ class RegisterSerializer(serializers.Serializer):
         return value.strip().lower()
 
     def validate_password(self, value):
-        run_password_validators(value)
+        request = self.context.get("request")
+        lang = translation.get_language_from_request(request) if request else translation.get_language()
+
+        with translation.override(lang or "en"):
+            try:
+                run_password_validators(value)
+            except DjangoValidationError as exc:
+                messages = []
+                for err in getattr(exc, "error_list", [exc]):
+                    code = getattr(err, "code", None)
+                    params = getattr(err, "params", {}) or {}
+                    min_len = params.get("min_length", 8)
+
+                    if code == "password_too_short":
+                        # Стандартний ngettext
+                        msg = ngettext(
+                            "This password is too short. It must contain at least %(min_length)d character.",
+                            "This password is too short. It must contain at least %(min_length)d characters.",
+                            min_len,
+                        ) % {"min_length": min_len}
+
+                        # Якщо в системі локаль de не скомпільована, підставляємо німецький текст
+                        current_lang = translation.get_language()
+                        if current_lang and current_lang.startswith("de") and "Passwort" not in msg:
+                            msg = f"Dieses Passwort ist zu kurz. Es muss mindestens {min_len} Zeichen enthalten."
+                        elif current_lang and current_lang.startswith("uk"):
+                            msg = f"Цей пароль занадто короткий. Він має містити щонайменше {min_len} символів."
+
+                        messages.append(serializers.ErrorDetail(msg, code="password_too_short"))
+                    else:
+                        for m in getattr(err, "messages", [str(err)]):
+                            messages.append(serializers.ErrorDetail(m, code=code or "invalid"))
+
+                raise serializers.ValidationError(messages)
+
         return value
 
     def validate_accept_agb(self, value):

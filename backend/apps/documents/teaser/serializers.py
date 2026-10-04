@@ -36,3 +36,20 @@ class TeaserDraftSerializer(serializers.ModelSerializer):
 
     def get_error_code(self, job):
         return error_code_for(job)
+
+
+class TeaserSerializer(serializers.Serializer):
+    """Рабочий тизер для редактирования. Стоимость, время и исходный вывод ШІ не отдаём."""
+
+    status = serializers.CharField()
+    content = serializers.JSONField()
+    reviewed = serializers.JSONField()
+    risk_phrases = serializers.JSONField()
+    approval_blockers = serializers.SerializerMethodField()
+    declaration_a_accepted_at = serializers.DateTimeField()
+    approved_at = serializers.DateTimeField()
+    updated_at = serializers.DateTimeField()
+
+    def get_approval_blockers(self, teaser):
+        from .editing import approval_blockers
+        return approval_blockers(teaser.content, teaser.reviewed, teaser.risk_phrases)
