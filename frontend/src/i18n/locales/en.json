@@ -1,4 +1,7 @@
-{
+{ "teaser": {
+    "disclaimer": "Information provided by the startup, unverified by Start Share. No investment advice, recommendation, or offer to acquire shares."
+  },
+
   "app": {
     "name": "Start Share"
   },
@@ -60,18 +63,15 @@
     "done": "Your password has been changed. You can log in now."
   },
   "legal": {
-    "agb": "Terms and Conditions (AGB)",
-    "datenschutz": "Privacy Policy (Datenschutzerklärung)",
-    "placeholder": "The legal text will be provided by legal counsel and added here.",
-    "openInNewTab": "Open in new tab",
-    "close": "Close",
+    "agb": "Terms & Conditions (AGB)",
+    "datenschutz": "Privacy Policy",
     "impressum": "Legal Notice (Impressum)",
-    "back": "Back"
+    "kriterien": "How We Select Profiles (Criteria)",
+    "close": "Close",
+    "back": "Back",
+    "placeholder": "The legally binding texts for this document are being finalized by legal counsel."
   },
-  "investor": {
-    "title": "Welcome",
-    "text": "Your investor account is ready. Mandate settings and weekly teasers will follow in the next release."
-  },
+
   "profile": {
     "title": "Startup profile",
     "intro": "Fill in your profile and upload your pitch deck. Everything is saved automatically as a draft.",
@@ -141,9 +141,10 @@
     "invalid_or_expired_token": "This link is invalid or has expired."
   },
   "footer": {
-    "agb": "Terms (AGB)",
-    "datenschutz": "Privacy Policy",
-    "impressum": "Legal Notice"
+    "agb": "Terms",
+    "datenschutz": "Privacy",
+    "impressum": "Legal Notice",
+    "kriterien": "Selection Criteria (DSA)"
   },
    "authPromo": {
     "badge": "Regulated B2B Intro Engine",
@@ -158,7 +159,9 @@
    "investor": {
     "selectAll": "Select all",
     "clear": "Clear",
-
+    "title": "Welcome",
+    "text": "Your investor account is ready. Mandate settings and weekly teasers will follow in the next release."
+      ,
     "status": {
       "title": "Investor Status Confirmation",
       "intro": "Please confirm that you act as a professional investor before proceeding.",

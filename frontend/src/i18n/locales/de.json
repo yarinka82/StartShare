@@ -1,4 +1,7 @@
 {
+  "teaser": {
+    "disclaimer": "Angaben des Startups, nicht von Start Share geprüft. Keine Anlageberatung, keine Empfehlung und kein Angebot zum Erwerb von Beteiligungen."
+  },
   "app": {
     "name": "Start Share"
   },
@@ -60,13 +63,13 @@
     "done": "Ihr Passwort wurde geändert. Sie können sich jetzt anmelden."
   },
   "legal": {
-    "impressum": "Impressum",
     "agb": "Allgemeine Geschäftsbedingungen (AGB)",
     "datenschutz": "Datenschutzerklärung",
-    "placeholder": "Der Rechtstext wird von der Rechtsberatung bereitgestellt und hier eingefügt.",
-    "openInNewTab": "In neuem Tab öffnen",
+    "impressum": "Impressum",
+    "kriterien": "Wie wir Profile auswählen (Kriterien)",
     "close": "Schließen",
-    "back": "Zurück"
+    "back": "Zurück",
+    "placeholder": "Die rechtsverbindlichen Texte für dieses Dokument werden durch den Rechtsbeistand finalisiert."
   },
   "profile": {
     "title": "Startup-Profil",
@@ -139,8 +142,10 @@
   "footer": {
     "agb": "AGB",
     "datenschutz": "Datenschutz",
-    "impressum": "Impressum"
+    "impressum": "Impressum",
+    "kriterien": "Profilauswahl (DSA)"
   },
+
     "authPromo": {
     "badge": "Regulierte B2B-Matching-Plattform",
     "marketTag": "B2B Deutschland",
