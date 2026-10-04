@@ -66,6 +66,9 @@ def get_client() -> LLMClient:
     provider = getattr(settings, "TEASER_LLM_PROVIDER", "fake")
     if provider == "fake":
         return FakeLLMClient()
+    if provider in ("gemini_free", "gemini"):
+        from .gemini import GeminiClient
+        return GeminiClient.from_settings(settings, free_tier=(provider == "gemini_free"))
     raise LLMError(f"Unknown TEASER_LLM_PROVIDER: {provider!r}")
 
 

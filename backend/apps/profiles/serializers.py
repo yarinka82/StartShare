@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from .models import Country, Deck, StartupProfile
 from .validators import validate_deck_file
+from ..documents.serializers import DeckSerializer
 
 REQUIRED_FOR_COMPLETE = ("sector", "stage", "country", "amount_sought", "team_size")
 
@@ -11,15 +12,7 @@ class DictionaryItemSerializer(serializers.Serializer):
     name = serializers.CharField()
 
 
-class DeckSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Deck
-        fields = ("original_name", "size", "status", "uploaded_at")
-        read_only_fields = fields
 
-
-class DeckUploadSerializer(serializers.Serializer):
-    file = serializers.FileField(allow_empty_file=True, validators=[validate_deck_file])
 
 
 class StartupProfileSerializer(serializers.ModelSerializer):

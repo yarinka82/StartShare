@@ -68,10 +68,6 @@
     "close": "Schließen",
     "back": "Zurück"
   },
-  "investor": {
-    "title": "Willkommen",
-    "text": "Ihr Investor-Konto ist eingerichtet. Mandatskriterien und wöchentliche Teaser folgen im nächsten Release."
-  },
   "profile": {
     "title": "Startup-Profil",
     "intro": "Füllen Sie Ihr Profil aus und laden Sie Ihr Pitch Deck hoch. Alles wird automatisch als Entwurf gespeichert.",
@@ -156,9 +152,11 @@
     "copyright": "Start Share Plattform. Alle Rechte vorbehalten."
   },
    "investor":
+
    {"selectAll": "Alle auswählen",
     "clear": "Zurücksetzen" ,
-
+    "title": "Willkommen",
+    "text": "Ihr Investor-Konto ist eingerichtet. Mandatskriterien und wöchentliche Teaser folgen im nächsten Release.",
     "status": {
       "title": "Bestätigung des Investorenstatus",
       "intro": "Bitte bestätigen Sie vor dem Fortfahren, dass Sie als professioneller Investor handeln.",
@@ -221,4 +219,3 @@
   }
 
 }
-E
