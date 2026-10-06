@@ -2,10 +2,10 @@
 import { useState } from "react";
 import { FieldCard } from "./FieldCard";
 import { BLOCKER_MESSAGES, FIELD_LABELS } from "./labels";
-import { TEXT_A } from "../legalTexts";
 import { teaserApi, type TeaserApi } from "./api";
 import { FIELD_NAMES, type DeckDraftResponse } from "./types";
 import { useTeaser } from "./useTeaser";
+import { TEXT_A } from "../legalTexts";
 
 interface Props {
   deckId: number;
@@ -22,8 +22,13 @@ export function TeaserEditor({ deckId, draft, api = teaserApi }: Props) {
   if (!teaser) return <p role="status">Loading your teaser…</p>;
 
   const locked = teaser.status === "APPROVED";
-  const review = draft.draft?.review;
-  const blockers = teaser.approval_blockers;
+  const review = draft?.draft?.review;
+
+  // Безпечні масиви за замовчуванням (захист від undefined)
+  const blockers = teaser.approval_blockers ?? [];
+  const reviewedList = teaser.reviewed ?? [];
+  const riskPhrases = teaser.risk_phrases ?? [];
+  const content = teaser.content ?? {};
 
   return (
     <div className="tz-editor">
@@ -32,7 +37,7 @@ export function TeaserEditor({ deckId, draft, api = teaserApi }: Props) {
           Your teaser is approved and can no longer be edited.
         </p>
       )}
-      {review && review.image_slides.length > 0 && (
+      {review && (review.image_slides?.length ?? 0) > 0 && (
         <p className="tz-banner">
           Slides {review.image_slides.join(", ")} contain images. We cannot analyse images yet, so please
           check them yourself for logos, names or screenshots.
@@ -43,12 +48,12 @@ export function TeaserEditor({ deckId, draft, api = teaserApi }: Props) {
         <FieldCard
           key={name}
           name={name}
-          value={teaser.content[name]}
-          phrases={teaser.risk_phrases.filter((p) => p.field === name)}
-          reviewed={teaser.reviewed.includes(name)}
+          value={content[name] ?? ""}
+          phrases={riskPhrases.filter((p) => p.field === name)}
+          reviewed={reviewedList.includes(name)}
           locked={locked}
           busy={busy}
-          notFoundInDeck={review?.blanked_fields.includes(name) ?? false}
+          notFoundInDeck={review?.blanked_fields?.includes(name) ?? false}
           onSave={(v) => saveField(name, v)}
           onConfirm={() => confirmField(name)}
         />
@@ -57,10 +62,10 @@ export function TeaserEditor({ deckId, draft, api = teaserApi }: Props) {
       {!locked && (
         <section className="tz-approve">
           <h3 style={{ marginBottom: 12, fontSize: "1.15rem", fontWeight: 700, color: "#0b2142" }}>
-            Тизер перевірено та готовий до публікації
+            Approve teaser
           </h3>
 
-          {/* Список відкритих проблем (якщо є) */}
+          {/* Список відкритих блокерів */}
           {blockers.length > 0 && (
             <div style={{ background: "#fee4e2", border: "1px solid #fecdca", borderRadius: 8, padding: "12px 16px", marginBottom: 16 }}>
               <strong style={{ color: "#b42318", fontSize: "0.9rem" }}>
@@ -74,9 +79,7 @@ export function TeaserEditor({ deckId, draft, api = teaserApi }: Props) {
             </div>
           )}
 
-          {/* ============================================================ */}
-          {/* ЮРИДИЧНИЙ БЛОК: ДЕКЛАРАЦІЯ A (Обов'язковий оригінал німецькою) */}
-          {/* ============================================================ */}
+          {/* Декларація A */}
           <div style={{
             background: "#f8fafc",
             borderLeft: "4px solid #17407a",
@@ -104,7 +107,6 @@ export function TeaserEditor({ deckId, draft, api = teaserApi }: Props) {
 
           {approveError && <p role="alert" className="tz-error">{approveError}</p>}
 
-          {/* КНОПКА ЗАТВЕРДЖЕННЯ ТИЗЕРА */}
           <button
             type="button"
             disabled={busy || blockers.length > 0 || !declared}

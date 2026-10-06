@@ -25,6 +25,8 @@ def good(**over):
         "risk_phrases": [{"category_id": "R09", "field": "traction",
                           "quote": "einem grossen Klinikverbund", "reason": "generalised customer"}],
         "language": "de",
+        "evidence": {f: "Wir bauen Software fuer die ambulante Pflege" for f in
+                     ("headline", "problem", "solution", "traction", "market", "team")},
     }
     base.update(over)
     return base
@@ -147,3 +149,44 @@ def test_number_variants(text):
 def test_small_numbers_ignored_and_no_partial_digits():
     assert number_terms(Decimal("12"), "team") == []
     assert not find_leaks({"a": "ID 4720012"}, number_terms(Decimal("47200"), "mrr"))
+
+
+# --- опора на дек (evidence): защита от выдуманных фактов ---
+def test_unsupported_field_triggers_retry_with_feedback():
+    invented = good()
+    invented["teaser"]["market"] = "Der stark wachsende europaeische Markt."
+    invented["evidence"].pop("market")
+    c = FakeLLMClient([invented, good()])
+    r = run(c, LONG)
+    assert r.attempts == 2
+    assert "evidence" in c.calls[1]["user"] and "market" in c.calls[1]["user"]
+
+
+def test_final_attempt_blanks_unsupported_fields_and_reports_them():
+    invented = good()
+    invented["teaser"]["market"] = "Der stark wachsende europaeische Markt."
+    invented["evidence"]["market"] = "Der Markt waechst stark"          # такой цитаты в деке нет
+    r = run(FakeLLMClient([invented] * 3), LONG)
+    assert r.attempts == 3
+    assert r.draft["teaser"]["market"] == ""
+    assert r.draft["review"]["blanked_fields"] == ["market"]
+    assert r.draft["teaser"]["headline"]                                 # поля с опорой остаются
+
+
+def test_evidence_is_not_persisted():
+    r = run(FakeLLMClient([good()]), LONG)
+    assert "evidence" not in r.draft
+    assert all("evidence" not in p for p in r.risk_phrases)
+
+
+def test_evidence_must_come_from_redacted_deck():
+    # цитата с e-mail не подходит: провайдер этого текста не видел, в очищенном деке его нет
+    resp = good()
+    resp["evidence"]["headline"] = "Kontakt: info@lumora-beispiel.de"
+    r = run(FakeLLMClient([resp] * 3), LONG + " Kontakt: info@lumora-beispiel.de")
+    assert "headline" in r.draft["review"]["blanked_fields"]
+
+
+def test_system_prompt_requires_evidence_and_forbids_invention():
+    p = build_system_prompt()
+    assert "evidence" in p and "Use ONLY facts stated in the deck" in p

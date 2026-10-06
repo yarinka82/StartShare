@@ -6,7 +6,6 @@ export const FIELD_LABELS: Record<FieldName, string> = {
   headline: "Заголовок компанії (Headline)",
   problem: "Проблема (Problem)",
   solution: "Рішення та продукт (Solution)",
-  business_model: "Модель монетизації (Business Model)",
   traction: "Метрики та результати (Traction)",
   market: "Ринок та конкуренція (Market)",
   team: "Досвід команди (Team Background)",

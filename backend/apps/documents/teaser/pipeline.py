@@ -7,7 +7,7 @@ from pydantic import ValidationError
 from anonymizer import detect
 
 from ..pdf_extract import DeckContent, DeckExtractionError, extract_deck
-from .contract import DraftResponse, check_response, response_schema, valid_phrases
+from .contract import DraftResponse, check_response, response_schema, unsupported_fields, valid_phrases
 from .leak_check import ForbiddenTerm, terms_from_profile
 from .llm import LLMClient, LLMError, get_client
 from .phrases import final_checks, make_phrase, merge_phrases
@@ -41,6 +41,7 @@ def run_pipeline(content: DeckContent, form: dict, terms: list[ForbiddenTerm],
     # Шаг 5: regex до вызова ШІ, провайдер не видит e-mail, ссылки, телефоны, номера реестра
     slides = [detect(s.text).redacted_text for s in content.slides]
 
+    deck_text = "\n".join(slides)
     system = build_system_prompt()
     schema = response_schema()
     feedback: "list[str] | None" = None
@@ -65,7 +66,7 @@ def run_pipeline(content: DeckContent, form: dict, terms: list[ForbiddenTerm],
             feedback = [f"{'.'.join(map(str, e['loc']))}: {e['msg']}" for e in exc.errors()][:10]
             continue
         resp = parsed
-        problems = check_response(parsed)
+        problems = check_response(parsed, deck_text)
         if not problems:
             feedback = None
             break
@@ -75,6 +76,10 @@ def run_pipeline(content: DeckContent, form: dict, terms: list[ForbiddenTerm],
         raise PipelineError("invalid_response", "; ".join(feedback or []))
 
     # Последняя попытка с остаточными проблемами: плейсхолдеры в тексте недопустимы, битые фразы чистим
+    # Последняя попытка с полями без опоры в деке: лучше пустое поле, чем выдуманный факт
+    blanked = unsupported_fields(resp, deck_text)
+    if blanked:
+        resp = resp.model_copy(update={"teaser": resp.teaser.model_copy(update={n: "" for n in blanked})})
     fields = resp.teaser.model_dump()
     if any("[REDACTED_" in v for v in fields.values()):
         raise PipelineError("invalid_response", "placeholder left in teaser text")
@@ -89,7 +94,7 @@ def run_pipeline(content: DeckContent, form: dict, terms: list[ForbiddenTerm],
     draft = {
         "teaser": fields,
         "language": resp.language,
-        "review": {"image_slides": content.slides_with_images},  # R19: «проверьте логотипы на слайдах …»
+        "review": {"image_slides": content.slides_with_images, "blanked_fields": blanked},  # R19: «проверьте логотипы на слайдах …»
     }
     return PipelineResult(draft, unique, total_cost, attempts)
 

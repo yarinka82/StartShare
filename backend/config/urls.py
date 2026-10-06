@@ -1,26 +1,23 @@
 from django.contrib import admin
 from django.urls import include, path
-
 from apps.startups.views import ChoicesMetaView
-
 
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    # Авторизация
+    # Авторизація
     path("api/auth/", include("apps.accounts.urls")),
 
-    # Стартапы
+    # Довідники (сектори, стадії)
+    path("api/dictionaries/", ChoicesMetaView.as_view(), name="dictionaries"),
+
+    # Профіль та завантаження деку (/api/profile/ та /api/profile/deck/)
+    path("api/profile/", include("apps.profiles.urls")),
     path("api/startups/", include("apps.startups.urls")),
 
-    # Профиль
-    path("api/", include("apps.profiles.urls")),
+    # Інвестор
+    path("api/investor/", include("apps.investors.urls")),
 
-
-
-    # Инвестор
-    path("api/investors/", include("apps.investors.urls")),
-
-    # Pitch decks
+    # Тизери та ШІ (/api/decks/<id>/draft/ тощо)
     path("api/", include("apps.documents.urls")),
 ]

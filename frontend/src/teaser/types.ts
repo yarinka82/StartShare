@@ -3,7 +3,6 @@ export type FieldName =
   | "headline"
   | "problem"
   | "solution"
-  | "business_model"
   | "traction"
   | "market"
   | "team";
@@ -12,7 +11,6 @@ export const FIELD_NAMES: FieldName[] = [
   "headline",
   "problem",
   "solution",
-  "business_model",
   "traction",
   "market",
   "team",

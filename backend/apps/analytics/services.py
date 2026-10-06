@@ -8,8 +8,16 @@ from apps.documents.models import Teaser, TeaserJob
 
 
 def can_replace_deck(profile) -> bool:
-    """Замена и удаление дека каскадно убивают тизер. Затверждённый тизер так терять нельзя."""
-    return not Teaser.objects.filter(job__deck__profile=profile, status=Teaser.Status.APPROVED).exists()
+    """
+    Заміна та видалення дека блокуються ТІЛЬКИ тоді, коли профіль активний (LIVE).
+    Якщо профіль на паузі (PAUSED) або чернетка (DRAFT) — заміна дозволена.
+    """
+    # 1. Якщо профіль активний для інвесторів (LIVE) — видаляти дек ЗАБОРОНЕНО
+    if getattr(profile, "status", None) == "LIVE":
+        return False
+
+    # 2. Якщо профіль на паузі (PAUSED) чи DRAFT — видаляти та замінювати МОЖНА
+    return True
 
 
 def start_teaser_job(deck, user) -> TeaserJob:

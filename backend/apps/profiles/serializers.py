@@ -12,6 +12,11 @@ class DictionaryItemSerializer(serializers.Serializer):
     name = serializers.CharField()
 
 
+STATUS_TRANSITIONS = {
+    "LIVE": {"PAUSED", "REMOVED"},
+    "PAUSED": {"LIVE", "REMOVED"},
+    "DRAFT": {"REMOVED"},
+}
 
 
 
@@ -37,7 +42,7 @@ class StartupProfileSerializer(serializers.ModelSerializer):
     deck = serializers.SerializerMethodField()
     is_complete = serializers.SerializerMethodField()
     missing_fields = serializers.SerializerMethodField()
-
+    
     class Meta:
         model = StartupProfile
         fields = (
@@ -45,15 +50,29 @@ class StartupProfileSerializer(serializers.ModelSerializer):
             "growth_percent", "growth_period", "team_size",
             "status", "deck", "is_complete", "missing_fields",
         )
-        read_only_fields = ("status",)
-
+    
+    def validate_status(self, value):
+        current = self.instance.status if self.instance else None
+        if value == current:
+            return value
+        if value not in STATUS_TRANSITIONS.get(current, set()):
+            raise serializers.ValidationError("status_transition_not_allowed")
+        return value
+    
     def validate(self, attrs):
         percent = attrs.get("growth_percent", getattr(self.instance, "growth_percent", None))
         period = attrs.get("growth_period", getattr(self.instance, "growth_period", ""))
         if percent is not None and not period:
             raise serializers.ValidationError({"growth_period": "growth_period_required"})
         return attrs
-
+    
+    def to_internal_value(self, data):
+        # Якщо передали країну (наприклад "CH" або "DE"), автоматично робимо її "ch", "de"
+        if isinstance(data, dict) and "country" in data and isinstance(data["country"], str):
+            data = data.copy()
+            data["country"] = data["country"].lower()
+        return super().to_internal_value(data)
+    
     def get_deck(self, obj):
         deck = getattr(obj, "deck", None)
         return DeckSerializer(deck).data if deck else None

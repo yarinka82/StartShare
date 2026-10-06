@@ -17,10 +17,27 @@ export interface TeaserApi {
   approveTeaser: (deckId: number) => Promise<void>;
 }
 
+
+
+// Функція для отримання CSRF-токена з cookies
+function getCsrfToken(): string {
+  const match = document.cookie.match(/(^|;)\s*csrftoken=([^;]+)/);
+  return match ? decodeURIComponent(match[2]) : "";
+}
+
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const csrfToken = getCsrfToken();
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}), // <-- Передаємо CSRF-токен
+    ...(options.headers as Record<string, string>),
+  };
+
   const res = await fetch(url, {
-    headers: { "Content-Type": "application/json", ...options.headers },
+    credentials: "same-origin", // <-- Обов'язково передаємо сесійні куки
     ...options,
+    headers,
   });
 
   if (!res.ok) {
@@ -28,7 +45,7 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
     try {
       const body = await res.json();
       errorMsg = body.detail || body.message || errorMsg;
-    } catch { /* игнорируем */ }
+    } catch { /* ігноруємо */ }
     throw new ApiError(errorMsg, res.status);
   }
 
@@ -36,24 +53,31 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const teaserApi: TeaserApi = {
-  getDraft: (deckId: number) => request<DeckDraftResponse>(`/api/decks/${deckId}/draft/`),
-  getTeaser: (deckId: number) => request<TeaserContent>(`/api/decks/${deckId}/teaser/`),
+  getDraft: (deckId: number) =>
+    request<DeckDraftResponse>(`/api/decks/${deckId}/draft/`),
+
+  getTeaser: (deckId: number) =>
+    request<TeaserContent>(`/api/decks/${deckId}/teaser/`),
+
   saveField: (deckId: number, field: FieldName, value: string) =>
-    request<TeaserContent>(`/api/decks/${deckId}/teaser/field/`, {
+    request<TeaserContent>(`/api/decks/${deckId}/teaser/`, {
       method: "PATCH",
-      body: JSON.stringify({ field, value }),
+      body: JSON.stringify({
+        fields: {
+          [field]: value,
+        },
+      }),
     }),
+
   confirmField: (deckId: number, field: FieldName) =>
-    request<TeaserContent>(`/api/decks/${deckId}/teaser/confirm/`, {
+    request<TeaserContent>(`/api/decks/${deckId}/teaser/review/`, {
       method: "POST",
-      body: JSON.stringify({ field }),
+      body: JSON.stringify({ fields: [field] }),
     }),
+
   approveTeaser: (deckId: number) =>
     request<void>(`/api/decks/${deckId}/teaser/approve/`, {
       method: "POST",
+      body: JSON.stringify({ declaration_a: true }),
     }),
 };
-
-export function configureTeaserApi(customApi: Partial<TeaserApi>) {
-  Object.assign(teaserApi, customApi);
-}

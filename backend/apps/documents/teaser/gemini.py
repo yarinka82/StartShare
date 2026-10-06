@@ -35,7 +35,7 @@ class GeminiClient:
         self._max_attempts = max_attempts
         self._price_in = price_in_eur_per_m
         self._price_out = price_out_eur_per_m
-
+ 
     @classmethod
     def from_settings(cls, settings, *, free_tier: bool) -> "GeminiClient":
         if free_tier:
@@ -53,10 +53,10 @@ class GeminiClient:
             price_in_eur_per_m=getattr(settings, "TEASER_GEMINI_PRICE_IN_EUR_PER_M", None),
             price_out_eur_per_m=getattr(settings, "TEASER_GEMINI_PRICE_OUT_EUR_PER_M", None),
         )
-
+ 
     def generate_json(self, *, system: str, user: str, schema: dict) -> LLMResult:
         from google.genai import types
-
+ 
         config = types.GenerateContentConfig(
             system_instruction=system,
             response_mime_type="application/json",
@@ -66,7 +66,7 @@ class GeminiClient:
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),  # инструментов нет
         )
         response = self._call(user, config)
-
+ 
         text = getattr(response, "text", None)
         if not text:
             raise LLMError("Gemini returned an empty response (possibly blocked).")
@@ -76,28 +76,33 @@ class GeminiClient:
                 data = {}
         except json.JSONDecodeError:
             data = {}  # невалидный JSON: пайплайн сам сделает повтор с обратной связью
-
+ 
         usage = getattr(response, "usage_metadata", None)
         tokens_in = getattr(usage, "prompt_token_count", None)
         tokens_out = (getattr(usage, "candidates_token_count", 0) or 0) + (getattr(usage, "thoughts_token_count", 0) or 0)
         return LLMResult(data=data, cost_eur=self._cost(tokens_in, tokens_out),
                          input_tokens=tokens_in, output_tokens=tokens_out)
-
+ 
     def _call(self, user: str, config):
         from google.genai import errors
-
+ 
         for attempt in range(1, self._max_attempts + 1):
             try:
                 return self._client.models.generate_content(model=self.model, contents=user, config=config)
             except errors.APIError as exc:
+                status = getattr(exc, "status", None)
+                detail = f"{exc.code} {status}" if status else f"{exc.code}"
+                if exc.code == 429 and "perday" in str(exc).lower():
+                    # дневная квота исчерпана: повторы бессмысленны, ждать нужно до завтра
+                    raise LLMError(f"Gemini API error {detail} (daily quota exhausted)") from exc
                 if exc.code in RETRY_CODES and attempt < self._max_attempts:
                     self._sleep(BACKOFF_SECONDS[min(attempt - 1, len(BACKOFF_SECONDS) - 1)])
                     continue
-                raise LLMError(f"Gemini API error {exc.code}") from exc
+                raise LLMError(f"Gemini API error {detail}") from exc
             except Exception as exc:
                 raise LLMError(f"Gemini call failed: {type(exc).__name__}") from exc
         raise LLMError("Gemini call failed")  # недостижимо, для полноты
-
+ 
     def _cost(self, tokens_in, tokens_out) -> "Decimal | None":
         if self.free_tier:
             return Decimal("0")
