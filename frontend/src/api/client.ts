@@ -107,7 +107,7 @@ export const api = {
   deleteDeck: () => request<void>("/api/profile/deck/", "DELETE"),
   deckDownloadUrl: "/api/profile/deck/download/",
   // investor
-  investorState: () => request<InvestorState>("/api/investors/"),
-  confirmInvestorStatus: () => request<InvestorState>("/api/investors/confirm-status/", "POST", { accept: true }),
-  saveMandate: (data: MandateInput) => request<Mandate>("/api/investors/mandate/", "PUT", data),
+  investorState: () => request<InvestorState>("/api/investor/"),
+  confirmInvestorStatus: () => request<InvestorState>("/api/investor/confirm-status/", "POST", { accept: true }),
+  saveMandate: (data: MandateInput) => request<Mandate>("/api/investor/mandate/", "PUT", data),
 };

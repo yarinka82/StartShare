@@ -1,5 +1,5 @@
 
-"""Редактирование и затверждение тизера. Отдельные APIView, как отдельные эндпоинты поверх profiles.Deck."""
+"""Редактирование и утверждение тизера. Отдельные APIView, как отдельные эндпоинты поверх profiles.Deck."""
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -122,29 +122,58 @@ class TeaserReviewView(APIView):
 
 class TeaserApproveView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
+    
     def post(self, request, pk):
         """Тело: {"declaration_a": true}. Идемпотентно: повтор после затверждения даёт 200 без нового события."""
         if request.data.get("declaration_a") is not True:
             raise ValidationError({"declaration_a": "Declaration A must be accepted."})
+        
         teaser = _teaser_for(request, pk)
         if teaser.status == Teaser.Status.APPROVED:
             return _respond(teaser)
+        
         with transaction.atomic():
             try:
                 teaser = _locked(teaser.pk)
             except Conflict:  # параллельный запрос успел раньше
                 return _respond(Teaser.objects.get(pk=teaser.pk))
+            
             blockers = approval_blockers(teaser.content, teaser.reviewed, teaser.risk_phrases)
             if blockers:
                 raise ValidationError({"detail": "Teaser is not ready for approval.", "blockers": blockers})
+            
             now = timezone.now()
             teaser.status = Teaser.Status.APPROVED
             teaser.declaration_a_accepted_at = now
             teaser.approved_at = now
             teaser.save()
+            
+            # -------------------------------------------------------------
+            # 1. ПЕРЕВОДИМО ПРОФІЛЬ СТАРТАПУ В СТАТУС LIVE (за ТЗ)
+            # -------------------------------------------------------------
+            profile = getattr(request.user, "startup_profile", getattr(request.user, "startupprofile", None))
+            if profile and profile.status == "DRAFT":
+                profile.status = "LIVE"
+                profile.save(update_fields=["status"])
+            
+            # -------------------------------------------------------------
+            # 2. ВИДАЛЯЄМО ОРИГІНАЛ PDF З ДИСКА (за ТЗ)
+            # -------------------------------------------------------------
+            deck = getattr(profile, "deck", None)
+            if deck and deck.file and deck.file.name:
+                file_name = deck.file.name
+                storage = deck.file.storage
+                deck.file = ""  # не None: поле NOT NULL
+                deck.save(update_fields=["file"])
+                # физически удаляем только после успешного коммита транзакции
+                transaction.on_commit(lambda: storage.delete(file_name))
+        
+        # Трекінг аналітики
         track(EventName.TEASER_APPROVED, user=request.user)
+        track(EventName.WENT_LIVE, user=request.user)
+        
         return _respond(teaser)
+
 
 
 class DeckDraftView(APIView):

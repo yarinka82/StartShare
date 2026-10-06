@@ -84,6 +84,7 @@
     "saved": "Gespeichert",
     "saveError": "Speichern nicht möglich",
     "sections": {
+      "teaser": "Blind-Teaser (KI-Entwurf & Freigabe)",
       "basics": "Grunddaten",
       "metrics": "Kennzahlen",
       "deck": "Pitch Deck"
@@ -111,6 +112,8 @@
     "complete": "Ihr Profil ist vollständig. Die nächsten Schritte (Teaser und Veröffentlichung) folgen in einem späteren Release."
   },
   "deck": {
+    "lockedHint": "Ihr Teaser ist freigegeben (LIVE). Um das Deck zu ersetzen oder zu löschen, pausieren Sie bitte zuerst Ihr Profil.",
+    "lockedDeleteTooltip": "Löschen im LIVE-Status nicht möglich",
     "dropHere": "PDF hierher ziehen oder",
     "choose": "Datei auswählen",
     "hint": "Nur PDF, bis zu {{max}} MB",
@@ -124,6 +127,7 @@
   },
 
   "errors": {
+    "teaser_approved": "Das Deck kann nicht gelöscht werden, da der Teaser bereits freigegeben ist. Bitte pausieren Sie zuerst Ihr Profil.",
     "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "network": "Keine Verbindung zum Server.",
     "throttled": "Zu viele Versuche. Bitte versuchen Sie es später erneut.",

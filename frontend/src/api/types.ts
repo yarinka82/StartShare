@@ -23,6 +23,7 @@ export interface Dictionaries {
 }
 
 export interface Deck {
+  id: number | null;
   original_name: string;
   size: number;
   status: string;

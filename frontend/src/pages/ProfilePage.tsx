@@ -1,15 +1,21 @@
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlineOutlined";
-import { Alert, Box, Chip,
-  CircularProgress, InputAdornment, MenuItem, Paper, Snackbar,
-  Stack, TextField, Typography } from "@mui/material";
+
+
+import {
+  Alert, Box, Button, Chip,
+  CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, MenuItem, Paper, Snackbar,
+  Stack, TextField, Typography
+} from "@mui/material";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-
+import {TeaserPage} from "../teaser";
+import "../teaser/editor.css";
 import { api } from "../api/client";
 import { errorText, parseError } from "../api/errors";
 import type { Deck, Dictionaries, Option, Profile } from "../api/types";
 import DeckUpload from "../components/DeckUpload";
+
 
 type Values = {
   company_name: string; sector: string; stage: string; business_model: string; country: string;
@@ -71,11 +77,37 @@ export default function ProfilePage() {
   const [toastOpen, setToastOpen] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const valuesRef = useRef<Values | null>(null);
   valuesRef.current = values;
   const dirty = useRef<Set<Name>>(new Set());
   const timer = useRef<number | undefined>(undefined);
+
+  const handleTogglePause = async () => {
+    const nextStatus = meta?.status === "PAUSED" ? "LIVE" : "PAUSED";
+    try {
+      // 1. Надсилаємо запит на бекенд
+      const updatedProfile = await api.patchProfile({ status: nextStatus });
+
+      // 2. Миттєво оновлюємо стан на фронтенді
+      setMeta((prev) => (prev ? { ...prev, status: updatedProfile.status || nextStatus } : prev));
+
+      // 3. Синхронізуємо повні мета-дані
+      refreshMeta();
+    } catch (ex) {
+      setLoadError(errorText(t, parseError(ex).detail));
+    }
+  };
+
+  const handleRemoveProfile = async () => {
+    setDeleteDialogOpen(false);
+    try {
+      await api.patchProfile({ status: "REMOVED" });
+      refreshMeta();
+    } catch (ex) {
+      // обробка помилки
+    }
+  };
 
   useEffect(() => {
     Promise.all([api.getProfile(), api.dictionaries()])
@@ -204,30 +236,80 @@ export default function ProfilePage() {
     error: <><ErrorOutlineIcon fontSize="inherit" color="error" /> {t("profile.saveError")}</>,
   }[saveState];
 
-  return (
+return (
     <Stack spacing={3}>
+      {/* 1. ШАПКА З НАЗВОЮ, СТАТУСОМ ТА КНОПКАМИ ПАУЗИ / ВИДАЛЕННЯ */}
       <Stack direction="row" spacing={2} useFlexGap sx={{ alignItems: "center", flexWrap: "wrap" }}>
-        <Typography variant="h4" component="h1" sx={{ flexGrow: 1 }}>{t("profile.title")}</Typography>
+        <Typography variant="h4" component="h1" sx={{ flexGrow: 1, fontWeight: 800, color: "#0b2142" }}>
+          {t("profile.title")}
+        </Typography>
+
         <Typography variant="body2" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 0.75, minHeight: 24 }}>
           {saveIndicator}
         </Typography>
-        <Chip label={t(`profile.status.${meta.status}`)} />
+
+        {/* Кольоровий бейдж статусу */}
+        <Chip
+          label={t(`profile.status.${meta.status}`)}
+          color={
+            meta.status === "LIVE" ? "success" : meta.status === "PAUSED" ? "warning" : meta.status === "REMOVED" ? "error" : "default"
+          }
+          sx={{ fontWeight: 700 }}
+        />
+
+        {/* Кнопки зміни життєвого циклу профілю (Lifecycle buttons) */}
+        {meta.status === "LIVE" && (
+          <Button variant="outlined" color="warning" size="small" onClick={handleTogglePause}>
+            {t("profile.actions.pause", "Поставити на паузу (PAUSE)")}
+          </Button>
+        )}
+
+        {meta.status === "PAUSED" && (
+          <Button variant="contained" color="success" size="small" onClick={handleTogglePause}>
+            {t("profile.actions.resume", "Відновити показ (LIVE)")}
+          </Button>
+        )}
+
+        {meta.status !== "REMOVED" && (
+          <Button variant="text" color="error" size="small" onClick={() => setDeleteDialogOpen(true)}>
+            {t("profile.actions.remove", "Видалити профіль")}
+          </Button>
+        )}
       </Stack>
+
       <Typography color="text.secondary">{t("profile.intro")}</Typography>
 
-      {meta.is_complete ? (
-        <Alert severity="success">{t("profile.complete")}</Alert>
-      ) : (
-        <Alert severity="info">
-          {t("profile.missing")} {meta.missing_fields.map((f) => label(f)).join(", ")}
+      {/* 2. БАНЕРИ СТАНУ ПРОФІЛЮ */}
+      {meta.status === "PAUSED" && (
+        <Alert severity="warning">
+          {t("profile.pausedAlert", "Ваш профіль зараз на паузі. Інвестори не бачать ваш тизер у щотижневих дайджестах.")}
         </Alert>
       )}
 
+      {meta.status === "REMOVED" && (
+        <Alert severity="error">
+          {t("profile.removedAlert", "Профіль видалено з платформи (REMOVED). Показ інвесторам зупинено.")}
+        </Alert>
+      )}
+
+      {meta.status !== "PAUSED" && meta.status !== "REMOVED" && (
+        meta.is_complete ? (
+          <Alert severity="success">{t("profile.complete")}</Alert>
+        ) : (
+          <Alert severity="info">
+            {t("profile.missing")} {meta.missing_fields.map((f) => label(f)).join(", ")}
+          </Alert>
+        )
+      )}
+
+      {/* 3. СЕКЦІЯ 1: ОСНОВНІ ДАНІ */}
       <Section title={t("profile.sections.basics")}>
         <Box sx={grid}>
           <TextField
-            label={label("company_name") + ` (${t("profile.optional")})`} value={values.company_name}
-            onChange={(e) => change("company_name", e.target.value)} helperText={t("profile.companyHelper")}
+            label={label("company_name") + ` (${t("profile.optional")})`}
+            value={values.company_name}
+            onChange={(e) => change("company_name", e.target.value)}
+            helperText={t("profile.companyHelper")}
             slotProps={{ htmlInput: { maxLength: 200 } }}
             sx={{ gridColumn: { sm: "1 / -1" } }}
           />
@@ -240,28 +322,47 @@ export default function ProfilePage() {
         </Box>
       </Section>
 
+      {/* 4. СЕКЦІЯ 2: МЕТРИКИ */}
       <Section title={t("profile.sections.metrics")}>
         <Box sx={grid}>
           {number("mrr", { eur: true, optional: true })}
           <Box />
           {number("growth_percent", { percent: true, optional: true })}
           <TextField
-            select label={label("growth_period")} value={values.growth_period}
+            select
+            label={label("growth_period")}
+            value={values.growth_period}
             onChange={(e) => change("growth_period", e.target.value)}
-            error={!!fieldErrors.growth_period} helperText={fieldErrors.growth_period}
+            error={!!fieldErrors.growth_period}
+            helperText={fieldErrors.growth_period}
           >
             <MenuItem value=""><em>—</em></MenuItem>
             {dicts.growth_periods.map((g) => (
-              <MenuItem key={g.code} value={g.code}>{t(`profile.growthPeriods.${g.code}`, { defaultValue: g.name })}</MenuItem>
+              <MenuItem key={g.code} value={g.code}>
+                {t(`profile.growthPeriods.${g.code}`, { defaultValue: g.name })}
+              </MenuItem>
             ))}
           </TextField>
         </Box>
       </Section>
 
+      {/* 5. СЕКЦІЯ 3: ЗАВАНТАЖЕННЯ PITCH DECK */}
       <Section title={t("profile.sections.deck")}>
-        <DeckUpload deck={meta.deck as Deck | null} onChanged={refreshMeta} />
+        <DeckUpload
+          deck={meta.deck as Deck | null}
+          onChanged={refreshMeta}
+          locked={meta.status === "LIVE"}
+        />
       </Section>
 
+      {/* 6. СЕКЦІЯ 4: РЕДАКТОР СЛІПОГО ТИЗЕРА ТА ЗАТВЕРДЖЕННЯ (ДЕКЛАРАЦІЯ A) */}
+      {meta.deck && (
+        <Section title={t("profile.sections.teaser", "Blind-Teaser (KI-Entwurf & Freigabe)")}>
+          <TeaserPage deckId={Number((meta.deck as Deck).id)} />
+        </Section>
+      )}
+
+      {/* Тост автозбереження */}
       <Snackbar
         open={toastOpen}
         autoHideDuration={2500}
@@ -278,6 +379,26 @@ export default function ProfilePage() {
         </Alert>
       </Snackbar>
 
+      {/* 7. ДІАЛОГ ПІДТВЕРДЖЕННЯ ВИДАЛЕННЯ ПРОФІЛЮ */}
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <DialogTitle>{t("profile.deleteDialog.title", "Видалити профіль стартапу?")}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            {t(
+              "profile.deleteDialog.text",
+              "Ваш профіль та сліпий тизер будуть повністю вилучені з бази підбору інвесторів (статус REMOVED). Ви зможете відновити його пізніше."
+            )}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)} color="inherit">
+            {t("common.cancel", "Скасувати")}
+          </Button>
+          <Button color="error" variant="contained" onClick={handleRemoveProfile}>
+            {t("profile.deleteDialog.confirm", "Підтвердити видалення")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
-}
+ };

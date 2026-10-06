@@ -13,6 +13,7 @@ class EventName(models.TextChoices):
     AI_DRAFT_CREATED = "ai_draft_created", "AI finished the teaser draft"
     FIELD_EDITED = "field_edited", "Teaser Field Edited"
     TEASER_APPROVED = "teaser_approved", "Teaser Approved"
+    WENT_LIVE = "went_live", "Went live"
 
 class Event(models.Model):
     name = models.CharField(max_length=50, choices=EventName.choices, db_index=True)

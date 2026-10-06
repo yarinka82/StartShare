@@ -6,7 +6,7 @@ from django.core.cache import cache
 from rest_framework.test import APIClient, APITestCase
 from rest_framework.throttling import ScopedRateThrottle
 
-from .models import Consent, User
+from .models import UserConsent, User
 
 PASSWORD = "correct-horse-battery"
 
@@ -44,7 +44,7 @@ class RegistrationTests(APITestCase):
         self.assertEqual(r.status_code, 201)
         user = User.objects.get(email="founder@example.com")
         self.assertIsNone(user.email_verified_at)
-        docs = {c.document_type: c.document_version for c in Consent.objects.filter(user=user)}
+        docs = {c.document_type: c.document_version for c in UserConsent.objects.filter(user=user)}
         self.assertEqual(set(docs), {"agb", "datenschutz"})
         self.assertTrue(all(docs.values()))
         self.assertEqual(len(mail.outbox), 1)

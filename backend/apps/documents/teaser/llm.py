@@ -1,5 +1,7 @@
 """Тонкий интерфейс к провайдеру ШІ. Провайдера выбираем позже: меняется одна настройка."""
 from dataclasses import dataclass
+"""Тонкий интерфейс к провайдеру ШІ. Провайдера выбираем позже: меняется одна настройка."""
+from dataclasses import dataclass
 from decimal import Decimal
 from typing import Protocol
 
@@ -42,8 +44,12 @@ class FakeLLMClient:
             if isinstance(item, Exception):
                 raise item
             return LLMResult(data=item, cost_eur=Decimal("0"))
+        marker = "[Slide 1]\n"
+        i = user.find(marker)
+        quote = user[i + len(marker):].split("\n")[0][:80] if i >= 0 else ""
         return LLMResult(
             data={
+                "evidence": {k: quote for k in ("headline", "problem", "solution")},
                 "teaser": {
                     "headline": "Software fuer ein Nischenproblem im Gesundheitswesen",
                     "problem": "Ein haeufiges Problem kostet Betriebe Zeit und Geld.",

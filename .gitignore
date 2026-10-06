@@ -111,3 +111,13 @@ frontend/build/
 .DS_Store
 Thumbs.db
 *.iml
+
+# Завантажені презентації та деки
+decks/
+**/decks/
+**/decks/**
+private_media/
+**/private_media/
+backend/private_media/
+media/
+**/media/

@@ -1,11 +1,25 @@
+
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import DownloadIcon from "@mui/icons-material/Download";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import {
-  Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
-  LinearProgress, Link, Paper, Stack, Typography,
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  LinearProgress,
+  Link,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography,
 } from "@mui/material";
 import { useRef, useState, type DragEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,9 +37,11 @@ interface Props {
   deck: Deck | null;
   /** called after upload / removal so the parent can refresh the completeness checklist */
   onChanged: () => void;
+  /** Чи заблоковано заміну/видалення через затверджений тизер (статус LIVE / APPROVED) */
+  locked?: boolean;
 }
 
-export default function DeckUpload({ deck, onChanged }: Props) {
+export default function DeckUpload({ deck, onChanged, locked = false }: Props) {
   const { t, i18n } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
@@ -35,8 +51,9 @@ export default function DeckUpload({ deck, onChanged }: Props) {
   const params = { max: MAX_MB };
 
   async function handleFile(file: File) {
+    if (locked) return;
     setError("");
-    // quick client-side feedback; the server repeats and enforces all checks
+
     if (!file.name.toLowerCase().endsWith(".pdf")) return setError(errorText(t, "deck_not_pdf", params));
     if (file.size === 0) return setError(errorText(t, "deck_empty", params));
     if (file.size > MAX_MB * 1024 * 1024) return setError(errorText(t, "deck_too_large", params));
@@ -57,6 +74,7 @@ export default function DeckUpload({ deck, onChanged }: Props) {
 
   function onDrop(e: DragEvent) {
     e.preventDefault();
+    if (locked) return;
     setDragOver(false);
     const file = e.dataTransfer.files?.[0];
     if (file) void handleFile(file);
@@ -78,8 +96,15 @@ export default function DeckUpload({ deck, onChanged }: Props) {
     <Stack spacing={2}>
       {error && <Alert severity="error" onClose={() => setError("")}>{error}</Alert>}
 
+      {/* Якщо тизер опубліковано і файл заблоковано від видалення */}
+      {locked && (
+        <Alert severity="info" icon={<LockOutlinedIcon fontSize="inherit" />}>
+          {t("deck.lockedHint", "Тизер опубліковано (LIVE). Для заміни або видалення презентації спочатку переведіть профіль у режим паузи.")}
+        </Alert>
+      )}
+
       {deck && (
-        <Paper variant="outlined" sx={{ p: 2 }}>
+        <Paper variant="outlined" sx={{ p: 2, bgcolor: locked ? "#fafafa" : "background.paper" }}>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ alignItems: { sm: "center" } }}>
             <PictureAsPdfIcon color="error" fontSize="large" />
             <Box sx={{ flexGrow: 1, minWidth: 0 }}>
@@ -90,45 +115,67 @@ export default function DeckUpload({ deck, onChanged }: Props) {
               </Typography>
             </Box>
             <CheckCircleOutlineIcon color="success" />
+            
             <Button component={Link} href={api.deckDownloadUrl} startIcon={<DownloadIcon />} size="small">
               {t("deck.download")}
             </Button>
-            <Button color="error" startIcon={<DeleteOutlineIcon />} size="small" onClick={() => setConfirmOpen(true)} disabled={uploading}>
-              {t("deck.remove")}
-            </Button>
+
+            <Tooltip title={locked ? t("deck.lockedDeleteTooltip", "Неможливо видалити під час статусу LIVE") : ""}>
+              <span>
+                <Button
+                  color="error"
+                  startIcon={<DeleteOutlineIcon />}
+                  size="small"
+                  onClick={() => setConfirmOpen(true)}
+                  disabled={uploading || locked} // Блокуємо видалення
+                >
+                  {t("deck.remove")}
+                </Button>
+              </span>
+            </Tooltip>
           </Stack>
         </Paper>
       )}
 
-      <Box
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={onDrop}
-        sx={{
-          border: "2px dashed", borderColor: dragOver ? "primary.main" : "divider", borderRadius: 2,
-          bgcolor: dragOver ? "action.hover" : "transparent", p: 3, textAlign: "center",
-        }}
-      >
-        <UploadFileIcon color="action" fontSize="large" />
-        <Typography>
-          {deck ? t("deck.replace") + ": " : ""}
-          {t("deck.dropHere")}{" "}
-          <Link component="button" type="button" onClick={() => inputRef.current?.click()} disabled={uploading}>
-            {t("deck.choose")}
-          </Link>
-        </Typography>
-        <Typography variant="body2" color="text.secondary">{t("deck.hint", params)}</Typography>
-        <input
-          ref={inputRef} type="file" accept="application/pdf,.pdf" hidden
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); }}
-        />
-        {uploading && (
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="body2">{t("deck.uploading")} {progress}%</Typography>
-            <LinearProgress variant="determinate" value={progress ?? 0} />
-          </Box>
-        )}
-      </Box>
+      {/* Зона завантаження (приховується або вимикається, якщо файл уже заблоковано) */}
+      {!locked && (
+        <Box
+          onDragOver={(e) => { e.preventDefault(); if (!locked) setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={onDrop}
+          sx={{
+            border: "2px dashed",
+            borderColor: dragOver ? "primary.main" : "divider",
+            borderRadius: 2,
+            bgcolor: dragOver ? "action.hover" : "transparent",
+            p: 3,
+            textAlign: "center",
+          }}
+        >
+          <UploadFileIcon color="action" fontSize="large" />
+          <Typography>
+            {deck ? t("deck.replace") + ": " : ""}
+            {t("deck.dropHere")}{" "}
+            <Link component="button" type="button" onClick={() => inputRef.current?.click()} disabled={uploading}>
+              {t("deck.choose")}
+            </Link>
+          </Typography>
+          <Typography variant="body2" color="text.secondary">{t("deck.hint", params)}</Typography>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="application/pdf,.pdf"
+            hidden
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); }}
+          />
+          {uploading && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2">{t("deck.uploading")} {progress}%</Typography>
+              <LinearProgress variant="determinate" value={progress ?? 0} />
+            </Box>
+          )}
+        </Box>
+      )}
 
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>{t("deck.removeTitle")}</DialogTitle>

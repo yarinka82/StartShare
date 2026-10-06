@@ -14,8 +14,8 @@ class TeaserFields(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     headline: str = Field(min_length=1, max_length=200)
-    problem: str = Field(min_length=1, max_length=800)
-    solution: str = Field(min_length=1, max_length=800)
+    problem: str = Field(default="", max_length=800)    # пусто, если в деке об этом ничего нет
+    solution: str = Field(default="", max_length=800)
     market: str = Field(default="", max_length=800)
     traction: str = Field(default="", max_length=800)
     team: str = Field(default="", max_length=800)
@@ -36,16 +36,40 @@ class DraftResponse(BaseModel):
     teaser: TeaserFields
     risk_phrases: list[RiskPhrase] = Field(default_factory=list)
     language: Literal["de", "en"]
+    # Для каждого непустого поля тизера: дословная цитата из дека, на которой оно основано.
+    # Используется только для проверки и НЕ сохраняется (в цитатах могут быть названия).
+    evidence: dict[str, str] = Field(default_factory=dict)
 
 
 def response_schema() -> dict:
     return DraftResponse.model_json_schema()
 
 
-def check_response(resp: DraftResponse) -> list[str]:
+def _norm(text: str) -> str:
+    return " ".join(text.split()).casefold()
+
+
+def unsupported_fields(resp: DraftResponse, deck_text: str) -> list[str]:
+    """Непустые поля тизера без дословной цитаты-опоры из (уже очищенного) текста дека."""
+    deck_norm = _norm(deck_text)
+    out = []
+    for name, text in resp.teaser.model_dump().items():
+        if text.strip():
+            quote = _norm(resp.evidence.get(name, ""))
+            if len(quote) < 8 or quote not in deck_norm:
+                out.append(name)
+    return out
+
+
+def check_response(resp: DraftResponse, deck_text: "str | None" = None) -> list[str]:
     """Смысловые проверки поверх схемы. Пустой список = ответ годен."""
     problems: list[str] = []
     fields = resp.teaser.model_dump()
+    if deck_text is not None:
+        for name in unsupported_fields(resp, deck_text):
+            problems.append(
+                f"Field '{name}' has no verbatim supporting quote from the deck in `evidence`. "
+                "Copy a short exact quote from the deck, or return an empty string if the deck does not say it.")
 
     for name, text in fields.items():
         if PLACEHOLDER_PREFIX in text:

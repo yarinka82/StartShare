@@ -85,6 +85,7 @@
     "saved": "Saved",
     "saveError": "Could not save",
     "sections": {
+      "teaser": "Blind Teaser (AI Draft & Approval)",
       "basics": "Basics",
       "metrics": "Metrics",
       "deck": "Pitch deck"
@@ -112,6 +113,8 @@
     "complete": "Your profile is complete. The next steps (teaser and publication) follow in a later release."
   },
   "deck": {
+    "lockedHint": "Your teaser is published (LIVE). To replace or delete the pitch deck, please pause your profile first.",
+    "lockedDeleteTooltip": "Cannot delete while LIVE",
     "dropHere": "Drag a PDF here or",
     "choose": "choose a file",
     "hint": "PDF only, up to {{max}} MB",
@@ -125,6 +128,7 @@
   },
 
   "errors": {
+    "teaser_approved": "Cannot delete deck because teaser is already approved. Please pause your profile first.",
     "generic": "Something went wrong. Please try again.",
     "network": "No connection to the server.",
     "throttled": "Too many attempts. Please try again later.",

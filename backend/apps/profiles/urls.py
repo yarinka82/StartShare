@@ -1,10 +1,12 @@
 from django.urls import path
-
-from . import views
+from .views import DeckView, ProfileView, DeckDownloadView
 
 urlpatterns = [
-    path("dictionaries/", views.DictionariesView.as_view()),
-    path("profile/", views.ProfileView.as_view()),
-    path("profile/deck/", views.DeckView.as_view()),
-    path("profile/deck/download/", views.DeckDownloadView.as_view()),
+    # GET /api/profile/ та PATCH /api/profile/
+    path("", ProfileView.as_view(), name="profile"),
+
+    # GET, POST, DELETE /api/profile/deck/ (ОСЬ ВАШ DeckView)
+    path("deck/", DeckView.as_view(), name="profile-deck"),
+    
+    path("deck/download/", DeckDownloadView.as_view(), name="profile-deck-download"),
 ]

@@ -12,8 +12,10 @@ from apps.documents.teaser.gemini import GeminiClient  # noqa: E402
 from apps.documents.teaser.llm import LLMError, RemoteProviderNotAllowed  # noqa: E402
 from apps.documents.teaser.pipeline import run_pipeline  # noqa: E402
 
+_Q = "Wir bauen Software fuer die ambulante Pflege"
 GOOD = ('{"teaser": {"headline": "Software fuer die Pflege", "problem": "Zeitverlust.", '
-        '"solution": "Cloud-Loesung."}, "risk_phrases": [], "language": "de"}')
+        '"solution": "Cloud-Loesung."}, "risk_phrases": [], "language": "de", '
+        '"evidence": {"headline": "%s", "problem": "%s", "solution": "%s"}}' % (_Q, _Q, _Q))
 
 
 class FakeSDK:
@@ -81,12 +83,12 @@ def test_retries_on_429_then_succeeds():
 
 
 def test_gives_up_after_max_attempts_without_leaking_message():
-    sdk = FakeSDK(*[errors.ServerError(503, {"error": {"message": "secret detail"}})] * 3)
+    sdk = FakeSDK(*[errors.ServerError(503, {"error": {"message": "secret detail"}})] * 4)
     c, sleeps = client(sdk)
     with pytest.raises(LLMError) as e:
         call(c)
     assert "503" in str(e.value) and "secret" not in str(e.value)
-    assert len(sdk.calls) == 3 and sleeps == [2, 4]
+    assert len(sdk.calls) == 4 and sleeps == [2, 5, 15]
 
 
 def test_client_error_is_not_retried():
