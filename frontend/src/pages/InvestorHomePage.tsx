@@ -1,15 +1,16 @@
 import {
-  Alert, Box, Button, Checkbox, CircularProgress, FormControlLabel, InputAdornment, Paper, Snackbar, Stack,
-  TextField, Typography,
+  Alert, Box, Button, Checkbox, CircularProgress,
+  FormControlLabel, InputAdornment, Paper, Snackbar, Stack,
+  Skeleton, TextField, Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useLegalText } from "../hooks/useLegalText";
 
 import { api } from "../api/client";
 import { errorText, parseError, type ParsedError } from "../api/errors";
 import type { Dictionaries, InvestorState, Mandate, MandateInput, Option } from "../api/types";
 import ChipSelect from "../components/ChipSelect";
-import { TEXT_C } from "../legalTexts";
 
 const trimDecimal = (v: string) => v.replace(/\.00$/, "");
 
@@ -33,6 +34,7 @@ function StatusConfirm({ onDone }: { onDone: (s: InvestorState) => void }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<ParsedError | null>(null);
   const translation = t("investor.status.translation"); // empty for German
+  const { statement, loading, error } = useLegalText("C");
 
   async function confirm() {
     setBusy(true);
@@ -46,17 +48,33 @@ function StatusConfirm({ onDone }: { onDone: (s: InvestorState) => void }) {
     }
   }
 
+  const legalUnavailable = !loading && (!!error || !statement);
+
   return (
     <Paper variant="outlined" sx={{ p: { xs: 2.5, sm: 4 }, maxWidth: 720, mx: "auto" }}>
       <Stack spacing={2.5}>
         <Typography variant="h5" component="h1">{t("investor.status.title")}</Typography>
         <Typography color="text.secondary">{t("investor.status.intro")}</Typography>
-        {err && <Alert severity="error">{errorText(t, err.detail ?? Object.values(err.fields)[0]?.[0])}</Alert>}
 
-        {/* legal wording: always the approved German text */}
+        {err && (
+          <Alert severity="error">
+            {errorText(t, err.detail ?? Object.values(err.fields)[0]?.[0])}
+          </Alert>
+        )}
+
+        {/* legal wording: always the approved German text, sourced from DB */}
         <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", bgcolor: "action.hover", p: 2, borderRadius: 1 }}>
-          <Typography lang="de">{TEXT_C.statement}</Typography>
+          {loading ? (
+            <Skeleton variant="text" />
+          ) : legalUnavailable ? (
+            <Alert severity="error">
+              {t("legal.unavailable", "Rechtstext konnte nicht geladen werden.")}
+            </Alert>
+          ) : (
+            <Typography lang="de">{statement}</Typography>
+          )}
         </Box>
+
         {translation && (
           <Typography variant="body2" color="text.secondary">
             {t("investor.status.translationNote")}: {translation}
@@ -64,11 +82,23 @@ function StatusConfirm({ onDone }: { onDone: (s: InvestorState) => void }) {
         )}
 
         <FormControlLabel
-          control={<Checkbox checked={checked} onChange={(e) => setChecked(e.target.checked)} />}
-          label={<span lang="de">{TEXT_C.checkbox}</span>}
+          control={
+            <Checkbox
+              checked={checked}
+              onChange={(e) => setChecked(e.target.checked)}
+              disabled={legalUnavailable || loading}
+            />
+          }
+          label={<span lang="de">{t("legal.consent.confirm")}</span>}
         />
+
         <Box>
-          <Button variant="contained" size="large" disabled={!checked || busy} onClick={confirm}>
+          <Button
+            variant="contained"
+            size="large"
+            disabled={!checked || busy || legalUnavailable || loading}
+            onClick={confirm}
+          >
             {t("investor.status.continue")}
           </Button>
         </Box>

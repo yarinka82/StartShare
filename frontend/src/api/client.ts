@@ -1,5 +1,5 @@
 import i18n from "../i18n";
-import type { Deck, Dictionaries, InvestorState, Mandate, MandateInput, Profile, User } from "./types";
+import type {Deck, Dictionaries, InvestorState, LegalDocItem, Mandate, MandateInput, Profile, User} from "./types";
 
 export class ApiError extends Error {
   status: number;
@@ -99,6 +99,9 @@ export const api = {
   forgotPassword: (email: string) => request("/api/auth/password-reset/", "POST", { email }),
   resetPassword: (uid: string, token: string, new_password: string) =>
     request("/api/auth/password-reset/confirm/", "POST", { uid, token, new_password }),
+  getActiveLegalDocs: (lang = "de") =>
+    request<Record<string, LegalDocItem>>(`/api/auth/legal-documents/?lang=${lang}`),
+
   // profile
   dictionaries: () => request<Dictionaries>("/api/dictionaries/"),
   getProfile: () => request<Profile>("/api/profile/"),
@@ -111,3 +114,4 @@ export const api = {
   confirmInvestorStatus: () => request<InvestorState>("/api/investor/confirm-status/", "POST", { accept: true }),
   saveMandate: (data: MandateInput) => request<Mandate>("/api/investor/mandate/", "PUT", data),
 };
+

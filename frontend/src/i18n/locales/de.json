@@ -63,6 +63,11 @@
     "done": "Ihr Passwort wurde geändert. Sie können sich jetzt anmelden."
   },
   "legal": {
+    "unavailable": "Rechtstext konnte nicht geladen werden.",
+    "consent": {
+      "confirm": "Ich bestätige diese Erklärung."
+    },
+
     "agb": "Allgemeine Geschäftsbedingungen (AGB)",
     "datenschutz": "Datenschutzerklärung",
     "impressum": "Impressum",

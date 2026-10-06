@@ -15,18 +15,26 @@ import {
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLegalDocument } from "../hooks/useLegalDocument";
 
-// 1. Додаємо 'kriterien' (Текст F) у список дозволених документів
-const DOCS = ["agb", "datenschutz", "impressum", "kriterien"] as const;
-type Doc = (typeof DOCS)[number];
+const DOC_MAP = {
+  agb: "AGB",
+  datenschutz: "DSE",
+  kriterien: "F",
+  impressum: "IMPRESSUM",
+} as const;
+
+type DocParam = keyof typeof DOC_MAP;
 
 export default function LegalPage() {
   const { t } = useTranslation();
-  const { doc } = useParams();
+  const { doc } = useParams<{ doc: string }>();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const goBack = () => (location.key === "default" ? navigate("/") : navigate(-1));
+
+  const goBack = () =>
+    location.key === "default" ? navigate("/") : navigate(-1);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && goBack();
@@ -35,17 +43,17 @@ export default function LegalPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.key]);
 
-  if (!DOCS.includes(doc as Doc)) return <Navigate to="/" replace />;
+  if (!doc || !(doc in DOC_MAP)) return <Navigate to="/" replace />;
 
-  const currentDoc = doc as Doc;
-
+  const currentDocKey = doc as DocParam;
+  const legalCode = DOC_MAP[currentDocKey]; // тип: "AGB" | "DSE" | "F" | "IMPRESSUM"
+  const { data: legalData, loading } = useLegalDocument(legalCode);
   return (
-    <Paper elevation={8} sx={{ p: { xs: 2.5, sm: 4.5 }, maxWidth: 800, mx: "auto", borderRadius: 3 }}>
+    <Paper elevation={8} sx={{ p: { xs: 2.5, sm: 4.5 }, maxWidth: 800, mx: "auto", borderRadius: 3, my: 4 }}>
       <Stack spacing={3}>
-        {/* Шапка модального вікна */}
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Typography variant="h5" component="h1" sx={{ fontWeight: 800, color: "#0b2142" }}>
-            {t(`legal.${currentDoc}`)}
+            {legalData?.title || t(`legal.${currentDocKey}`)}
           </Typography>
           <IconButton edge="end" aria-label={t("legal.close", "Schließen")} onClick={goBack}>
             <CloseIcon />
@@ -54,13 +62,11 @@ export default function LegalPage() {
 
         <Divider />
 
-        {/* СПЕЦІАЛЬНИЙ КОНТЕНТ ДЛЯ ТЕКСТУ F (КРИТЕРІЇ ВІДБОРУ) */}
-        {currentDoc === "kriterien" ? (
+        {currentDocKey === "kriterien" ? (
           <Stack spacing={2.5}>
-            {/* Офіційне юридичне формулювання (Текст F) */}
             <Box sx={{ borderLeft: "4px solid #17407a", bgcolor: "#f8fafc", p: 2.5, borderRadius: 1 }}>
               <Typography variant="body1" sx={{ fontWeight: 600, color: "#0b2142", lineHeight: 1.6 }} lang="de">
-                „Wir wählen Profile ausschließlich anhand der von Ihnen angegebenen Kriterien (Branche, Stadium, Region, Volumen). Es gibt keine bezahlten Platzierungen und keine Bewertung durch einen Score.“
+                „{legalData?.body || t("legal.criteriaStatement", "Wir wählen Profile ausschließlich anhand der von Ihnen angegebenen Kriterien (Branche, Stadium, Region, Volumen). Es gibt keine bezahlten Platzierungen und keine Bewertung durch einen Score.")}“
               </Typography>
             </Box>
 
@@ -73,22 +79,17 @@ export default function LegalPage() {
             </Typography>
 
             <Stack spacing={1}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <CheckCircleOutlinedIcon color="primary" fontSize="small" />
-                <Typography variant="body2"><strong>{t("legal.paramSector", "Branche (Sektor)")}</strong></Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <CheckCircleOutlinedIcon color="primary" fontSize="small" />
-                <Typography variant="body2"><strong>{t("legal.paramStage", "Finanzierungsstadium (Stage)")}</strong></Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <CheckCircleOutlinedIcon color="primary" fontSize="small" />
-                <Typography variant="body2"><strong>{t("legal.paramRegion", "Zielregion")}</strong></Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <CheckCircleOutlinedIcon color="primary" fontSize="small" />
-                <Typography variant="body2"><strong>{t("legal.paramTicket", "Ticketgröße / Kapitalbedarf")}</strong></Typography>
-              </Box>
+              {[
+                ["legal.paramSector", "Branche (Sektor)"],
+                ["legal.paramStage", "Finanzierungsstadium (Stage)"],
+                ["legal.paramRegion", "Zielregion"],
+                ["legal.paramTicket", "Ticketgröße / Kapitalbedarf"],
+              ].map(([key, fallback]) => (
+                <Box key={key} sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <CheckCircleOutlinedIcon color="primary" fontSize="small" />
+                  <Typography variant="body2"><strong>{t(key, fallback)}</strong></Typography>
+                </Box>
+              ))}
             </Stack>
 
             <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 1 }}>
@@ -107,8 +108,23 @@ export default function LegalPage() {
             </Stack>
           </Stack>
         ) : (
-          /* ДЛЯ AGB, DATENSCHUTZ, IMPRESSUM (Поки фінальні тексти готуються юристом) */
-          <Alert severity="info">{t("legal.placeholder")}</Alert>
+          <Box>
+            {loading ? (
+              <Typography variant="body2" color="text.secondary">
+                {t("common.loading", "Wird geladen…")}
+              </Typography>
+            ) : legalData?.body ? (
+              <Typography
+                variant="body1"
+                lang="de"
+                sx={{ whiteSpace: "pre-line", lineHeight: 1.7, color: "#1e293b" }}
+              >
+                {legalData.body}
+              </Typography>
+            ) : (
+              <Alert severity="info">{t("legal.placeholder", "In Vorbereitung...")}</Alert>
+            )}
+          </Box>
         )}
 
         <Box sx={{ pt: 1 }}>

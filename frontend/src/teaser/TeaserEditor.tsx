@@ -1,11 +1,12 @@
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FieldCard } from "./FieldCard";
 import { BLOCKER_MESSAGES, FIELD_LABELS } from "./labels";
 import { teaserApi, type TeaserApi } from "./api";
 import { FIELD_NAMES, type DeckDraftResponse } from "./types";
 import { useTeaser } from "./useTeaser";
-import { TEXT_A } from "../legalTexts";
+import { useLegalText } from "../hooks/useLegalText";
 
 interface Props {
   deckId: number;
@@ -14,9 +15,12 @@ interface Props {
 }
 
 export function TeaserEditor({ deckId, draft, api = teaserApi }: Props) {
+  const { t } = useTranslation();
   const { teaser, loadError, busy, saveField, confirmField, approve } = useTeaser(deckId, true, api);
   const [declared, setDeclared] = useState(false);
   const [approveError, setApproveError] = useState<string | null>(null);
+  const { statement, loading: legalLoading, error: legalError } = useLegalText("A");
+
 
   if (loadError) return <p role="alert" className="tz-error">{loadError}</p>;
   if (!teaser) return <p role="status">Loading your teaser…</p>;
@@ -30,6 +34,9 @@ export function TeaserEditor({ deckId, draft, api = teaserApi }: Props) {
   const riskPhrases = teaser.risk_phrases ?? [];
   const content = teaser.content ?? {};
 
+  const legalUnavailable = !legalLoading && (!!legalError || !statement);
+  const approveDisabled = busy || blockers.length > 0 || !declared || legalLoading || legalUnavailable;
+  
   return (
     <div className="tz-editor">
       {locked && (
@@ -79,47 +86,60 @@ export function TeaserEditor({ deckId, draft, api = teaserApi }: Props) {
             </div>
           )}
 
-          {/* Декларація A */}
-          <div style={{
-            background: "#f8fafc",
-            borderLeft: "4px solid #17407a",
-            borderTop: "1px solid #e2e8f0",
-            borderRight: "1px solid #e2e8f0",
-            borderBottom: "1px solid #e2e8f0",
-            borderRadius: 6,
-            padding: 16,
-            marginBottom: 16,
-          }}>
-            <p style={{ margin: "0 0 12px 0", fontSize: "0.88rem", color: "#1e293b", lineHeight: 1.6 }} lang="de">
-              {TEXT_A.statement}
+        {/* Декларація A */}
+        <div style={{
+          background: "#f8fafc",
+          borderLeft: "4px solid #17407a",
+          borderTop: "1px solid #e2e8f0",
+          borderRight: "1px solid #e2e8f0",
+          borderBottom: "1px solid #e2e8f0",
+          borderRadius: 6,
+          padding: 16,
+          marginBottom: 16,
+        }}>
+          {legalLoading ? (
+            <p style={{ margin: 0, fontSize: "0.88rem", color: "#64748b" }}>
+              {t("common.loading", "Wird geladen…")}
             </p>
+          ) : legalError || !statement ? (
+            <p role="alert" className="tz-error" style={{ margin: 0 }}>
+              {t("legal.unavailable", "Rechtstext konnte nicht geladen werden.")}
+            </p>
+          ) : (
+            <>
+              <p style={{ margin: "0 0 12px 0", fontSize: "0.88rem", color: "#1e293b", lineHeight: 1.6 }} lang="de">
+                {statement}
+              </p>
 
-            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontWeight: 600, fontSize: "0.9rem", color: "#0f172a" }}>
-              <input
-                type="checkbox"
-                checked={declared}
-                onChange={(e) => setDeclared(e.target.checked)}
-                style={{ width: 18, height: 18, accentColor: "#17407a", cursor: "pointer" }}
-              />
-              <span lang="de">{TEXT_A.checkbox}</span>
-            </label>
-          </div>
+              <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontWeight: 600, fontSize: "0.9rem", color: "#0f172a" }}>
+                <input
+                  type="checkbox"
+                  checked={declared}
+                  onChange={(e) => setDeclared(e.target.checked)}
+                  style={{ width: 18, height: 18, accentColor: "#17407a", cursor: "pointer" }}
+                />
+                <span lang="de">{t("legal.consent.confirm")}</span>
+              </label>
+            </>
+          )}
+        </div>
 
           {approveError && <p role="alert" className="tz-error">{approveError}</p>}
 
+
           <button
             type="button"
-            disabled={busy || blockers.length > 0 || !declared}
+            disabled={approveDisabled}
             onClick={async () => setApproveError(await approve())}
             style={{
-              background: (busy || blockers.length > 0 || !declared) ? "#94a3b8" : "#17407a",
+              background: approveDisabled ? "#94a3b8" : "#17407a",
               color: "#fff",
               border: "none",
               borderRadius: 6,
               padding: "12px 24px",
               fontWeight: 700,
               fontSize: "1rem",
-              cursor: (busy || blockers.length > 0 || !declared) ? "not-allowed" : "pointer",
+              cursor: approveDisabled ? "not-allowed" : "pointer",
               transition: "background 0.2s",
             }}
           >
@@ -128,5 +148,6 @@ export function TeaserEditor({ deckId, draft, api = teaserApi }: Props) {
         </section>
       )}
     </div>
+
   );
 }

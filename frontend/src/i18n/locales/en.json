@@ -63,6 +63,10 @@
     "done": "Your password has been changed. You can log in now."
   },
   "legal": {
+    "consent": {
+      "confirm": "I confirm this statement."
+    },
+    "unavailable": "Legal text could not be loaded.",
     "agb": "Terms & Conditions (AGB)",
     "datenschutz": "Privacy Policy",
     "impressum": "Legal Notice (Impressum)",

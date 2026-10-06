@@ -63,5 +63,13 @@ export interface InvestorState {
   mandate: Mandate | null;
 }
 
+export interface LegalDocItem {
+  code: string;
+  version: number;
+  title: string;
+  body: string;
+  language: string;
+}
+
 /** What the mandate form sends (money as strings, lists as codes). */
 export type MandateInput = Omit<Mandate, "updated_at">;

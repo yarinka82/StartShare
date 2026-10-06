@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
@@ -10,7 +9,7 @@ from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -203,3 +202,27 @@ class PasswordResetConfirmView(PublicPostView):
         user.set_password(d["new_password"])
         user.save(update_fields=["password"])
         return Response({"detail": "password_changed"})
+    
+    
+    
+class ActiveLegalDocumentsView(APIView):
+    """Повертає найсвіжіші діючі тексти документів A-G, AGB, DSE."""
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        lang = request.query_params.get("lang", "de")
+        # Беремо чинні документи (де valid_to порожній)
+        docs = LegalDocument.objects.filter(language=lang, valid_to__isnull=True).order_by("code", "-version")
+
+        result = {}
+        for d in docs:
+            code_key = d.code.upper()
+            if code_key not in result:
+                result[code_key] = {
+                    "code": d.code,
+                    "version": d.version,
+                    "title": d.title,
+                    "body": d.body,
+                    "language": d.language,
+                }
+        return Response(result)
