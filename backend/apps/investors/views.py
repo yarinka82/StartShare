@@ -1,9 +1,8 @@
-from django.conf import settings
 from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.accounts.models import Consent
+from apps.accounts.models import UserConsent, LegalDocument, LegalDocumentCode
 from apps.analytics.events import track
 from apps.analytics.models import EventName
 
@@ -24,17 +23,24 @@ def snapshot(mandate: InvestorMandate) -> dict:
 
 
 def build_state(user) -> dict:
+    """Формує поточний стан інвестора: підтвердження Тексту C та параметри мандату."""
     consent = (
-        Consent.objects.filter(user=user, document_type=Consent.DocumentType.INVESTOR_STATUS)
+        UserConsent.objects.filter(
+            user=user,
+            context=UserConsent.Context.INVESTOR_STATUS
+        )
         .order_by("accepted_at")
         .first()
     )
+    
     mandate = InvestorMandate.objects.filter(user=user).first()
+    
     return {
         "status_confirmed": consent is not None,
         "status_confirmed_at": consent.accepted_at if consent else None,
         "mandate": MandateOutSerializer(mandate).data if mandate else None,
     }
+
 
 
 class InvestorStateView(APIView):
@@ -46,22 +52,30 @@ class InvestorStateView(APIView):
         return Response(build_state(request.user))
 
 
-class ConfirmStatusView(APIView):
-    """Text C: "Ich handle als professioneller Investor ... und nicht als Verbraucher". Idempotent."""
 
+class ConfirmStatusView(APIView):
     permission_classes = [IsVerifiedInvestor]
 
     def post(self, request):
         s = ConfirmStatusSerializer(data=request.data)
         s.is_valid(raise_exception=True)
+
         if not is_status_confirmed(request.user):
-            Consent.objects.create(
-                user=request.user,
-                document_type=Consent.DocumentType.INVESTOR_STATUS,
-                document_version=settings.LEGAL_DOCUMENT_VERSIONS["investor-status"],
-            )
-            track(EventName.STATUS_CONFIRMED, request.user)
+            with transaction.atomic():
+                doc_c, _ = LegalDocument.objects.get_or_create(
+                    code=getattr(LegalDocumentCode, "C", getattr(LegalDocumentCode, "INVESTOR_STATUS", "c")),
+                    language="de",
+                    defaults={"version": 1, "title": "Text C", "body": "Investor Status Text"}
+                )
+                UserConsent.objects.create(
+                    user=request.user,
+                    legal_document=doc_c,
+                    context=UserConsent.Context.INVESTOR_STATUS,
+                )
+                track(EventName.STATUS_CONFIRMED, request.user)
+
         return Response(build_state(request.user))
+
 
 
 class MandateView(APIView):

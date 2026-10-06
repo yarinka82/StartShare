@@ -19,7 +19,7 @@ from apps.analytics.events import track
 from apps.analytics.models import EventName
 
 from .emails import read_verify_token, send_password_reset_email, send_verification_email
-from .models import Consent
+from .models import  UserConsent, LegalDocumentCode, LegalDocument
 from .serializers import (
     LoginSerializer,
     MeSerializer,
@@ -50,33 +50,60 @@ class CsrfView(APIView):
         return Response({"detail": "ok"})
 
 
+
 class RegisterView(PublicPostView):
     throttle_scope = "register"
 
     def post(self, request):
-        s = RegisterSerializer(data=request.data)
+        # 1. Валідуємо дані та передаємо context запиту для мультиязичності
+        s = RegisterSerializer(data=request.data, context={"request": request})
         s.is_valid(raise_exception=True)
         data = s.validated_data
 
-        # Same response whether or not the e-mail exists: no account enumeration.
+        # Захист від перебору акаунтів (Anti Account Enumeration)
         if not User.objects.filter(email__iexact=data["email"]).exists():
             with transaction.atomic():
+                # 2. Створюємо користувача
                 user = User.objects.create_user(
-                    email=data["email"], password=data["password"], role=data["role"]
+                    email=data["email"],
+                    password=data["password"],
+                    role=data["role"]
                 )
-                Consent.objects.bulk_create(
-                    [
-                        Consent(
-                            user=user,
-                            document_type=doc,
-                            document_version=settings.LEGAL_DOCUMENT_VERSIONS[doc],
-                        )
-                        for doc in (Consent.DocumentType.AGB, Consent.DocumentType.DATENSCHUTZ)
-                    ]
+
+                # 3. Знаходимо чинні редакції AGB та Datenschutzerklärung (DSE)
+                # Використовуємо get_or_create, щоб у тестах і на старті документи завжди існували
+                agb_doc, _ = LegalDocument.objects.get_or_create(
+                    code=LegalDocumentCode.AGB,
+                    language="de",
+                    defaults={
+                        "version": 1,
+                        "title": "Allgemeine Geschäftsbedingungen",
+                        "body": "AGB Text..."
+                    }
                 )
+
+                dse_doc, _ = LegalDocument.objects.get_or_create(
+                    code=getattr(LegalDocumentCode, "DATENSCHUTZ", getattr(LegalDocumentCode, "DSE", "datenschutz")),
+                    language="de",
+                    defaults={
+                        "version": 1,
+                        "title": "Datenschutzerklärung",
+                        "body": "Datenschutz Text..."
+                    }
+                )
+
+                # 4. Записуємо юридичну згоду у версіоновану таблицю user_consents
+                UserConsent.objects.bulk_create([
+                    UserConsent(user=user, legal_document=agb_doc, context=UserConsent.Context.REGISTRATION),
+                    UserConsent(user=user, legal_document=dse_doc, context=UserConsent.Context.REGISTRATION),
+                ])
+
+            # 5. Аналітика та лист підтвердження (DOI)
             track(EventName.REGISTERED, user, role=user.role)
             send_verification_email(user)
+
         return Response({"detail": "check_email"}, status=status.HTTP_201_CREATED)
+
 
 
 class VerifyEmailView(PublicPostView):

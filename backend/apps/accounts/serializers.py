@@ -4,7 +4,7 @@ from django.utils import translation
 from django.utils.translation import ngettext
 from rest_framework import serializers
 
-from .models import Role
+from apps.accounts.models import UserRole
 
 
 # NOTE: custom validation messages are stable error codes (e.g. "accept_agb_required").
@@ -12,12 +12,21 @@ from .models import Role
 
 
 class RegisterSerializer(serializers.Serializer):
+    # Дозволені для публічної реєстрації ролі (виключаємо staff)
+    PUBLIC_ROLES = [
+        (UserRole.STARTUP, "Startup"),
+        (UserRole.INVESTOR, "Investor"),
+    ]
+    
     email = serializers.EmailField(max_length=254)
     password = serializers.CharField(write_only=True, trim_whitespace=False, max_length=128)
-    role = serializers.ChoiceField(choices=Role.choices)
+    
+    # 2. Використовуємо UserRole
+    role = serializers.ChoiceField(choices=PUBLIC_ROLES)
+    
     accept_agb = serializers.BooleanField()
     accept_datenschutz = serializers.BooleanField()
-
+    
     def validate_email(self, value):
         return value.strip().lower()
 
