@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from django.conf import settings
 from .models import Country, Deck, StartupProfile
 from .validators import validate_deck_file
 from ..documents.serializers import DeckSerializer
@@ -94,3 +95,4 @@ class StartupProfileSerializer(serializers.ModelSerializer):
 
     def get_is_complete(self, obj):
         return not self.get_missing_fields(obj)
+

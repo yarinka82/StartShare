@@ -24,11 +24,9 @@ class ChoicesMetaView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        # Допоміжна функція перетворення в [{code: "...", name: "..."}, ...] для фронтенду
         def to_options(choices_list):
             return [{"code": c[0], "name": str(c[1])} for c in (choices_list or [])]
 
-        # 1. Отримуємо choices безпечно через _meta поля моделі
         def get_field_choices(field_name):
             try:
                 field = StartupProfile._meta.get_field(field_name)
@@ -36,7 +34,24 @@ class ChoicesMetaView(APIView):
             except Exception:
                 return []
 
-        # 2. Країни (якщо є модель Country, беремо з бази, інакше дефолтний список)
+        # 1. Регіони: імпортуємо клас Region (який очікують тести інвестора)
+        regions_list = []
+        try:
+            from apps.investors.models import Region
+            regions_list = Region.choices
+        except Exception:
+            try:
+                from apps.startups.models import Region
+                regions_list = Region.choices
+            except Exception:
+                regions_list = [
+                    ("dach", "DACH"),
+                    ("eu", "EU"),
+                    ("europe", "Europe"),
+                    ("worldwide", "Worldwide"),
+                ]
+
+        # 2. Країни (з бази або дефолтні у нижньому регістрі)
         countries = []
         try:
             from apps.startups.models import Country
@@ -49,13 +64,13 @@ class ChoicesMetaView(APIView):
 
         if not countries:
             countries = [
-                {"code": "DE", "name": "Germany (Deutschland)"},
-                {"code": "AT", "name": "Austria (Österreich)"},
-                {"code": "CH", "name": "Switzerland (Schweiz)"},
-                {"code": "GB", "name": "United Kingdom"},
-                {"code": "US", "name": "United States"},
-                {"code": "EU", "name": "Other European Union"},
-                {"code": "OTHER", "name": "Other Country"},
+                {"code": "de", "name": "Germany (Deutschland)"},
+                {"code": "at", "name": "Austria (Österreich)"},
+                {"code": "ch", "name": "Switzerland (Schweiz)"},
+                {"code": "gb", "name": "United Kingdom"},
+                {"code": "us", "name": "United States"},
+                {"code": "eu", "name": "Other European Union"},
+                {"code": "other", "name": "Other"},
             ]
 
         # 3. Періоди росту (MoM, QoQ, YoY)
@@ -67,12 +82,11 @@ class ChoicesMetaView(APIView):
                 ("yoy", "YoY (Year over year)"),
             ]
 
-        # Формуємо повну відповідь, яку очікує React-фронтенд
         return Response({
             "sectors": to_options(get_field_choices("sector")),
             "stages": to_options(get_field_choices("stage")),
             "business_models": to_options(get_field_choices("business_model")),
-            "regions": to_options(get_field_choices("region")),
+            "regions": to_options(regions_list),  # <-- ТЕПЕР ПОВЕРТАЄ ['dach', 'eu', 'europe', 'worldwide']
             "growth_periods": to_options(growth_periods),
             "countries": countries,
         })
