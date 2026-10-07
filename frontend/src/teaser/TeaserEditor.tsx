@@ -12,9 +12,10 @@ interface Props {
   deckId: number;
   draft: DeckDraftResponse;
   api?: TeaserApi;
+  onApproved?: () => void | Promise<void>;
 }
 
-export function TeaserEditor({ deckId, draft, api = teaserApi }: Props) {
+export function TeaserEditor({ deckId, draft, api = teaserApi, onApproved }: Props) {
   const { t } = useTranslation();
   const { teaser, loadError, busy, saveField, confirmField, approve } = useTeaser(deckId, true, api);
   const [declared, setDeclared] = useState(false);
@@ -130,7 +131,11 @@ export function TeaserEditor({ deckId, draft, api = teaserApi }: Props) {
           <button
             type="button"
             disabled={approveDisabled}
-            onClick={async () => setApproveError(await approve())}
+            onClick={async () => {
+              const err = await approve();
+              setApproveError(err);
+              if (!err) await onApproved?.();
+            }}
             style={{
               background: approveDisabled ? "#94a3b8" : "#17407a",
               color: "#fff",

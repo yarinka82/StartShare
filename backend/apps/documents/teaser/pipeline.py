@@ -1,4 +1,3 @@
-"""Пайплайн чернетки тизера (шаги 4-8). run_pipeline() не зависит от Django, build_draft() — обёртка."""
 from dataclasses import dataclass
 from decimal import Decimal
 
@@ -30,15 +29,20 @@ class PipelineResult:
     attempts: int
 
 
-def run_pipeline(content: DeckContent, form: dict, terms: list[ForbiddenTerm],
-                 client: LLMClient, max_retries: int = 2) -> PipelineResult:
+def run_pipeline(
+    content: DeckContent,
+    form: dict,
+    terms: list[ForbiddenTerm],
+    client: LLMClient,
+    max_retries: int = 2,
+) -> PipelineResult:
     from anonymizer.categories import CATEGORIES
 
     if not content.has_text:
-        # Пока нет vision (Q-31): дек из одних картинок обработать нельзя
+        # Пока нет vision: дек из одних картинок обработать нельзя
         raise PipelineError("no_text")
 
-    # Шаг 5: regex до вызова ШІ, провайдер не видит e-mail, ссылки, телефоны, номера реестра
+    # Шаг 5: regex до вызова ШИ, провайдер не видит e-mail, ссылки, телефоны, номера реестра
     slides = [detect(s.text).redacted_text for s in content.slides]
 
     deck_text = "\n".join(slides)
@@ -52,8 +56,11 @@ def run_pipeline(content: DeckContent, form: dict, terms: list[ForbiddenTerm],
     for attempt in range(max_retries + 1):
         attempts += 1
         try:
-            result = client.generate_json(system=system, user=build_user_prompt(slides, form, feedback),
-                                          schema=schema)
+            result = client.generate_json(
+                system=system,
+                user=build_user_prompt(slides, form, feedback),
+                schema=schema,
+            )
         except LLMError as exc:
             raise PipelineError("llm_error", str(exc)) from exc
         if result.cost_eur is not None:
@@ -76,7 +83,6 @@ def run_pipeline(content: DeckContent, form: dict, terms: list[ForbiddenTerm],
         raise PipelineError("invalid_response", "; ".join(feedback or []))
 
     # Последняя попытка с остаточными проблемами: плейсхолдеры в тексте недопустимы, битые фразы чистим
-    # Последняя попытка с полями без опоры в деке: лучше пустое поле, чем выдуманный факт
     blanked = unsupported_fields(resp, deck_text)
     if blanked:
         resp = resp.model_copy(update={"teaser": resp.teaser.model_copy(update={n: "" for n in blanked})})
@@ -94,34 +100,45 @@ def run_pipeline(content: DeckContent, form: dict, terms: list[ForbiddenTerm],
     draft = {
         "teaser": fields,
         "language": resp.language,
-        "review": {"image_slides": content.slides_with_images, "blanked_fields": blanked},  # R19: «проверьте логотипы на слайдах …»
+        "review": {"image_slides": content.slides_with_images, "blanked_fields": blanked},
     }
     return PipelineResult(draft, unique, total_cost, attempts)
 
 
-def build_draft(job):
-    """Обёртка для tasks.process_deck: возвращает (draft, risk_phrases, cost_eur)."""
+def build_draft(pitch_deck):
+    """
+    Обёртка для tasks.process_deck: возвращает (draft, risk_phrases, cost_eur).
+    Принимает объект PitchDeck.
+    """
     from django.conf import settings
 
-    deck = job.deck
-    if job.original_deleted_at or not deck.file:
+    # 1. Проверяем, существует ли файл и не был ли дек удалён
+    if getattr(pitch_deck, "deleted_at", None) or not pitch_deck.file:
         raise PipelineError("deck_deleted")
-    profile = deck.profile
 
+    profile = getattr(pitch_deck, "startup_profile", None) or getattr(pitch_deck, "profile", None)
+
+    # 2. Извлекаем текст из PDF
     try:
-        with deck.file.open("rb") as f:
+        with pitch_deck.file.open("rb") as f:
             content = extract_deck(f)
     except DeckExtractionError as exc:
         raise PipelineError(exc.code) from exc
 
+    # 3. Формируем контекст формы стартапа из связанных довідників
     form = {
-        "sector": profile.sector.name_de if profile.sector else (profile.sector_other_text or ""),
-        # ВИПРАВЛЕНО: замість get_stage_display() використовуємо .name_de
-        "stage": profile.stage.name_de if profile.stage else "",
-        "business_model": profile.business_model.name_de if profile.business_model else (profile.business_model_other_text or ""),
+        "sector": profile.sector.name_de if profile and profile.sector else (getattr(profile, "sector_other_text", "") or ""),
+        "stage": profile.stage.name_de if profile and profile.stage else "",
+        "business_model": profile.business_model.name_de if profile and profile.business_model else (getattr(profile, "business_model_other_text", "") or ""),
+        "country": profile.country.name_de if profile and profile.country else "",
     }
+
+    # 4. Запускаем LLM пайплайн генерации
     result = run_pipeline(
-        content, form, terms_from_profile(profile), get_client(),
+        content,
+        form,
+        terms_from_profile(profile) if profile else [],
+        get_client(),
         max_retries=getattr(settings, "TEASER_LLM_MAX_RETRIES", 2),
     )
     return result.draft, result.risk_phrases, result.cost_eur

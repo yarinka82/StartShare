@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 RETRY_CODES = {429, 500, 503}
 BACKOFF_SECONDS = (2, 5, 15)  # 503 «high demand» на бесплатном тарифе часто проходит со 2-3 попытки
-DEFAULT_MODEL = "gemini-2.0-flash"  # имена моделей меняются: переопределяйте TEASER_GEMINI_MODEL
+DEFAULT_MODEL = "gemini-3.5-flash-lite"  # имена моделей меняются: переопределяйте TEASER_GEMINI_MODEL
 _FENCE = re.compile(r"^\s*```(?:json)?\s*|\s*```\s*$", re.I)
 
 

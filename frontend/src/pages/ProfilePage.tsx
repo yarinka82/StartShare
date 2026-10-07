@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import {TeaserPage} from "../teaser";
+import { TeaserPage } from "../teaser";
 import "../teaser/editor.css";
 import { api } from "../api/client";
 import { errorText, parseError } from "../api/errors";
@@ -83,19 +83,23 @@ export default function ProfilePage() {
   const dirty = useRef<Set<Name>>(new Set());
   const timer = useRef<number | undefined>(undefined);
 
-  const handleTogglePause = async () => {
-    const nextStatus = meta?.status === "PAUSED" ? "LIVE" : "PAUSED";
+  const refreshMeta = useCallback(async () => {
     try {
-      // 1. Надсилаємо запит на бекенд
-      const updatedProfile = await api.patchProfile({ status: nextStatus });
+      const p = await api.getProfile();
+      setMeta({ status: p.status, is_complete: p.is_complete, missing_fields: p.missing_fields, deck: p.deck });
+    } catch { /* keep the old state */ }
+  }, []);
 
-      // 2. Миттєво оновлюємо стан на фронтенді
-      setMeta((prev) => (prev ? { ...prev, status: updatedProfile.status || nextStatus } : prev));
 
-      // 3. Синхронізуємо повні мета-дані
-      refreshMeta();
-    } catch (ex) {
-      setLoadError(errorText(t, parseError(ex).detail));
+  const handleTogglePause = async () => {
+    if (!meta) return;
+    const nextStatus = meta.status === "PAUSED" ? "LIVE" : "PAUSED";
+    try {
+      const p = await api.patchProfile({ status: nextStatus });
+      setMeta({ status: p.status, is_complete: p.is_complete, missing_fields: p.missing_fields, deck: p.deck });
+    } catch {
+      setSaveState("error");
+      setToastOpen(true);
     }
   };
 
@@ -108,6 +112,7 @@ export default function ProfilePage() {
       // обробка помилки
     }
   };
+
 
   useEffect(() => {
     Promise.all([api.getProfile(), api.dictionaries()])
@@ -165,6 +170,13 @@ export default function ProfilePage() {
   // never lose edits when leaving the page
   useEffect(() => () => { void flush(); }, [flush]);
 
+
+  if (loadError) return <Alert severity="error">{loadError}</Alert>;
+  if (!values || !meta || !dicts) {
+    return <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}><CircularProgress /></Box>;
+  }
+
+
   function change(name: Name, raw: string) {
     let value = raw;
     if (name === "team_size" && !/^\d{0,6}$/.test(value)) return;
@@ -181,17 +193,7 @@ export default function ProfilePage() {
     timer.current = window.setTimeout(() => void flush(), DEBOUNCE_MS);
   }
 
-  const refreshMeta = useCallback(async () => {
-    try {
-      const p = await api.getProfile();
-      setMeta({ status: p.status, is_complete: p.is_complete, missing_fields: p.missing_fields, deck: p.deck });
-    } catch { /* keep the old state */ }
-  }, []);
 
-  if (loadError) return <Alert severity="error">{loadError}</Alert>;
-  if (!values || !meta || !dicts) {
-    return <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}><CircularProgress /></Box>;
-  }
 
   const label = (n: string) => t(`profile.fields.${n}`);
   const optionName = (kind: DictKind, item: Option) => t(`dict.${kind}.${item.code}`, { defaultValue: item.name });
@@ -358,7 +360,10 @@ return (
       {/* 6. СЕКЦІЯ 4: РЕДАКТОР СЛІПОГО ТИЗЕРА ТА ЗАТВЕРДЖЕННЯ (ДЕКЛАРАЦІЯ A) */}
       {meta.deck && (
         <Section title={t("profile.sections.teaser", "Blind-Teaser (KI-Entwurf & Freigabe)")}>
-          <TeaserPage deckId={Number((meta.deck as Deck).id)} />
+          <TeaserPage
+            deckId={Number((meta.deck as Deck).id)}
+            onApproved={refreshMeta}
+          />
         </Section>
       )}
 

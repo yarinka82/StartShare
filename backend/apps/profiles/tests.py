@@ -10,7 +10,7 @@ from pypdf import PdfWriter
 from rest_framework.test import APIClient, APITestCase
 
 from apps.accounts.models import User
-from apps.documents.models import Deck
+from apps.documents.models import PitchDeck
 from apps.startups.models import StartupProfile
 from common.models import Sector, Stage, BusinessModel, Country, Region
 
@@ -189,7 +189,9 @@ class DeckTests(APITestCase):
         r = self.upload()
         self.assertEqual(r.status_code, 201, r.data)
         self.assertEqual(r.data["original_name"], "deck.pdf")
-        d = Deck.objects.get()
+        
+        # Получаем созданный активный дек
+        d = PitchDeck.objects.filter(deleted_at__isnull=True).get()
         self.assertTrue(os.path.exists(d.file.path))
         self.assertTrue(d.file.name.startswith("decks/") and "deck.pdf" not in d.file.name)
     
@@ -209,7 +211,7 @@ class DeckTests(APITestCase):
                 r = self.upload(**kw)
                 self.assertEqual(r.status_code, 400, (code, kw))
                 self.assertIn(code, str(r.data), (code, kw))
-        self.assertEqual(Deck.objects.count(), 0)
+        self.assertEqual(PitchDeck.objects.count(), 0)
     
     @override_settings(DECK_MAX_BYTES=1000)
     def test_too_large(self):
@@ -219,18 +221,28 @@ class DeckTests(APITestCase):
     
     def test_replace_removes_old_file(self):
         self.upload()
-        first = Deck.objects.get().file.path
+        first = PitchDeck.objects.filter(deleted_at__isnull=True).get().file.path
+        
+        # Загружаем вторую версию файла
         self.upload(name="v2.pdf")
-        self.assertEqual(Deck.objects.count(), 1)
-        d = Deck.objects.get()
+        
+        # Активный дек должен быть ровно один:
+        self.assertEqual(PitchDeck.objects.filter(deleted_at__isnull=True).count(), 1)
+        d = PitchDeck.objects.filter(deleted_at__isnull=True).get()
         self.assertEqual(d.original_name, "v2.pdf")
+        
+        # Старый физический файл удалён, новый существует:
         self.assertFalse(os.path.exists(first))
         self.assertTrue(os.path.exists(d.file.path))
     
     def test_delete_removes_file(self):
         self.upload()
-        path = Deck.objects.get().file.path
+        path = PitchDeck.objects.filter(deleted_at__isnull=True).get().file.path
+        
+        # Удаляем дек
         self.assertEqual(self.client.delete("/api/profile/deck/").status_code, 204)
+        
+        # Файл удалён из хранилища, а GET возвращает 404
         self.assertFalse(os.path.exists(path))
         self.assertEqual(self.client.get("/api/profile/deck/").status_code, 404)
     
@@ -242,7 +254,7 @@ class DeckTests(APITestCase):
         self.assertTrue(b"".join(r.streaming_content).startswith(b"%PDF-"))
         
         other = make_user("other@example.com")
-        c = APIClient();
+        c = APIClient()
         c.force_authenticate(other)
         self.assertEqual(c.get("/api/profile/deck/download/").status_code, 404)
         self.assertEqual(c.get("/api/profile/deck/").status_code, 404)

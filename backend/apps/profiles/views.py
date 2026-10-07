@@ -1,8 +1,10 @@
 import os
 import re
+from datetime import timedelta
 
 from django.db import transaction
 from django.http import FileResponse
+from django.utils import timezone
 from rest_framework import status, permissions
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.parsers import MultiPartParser
@@ -14,7 +16,8 @@ from common.models import Sector, Stage, BusinessModel, Country, Region
 from .permissions import IsVerifiedStartup
 
 from ..analytics.services import can_replace_deck, start_teaser_job
-from ..documents.models import Deck
+from ..documents.models import TeaserStatus, PitchDeckDeletionReason, Teaser, PitchDeckProcessingState, PitchDeck
+
 from ..documents.serializers import DeckSerializer, DeckUploadSerializer
 from ..startups.models import StartupProfile
 from ..startups.serializers import StartupProfileSerializer
@@ -92,61 +95,107 @@ class ProfileView(RetrieveUpdateAPIView):
 
 
 class DeckView(APIView):
-    permission_classes = [IsVerifiedStartup]
+    """Эндпоинт загрузки, получения и удаления Pitch Deck (/api/profile/deck/)."""
+
+    # permission_classes = [IsVerifiedStartup] # ваш класс прав
     parser_classes = [MultiPartParser]
-    
+
+    def get_current_deck(self, profile) -> "PitchDeck | None":
+        """Возвращает текущий активный (неудалённый) дек стартапа."""
+        return profile.pitch_decks.filter(deleted_at__isnull=True).order_by("-uploaded_at").first()
+
     def get(self, request):
-        deck = getattr(get_profile(request.user), "deck", None)
-        if deck is None:
+        profile = get_profile(request.user)
+        deck = self.get_current_deck(profile)
+        if deck is None or not deck.file:
             return Response({"detail": "no_deck"}, status=status.HTTP_404_NOT_FOUND)
         return Response(DeckSerializer(deck).data)
-    
+
     def post(self, request):
         s = DeckUploadSerializer(data=request.data)
         s.is_valid(raise_exception=True)
         upload = s.validated_data["file"]
         profile = get_profile(request.user)
-        
-        if not can_replace_deck(profile):  # затверждённый тизер каскадом не теряем
-            return Response({"detail": "teaser_approved"}, status=status.HTTP_409_CONFLICT)
-        
-        with transaction.atomic():
-            deck = getattr(profile, "deck", None) or Deck(profile=profile)
-            old_name = deck.file.name if deck.pk and deck.file else None
-            deck.file = upload
-            deck.original_name = re.sub(r"[\x00-\x1f]", "", os.path.basename(upload.name))[:255]
-            deck.size = upload.size
-            deck.status = Deck.Status.OK  # TODO: PENDING until the ClamAV scan finishes
-            deck.save()
-            start_teaser_job(deck, request.user)  # новая задача обработки (при замене старая сбрасывается)
-        if old_name and old_name != deck.file.name:
-            deck.file.storage.delete(old_name)  # replacing: старый файл удаляем уже после коммита
-        return Response(DeckSerializer(deck).data, status=status.HTTP_201_CREATED)
-    
-    def delete(self, request):
-        profile = get_profile(request.user)
-        deck = getattr(profile, "deck", None)
-        if deck is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        # 1. Проверяем, разрешена ли замена дека (запрещена только в статусе LIVE)
         if not can_replace_deck(profile):
             return Response({"detail": "teaser_approved"}, status=status.HTTP_409_CONFLICT)
-        deck.delete()  # post_delete signal removes the file; TeaserJob и Teaser удаляются каскадом
+
+        # 2. Очищаем имя файла от небезопасных управляющих символов
+        clean_name = re.sub(r"[\x00-\x1f]", "", os.path.basename(upload.name))[:255]
+        now = timezone.now()
+
+        with transaction.atomic():
+            # Создаём новую запись PitchDeck
+            pitch_deck = PitchDeck.objects.create(
+                startup_profile=profile,
+                file=upload,
+                original_name=clean_name,
+                file_size_bytes=upload.size,
+                mime_type="application/pdf",
+                uploaded_at=now,
+                delete_after=now + timedelta(hours=24),  # Политика автоудаления через 24 часа
+                processing_state=PitchDeckProcessingState.QUEUED,
+            )
+            # Архивация старых деков и запуск Celery-задачи
+            start_teaser_job(pitch_deck, request.user)
+
+        return Response(DeckSerializer(pitch_deck).data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request):
+        profile = get_profile(request.user)
+        deck = self.get_current_deck(profile)
+
+        if deck is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if not can_replace_deck(profile):
+            return Response({"detail": "teaser_approved"}, status=status.HTTP_409_CONFLICT)
+
+        with transaction.atomic():
+            # Мягкое удаление (Soft Delete) с фиксацией причины в аудите
+            deck.deleted_at = timezone.now()
+            deck.deletion_reason = PitchDeckDeletionReason.USER_REQUEST
+            if deck.file:
+                deck.file.delete(save=False)
+            deck.storage_key = None
+            deck.save(update_fields=["deleted_at", "deletion_reason", "storage_key"])
+
+            # Текущий тизер переводим в статус заменённого (SUPERSEDED)
+            Teaser.objects.filter(
+                startup_profile=profile,
+                is_current=True,
+            ).update(is_current=False, status=TeaserStatus.SUPERSEDED)
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 
 class DeckDownloadView(APIView):
-    """Owner-only download. Files are never exposed through a public URL."""
+    """GET /api/profile/deck/download/ — скачивание своего PDF-файла владельцем."""
 
-    permission_classes = [IsVerifiedStartup]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        deck = getattr(get_profile(request.user), "deck", None)
-        if deck is None:
-            return Response({"detail": "no_deck"}, status=status.HTTP_404_NOT_FOUND)
-        response = FileResponse(
-            deck.file.open("rb"), as_attachment=True, filename=deck.original_name,
-            content_type="application/pdf",
+        profile = getattr(request.user, "startup_profile", None)
+        if not profile:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        # Ищем активный неудалённый дек стартапа
+        pitch_deck = (
+            profile.pitch_decks.filter(deleted_at__isnull=True)
+            .order_by("-uploaded_at")
+            .first()
         )
-        response["X-Content-Type-Options"] = "nosniff"
-        return response
+
+        if pitch_deck is None or not pitch_deck.file:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        # Отдаём стриминг PDF-файла
+        try:
+            file_handle = pitch_deck.file.open("rb")
+            response = FileResponse(file_handle, content_type="application/pdf")
+            response["Content-Disposition"] = f'attachment; filename="{pitch_deck.original_name}"'
+            return response
+        except FileNotFoundError:
+            return Response(status=status.HTTP_404_NOT_FOUND)

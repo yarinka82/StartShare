@@ -1,19 +1,17 @@
 
 import { ERROR_MESSAGES } from "./labels";
 import { TeaserEditor } from "./TeaserEditor";
-import type { TeaserApi } from "./api";
 import { useDeckDraft } from "./useDeckDraft";
+import { teaserApi } from "./api";
 
-interface Props {
-  deckId: number | null;
-  api?: TeaserApi;
-  declarationHref?: string;
-}
 
-export function TeaserPage({ deckId, api, }: Props) {
-  const { data, error, timedOut, refetch, isPolling } = useDeckDraft(deckId, api ? { fetchDraft: api.getDraft } : {});
+type Props = { deckId: number; onApproved?: () => void | Promise<void> };
 
-  if (deckId === null) return null;
+export function TeaserPage({ deckId, onApproved }: Props) {
+  const { data, error, timedOut, refetch, isPolling } = useDeckDraft(deckId, {
+    fetchDraft: teaserApi.getDraft,
+  });
+
   if (error) {
     return (
       <div role="alert">
@@ -34,7 +32,7 @@ export function TeaserPage({ deckId, api, }: Props) {
     return <p role="alert" className="tz-error">{ERROR_MESSAGES[data.error_code ?? "unexpected"]}</p>;
   }
   if (data?.state === "DRAFT_READY") {
-    return <TeaserEditor deckId={deckId} draft={data} api={api} />;
+    return <TeaserEditor deckId={deckId} draft={data} api={teaserApi} onApproved={onApproved} />;
   }
   return (
     <p role="status" aria-busy={isPolling}>

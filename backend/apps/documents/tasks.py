@@ -4,58 +4,135 @@ from datetime import timedelta
 from celery import shared_task
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Q
 from django.utils import timezone
 
+from apps.analytics.events import track
 from apps.analytics.models import EventName
-from apps.analytics.services import track
-
-
-
-from .models import TeaserJob, Deck
-from .teaser.pipeline import build_draft
+from apps.documents.models import (
+    PitchDeck,
+    PitchDeckDeletionReason,
+    PitchDeckFailureReason,
+    PitchDeckProcessingState,
+    Teaser,
+    TeaserField,
+    TeaserFieldFieldName,
+    TeaserStatus,
+)
+from apps.documents.teaser.pipeline import build_draft
 
 logger = logging.getLogger(__name__)
 
 
-def _finish(job, **fields) -> bool:
-    """Записать результат, только если задача ещё существует и в PROCESSING.
-
-    Если дек заменили или удалили во время обработки, строки уже нет: результат отбрасывается.
-    """
-    return TeaserJob.objects.filter(pk=job.pk, state=TeaserJob.State.PROCESSING).update(**fields) == 1
-
-
 @shared_task
-def process_deck(job_id):
+def process_deck(deck_id: int):
+    """
+    Основная фоновая задача: извлекает текст из PDF, отправляет в Gemini
+    и создаёт Teaser со всеми языковыми полями TeaserField.
+    """
+    # 1. Атомарно переводим дек в состояние PROCESSING
     with transaction.atomic():
-        job = TeaserJob.objects.select_for_update().filter(pk=job_id).first()
-        if job is None or job.state != TeaserJob.State.QUEUED:
-            return  # задачи нет (дек заменили) или повторная доставка: ШІ второй раз не вызываем
-        job.state = TeaserJob.State.PROCESSING
-        job.started_at = timezone.now()
-        job.attempts += 1
-        job.save(update_fields=["state", "started_at", "attempts"])
+        pitch_deck = (
+            PitchDeck.objects.select_for_update()
+            .select_related("startup_profile__user")
+            .filter(pk=deck_id)
+            .first()
+        )
+        if pitch_deck is None or pitch_deck.processing_state != PitchDeckProcessingState.QUEUED:
+            return  # Дек удалён/заменён или уже взят в работу
 
+        pitch_deck.processing_state = PitchDeckProcessingState.PROCESSING
+        pitch_deck.processing_started_at = timezone.now()
+        pitch_deck.attempt_count += 1
+        pitch_deck.save(update_fields=["processing_state", "processing_started_at", "attempt_count"])
+
+    profile = pitch_deck.startup_profile
+    user = profile.user
+
+    # 2. Вызываем LLM-пайплайн
     try:
-        draft, risk_phrases, cost = build_draft(job)
+        draft, risk_phrases, cost = build_draft(pitch_deck)
     except Exception as exc:
-        logger.exception("Teaser job %s failed", job_id)
+        logger.exception("Pitch deck processing failed for deck #%s", deck_id)
         code = getattr(exc, "code", None)
-        # PipelineError уже формата "code: message"; неожиданные ошибки помечаем "unexpected"
-        _finish(job, state=TeaserJob.State.FAILED, error=(str(exc) if code else f"unexpected: {exc}")[:2000])
+
+        # Сопоставляем ошибку с FailureReason
+        failure_reason = PitchDeckFailureReason.OTHER
+        if code in ("corrupted", "encrypted", "no_text", "empty", "pdf_unreadable"):
+            failure_reason = PitchDeckFailureReason.PDF_UNREADABLE
+        elif code in ("invalid_response", "json_error"):
+            failure_reason = PitchDeckFailureReason.INVALID_RESPONSE
+        elif code in ("provider_unavailable", "503", "timeout", "llm_error"):
+            failure_reason = PitchDeckFailureReason.PROVIDER_UNAVAILABLE
+
+        with transaction.atomic():
+            PitchDeck.objects.filter(pk=deck_id, processing_state=PitchDeckProcessingState.PROCESSING).update(
+                processing_state=PitchDeckProcessingState.FAILED,
+                failure_reason=failure_reason,
+                processing_finished_at=timezone.now(),
+            )
         return
 
+    # 3. Сохраняем успешный результат генерации
     now = timezone.now()
-    processing_ms = int((now - job.started_at).total_seconds() * 1000)
-    saved = _finish(job, draft=draft, risk_phrases=risk_phrases, cost_eur=cost, processing_ms=processing_ms,
-                    state=TeaserJob.State.DRAFT_READY, ready_at=now)
-    if not saved:
-        logger.info("Teaser job %s result discarded (deck replaced or deleted)", job_id)
-        return
+    processing_ms = int((now - pitch_deck.processing_started_at).total_seconds() * 1000)
+
+    with transaction.atomic():
+        # Проверяем, что дек не был заменён или удалён пользователем во время генерации
+        updated = PitchDeck.objects.filter(
+            pk=deck_id, processing_state=PitchDeckProcessingState.PROCESSING
+        ).update(
+            processing_state=PitchDeckProcessingState.DRAFT_READY,
+            processing_finished_at=now,
+            ai_cost_eur=cost,
+            delete_after=now + timedelta(hours=24),  # Автоудаление оригинала ровно через 24 часа
+        )
+
+        if not updated:
+            logger.info("Pitch deck #%s result discarded (replaced or deleted while processing)", deck_id)
+            return
+
+        # Переводим старые тизеры этого стартапа в SUPERSEDED
+        Teaser.objects.filter(startup_profile=profile, is_current=True).update(
+            is_current=False, status=TeaserStatus.SUPERSEDED
+        )
+
+        # Вычисляем номер следующей версии тизера (v1, v2, v3...)
+        last_version = (
+            Teaser.objects.filter(startup_profile=profile).order_by("-version").values_list("version", flat=True).first() or 0
+        )
+        new_version = last_version + 1
+
+        # Создаём новую версию тизера
+        teaser = Teaser.objects.create(
+            startup_profile=profile,
+            pitch_deck=pitch_deck,
+            version=new_version,
+            status=TeaserStatus.DRAFT,
+            is_current=True,
+        )
+
+        # Создаём поля тизера (TeaserField)
+        teaser_content = draft.get("teaser", {}) if isinstance(draft, dict) else draft
+        for field_name, text in teaser_content.items():
+            if field_name in TeaserFieldFieldName.values:
+                # Фильтруем рисковые фразы, относящиеся к этому полю
+                field_risks = [
+                    r for r in risk_phrases
+                    if isinstance(r, dict) and r.get("field") == field_name or r.get("category")
+                ]
+                TeaserField.objects.create(
+                    teaser=teaser,
+                    field_name=field_name,
+                    language="de",
+                    ai_text=text or "",
+                    final_text=text or "",
+                    risk_phrases=field_risks,
+                )
+
+    # 4. Аналитическое событие
     track(
         EventName.AI_DRAFT_CREATED,
-        user=job.deck.profile.user,
+        user=user,
         processing_ms=processing_ms,
         risk_phrases_count=len(risk_phrases),
         cost_eur=float(cost) if cost is not None else None,
@@ -64,30 +141,52 @@ def process_deck(job_id):
 
 @shared_task
 def purge_expired_decks():
-    """REQ-16: удалить файл-оригинал через 24 ч после ai_draft_created (для FAILED: через 24 ч после создания).
-
-    Строка Deck и связанные TeaserJob/Teaser остаются: удаление строки каскадом убило бы тизер.
     """
-    cutoff = timezone.now() - timedelta(hours=24)
-    expired = Q(ready_at__lt=cutoff) | Q(state=TeaserJob.State.FAILED, created_at__lt=cutoff)
-    for job in TeaserJob.objects.filter(expired, original_deleted_at__isnull=True).select_related("deck"):
-        deck = job.deck
+    24h Retention Policy (GDPR):
+    Удаляет физический файл PDF через 24 часа после завершения обработки,
+    если стартап не выбрал флаг keep_original=True.
+    Метаданные PitchDeck остаются для аудита с пометкой AUTO_24H.
+    """
+    now = timezone.now()
+    expired_decks = PitchDeck.objects.filter(
+        delete_after__lte=now,
+        deleted_at__isnull=True,
+        keep_original=False,
+    )
+
+    for deck in expired_decks:
         if deck.file:
-            deck.file.delete(save=False)  # убирает файл из хранилища
-        # update(), а не save(): у Deck.uploaded_at стоит auto_now, save() его перезаписал бы
-        Deck.objects.filter(pk=deck.pk).update(file="")
-        job.original_deleted_at = timezone.now()
-        job.save(update_fields=["original_deleted_at"])
+            deck.file.delete(save=False)
+
+        deck.deleted_at = now
+        deck.deletion_reason = PitchDeckDeletionReason.AUTO_24H
+        deck.storage_key = None
+        deck.save(update_fields=["deleted_at", "deletion_reason", "storage_key"])
+
+    logger.info("Purged %d expired pitch deck files.", expired_decks.count())
 
 
 @shared_task
 def requeue_stuck_jobs():
+    """Перезапускает зависшие задачи (например, если воркер упал по OOM)."""
     cutoff = timezone.now() - timedelta(minutes=15)
-    stuck = TeaserJob.objects.filter(state=TeaserJob.State.PROCESSING, started_at__lt=cutoff)
-    max_attempts = settings.TEASER_MAX_ATTEMPTS
-    stuck.filter(attempts__gte=max_attempts).update(
-        state=TeaserJob.State.FAILED, error="timeout: processing timed out")
-    ids = list(stuck.filter(attempts__lt=max_attempts).values_list("id", flat=True))
-    TeaserJob.objects.filter(id__in=ids).update(state=TeaserJob.State.QUEUED)
-    for job_id in ids:
-        process_deck.delay(job_id)
+    max_attempts = getattr(settings, "TEASER_MAX_ATTEMPTS", 3)
+
+    stuck = PitchDeck.objects.filter(
+        processing_state=PitchDeckProcessingState.PROCESSING,
+        processing_started_at__lt=cutoff,
+    )
+
+    # Превысившие число попыток помечаем FAILED
+    stuck.filter(attempt_count__gte=max_attempts).update(
+        processing_state=PitchDeckProcessingState.FAILED,
+        failure_reason=PitchDeckFailureReason.PROVIDER_UNAVAILABLE,
+        processing_finished_at=timezone.now(),
+    )
+
+    # Зависшие, у которых ещё есть попытки, возвращаем в очередь QUEUED
+    retry_ids = list(stuck.filter(attempt_count__lt=max_attempts).values_list("id", flat=True))
+    PitchDeck.objects.filter(id__in=retry_ids).update(processing_state=PitchDeckProcessingState.QUEUED)
+
+    for deck_id in retry_ids:
+        process_deck.delay(deck_id)
