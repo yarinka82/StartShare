@@ -11,9 +11,9 @@ from rest_framework.views import APIView
 from apps.analytics.models import EventName
 from apps.analytics.services import track
 
-from apps.profiles.models import Deck
 
-from ..models import Teaser, TeaserJob
+
+from ..models import Teaser, TeaserJob, Deck
 from .contract import FIELD_NAMES
 from .editing import approval_blockers, refresh_phrases, risky_fields, validate_content
 from .leak_check import terms_from_profile

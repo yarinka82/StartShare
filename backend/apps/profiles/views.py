@@ -3,50 +3,78 @@ import re
 
 from django.db import transaction
 from django.http import FileResponse
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-
-from .choices import BusinessModel, Region, Sector, Stage
-from .models import Country, Deck, StartupProfile
+from common.models import Sector, Stage, BusinessModel, Country, Region
 from .permissions import IsVerifiedStartup
-from .serializers import (
 
-    DictionaryItemSerializer,
-    StartupProfileSerializer,
-)
 from ..analytics.services import can_replace_deck, start_teaser_job
+from ..documents.models import Deck
 from ..documents.serializers import DeckSerializer, DeckUploadSerializer
+from ..startups.models import StartupProfile
+from ..startups.serializers import StartupProfileSerializer
 
+GROWTH_PERIODS = [
+    {"code": "mom", "name": "MoM (Month over month)"},
+    {"code": "qoq", "name": "QoQ (Quarter over quarter)"},
+    {"code": "yoy", "name": "YoY (Year over year)"},
+]
 
 def get_profile(user):
     return StartupProfile.objects.get_or_create(user=user)[0]
 
 
-class DictionariesView(APIView):
-    """All list values for the profile form in one request (all items are {code, name})."""
+def serialize_reference(queryset, lang: str = "de"):
+    """Допоміжна функція: перетворює QuerySet ReferenceModel у список {code, name, is_other}."""
+    name_field = "name_en" if lang.startswith("en") else "name_de"
+    result = []
+    for item in queryset:
+        data = {
+            "code": item.code,
+            "name": getattr(item, name_field, item.name_de),
+        }
+        # Якщо в моделі є поле is_other (для Sector та BusinessModel)
+        if hasattr(item, "is_other"):
+            data["is_other"] = item.is_other
+        result.append(data)
+    return result
 
-    authentication_classes = []
-    permission_classes = [AllowAny]
+
+class DictionariesView(APIView):
+    """Повертає всі довідники для стартапів та інвесторів в одному запиті."""
+
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        def from_choices(choices):
-            return [{"code": value, "name": label} for value, label in choices.choices]
+        return Response({
+            "sectors": [
+                {"code": s.code, "name": s.name_de}
+                for s in Sector.objects.filter(is_active=True)
+            ],
+            "stages": [
+                {"code": s.code, "name": s.name_de}
+                for s in Stage.objects.filter(is_active=True)
+            ],
+            "business_models": [
+                {"code": b.code, "name": b.name_de}
+                for b in BusinessModel.objects.filter(is_active=True)
+            ],
+            "regions": [
+                {"code": r.code, "name": r.name_de}
+                for r in Region.objects.filter(is_active=True)
+            ],
+            "countries": [
+                {"code": c.code, "name": c.name_de}
+                for c in Country.objects.filter(is_active=True)
+            ],
+            "growth_periods": GROWTH_PERIODS,
+        })
 
-        return Response(
-            {
-                "sectors": from_choices(Sector),
-                "stages": from_choices(Stage),
-                "business_models": from_choices(BusinessModel),
-                "regions": from_choices(Region),
-                "countries": DictionaryItemSerializer(Country.objects.filter(is_active=True), many=True).data,
-                "growth_periods": [{"code": c, "name": n} for c, n in StartupProfile.GrowthPeriod.choices],
-            }
-        )
 
 
 class ProfileView(RetrieveUpdateAPIView):

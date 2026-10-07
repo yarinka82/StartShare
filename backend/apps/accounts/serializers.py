@@ -79,6 +79,7 @@ class RegisterSerializer(serializers.Serializer):
         return value
 
 
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(trim_whitespace=False)

@@ -10,9 +10,9 @@ from django.utils import timezone
 from apps.analytics.models import EventName
 from apps.analytics.services import track
 
-from apps.profiles.models import Deck
 
-from .models import TeaserJob
+
+from .models import TeaserJob, Deck
 from .teaser.pipeline import build_draft
 
 logger = logging.getLogger(__name__)

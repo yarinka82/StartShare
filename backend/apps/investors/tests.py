@@ -1,13 +1,15 @@
 from unittest.mock import patch
 
 from django.core.cache import cache
+from django.core.management import call_command
 from django.utils import timezone
 from rest_framework.test import APIClient, APITestCase
 
 from apps.accounts.models import UserConsent, User
 from apps.analytics.models import Event, EventName
 from apps.investors.models import InvestorMandate
-from apps.profiles.choices import BusinessModel, Region, Sector, Stage
+from common.models import BusinessModel, Region, Sector, Stage
+
 
 MANDATE = {
     "sectors": ["fintech", "ai-data"],
@@ -29,6 +31,9 @@ def make_user(email="inv@example.com", role="investor", verified=True):
 class InvestorBase(APITestCase):
     def setUp(self):
         cache.clear()
+        # Засіюємо юридичні тексти (для тексту C) та довідники
+        call_command("seed_legal_documents", verbosity=0)
+        call_command("seed_dictionaries", verbosity=0)
         self.user = make_user()
         self.client.force_authenticate(self.user)
 
@@ -139,7 +144,7 @@ class MandateTests(InvestorBase):
             ({"sectors": []}, "mandate_list_required"),
             ({"stages": []}, "mandate_list_required"),
             ({"regions": []}, "mandate_list_required"),
-            ({"sectors": ["FinTech"]}, "not a valid choice"),            # label instead of code
+            ({"sectors": ["FinTech"]}, "not a valid choice"),
             ({"stages": ["series-z"]}, "not a valid choice"),
             ({"business_models": ["magic"]}, "not a valid choice"),
             ({"ticket_min": "0"}, "ticket_min"),
@@ -151,7 +156,7 @@ class MandateTests(InvestorBase):
             self.assertEqual(r.status_code, 400, over)
             self.assertIn(expect, str(r.data), over)
         self.assertEqual(Event.objects.filter(name=EventName.MANDATE_SAVED).count(), 0)
-        self.assertFalse(InvestorMandate.objects.filter(user=self.user).exists())  # nothing half-saved
+        self.assertFalse(InvestorMandate.objects.filter(user=self.user).exists())
 
     def test_equal_min_and_max_is_allowed(self):
         self.assertEqual(self.put(ticket_min="250000", ticket_max="250000").status_code, 200)
@@ -169,10 +174,22 @@ class MandateTests(InvestorBase):
             self.assertNotIn("inv@example.com", str(e.properties))
 
 
-class SharedListsTests(InvestorBase):
+class SharedListsTests(APITestCase):
+    def setUp(self):
+        cache.clear()
+        call_command("seed_dictionaries", verbosity=0)
+
     def test_mandate_uses_the_same_lists_as_the_startup_profile(self):
         r = APIClient().get("/api/dictionaries/")
-        self.assertEqual([i["code"] for i in r.data["sectors"]], [v for v, _ in Sector.choices])
-        self.assertEqual([i["code"] for i in r.data["stages"]], [v for v, _ in Stage.choices])
-        self.assertEqual([i["code"] for i in r.data["business_models"]], [v for v, _ in BusinessModel.choices])
-        self.assertEqual([i["code"] for i in r.data["regions"]], [v for v, _ in Region.choices])
+        self.assertEqual(
+            [i["code"] for i in r.data["sectors"]],
+            list(Sector.objects.values_list("code", flat=True))
+        )
+        self.assertEqual(
+            [i["code"] for i in r.data["stages"]],
+            list(Stage.objects.values_list("code", flat=True))
+        )
+        self.assertEqual(
+            [i["code"] for i in r.data["business_models"]],
+            list(BusinessModel.objects.values_list("code", flat=True))
+        )

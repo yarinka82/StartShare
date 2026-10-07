@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 
 
+
 class EventName(models.TextChoices):
     """Events from the ТЗ table "Які події логувати". Only events that the code actually emits are listed."""
 
@@ -14,6 +15,8 @@ class EventName(models.TextChoices):
     FIELD_EDITED = "field_edited", "Teaser Field Edited"
     TEASER_APPROVED = "teaser_approved", "Teaser Approved"
     WENT_LIVE = "went_live", "Went live"
+
+
 
 class Event(models.Model):
     name = models.CharField(max_length=50, choices=EventName.choices, db_index=True)

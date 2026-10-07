@@ -2,9 +2,7 @@ from rest_framework import serializers, settings
 from django.conf import settings
 
 from apps.analytics.services import processing_status
-from apps.profiles.models import Deck
-
-
+from apps.documents.models import Deck
 
 
 class DeckSerializer(serializers.ModelSerializer):

@@ -115,9 +115,10 @@ def build_draft(job):
         raise PipelineError(exc.code) from exc
 
     form = {
-        "sector": profile.get_sector_display() if profile.sector else "",
-        "stage": profile.get_stage_display() if profile.stage else "",
-        "business_model": profile.get_business_model_display() if profile.business_model else "",
+        "sector": profile.sector.name_de if profile.sector else (profile.sector_other_text or ""),
+        # ВИПРАВЛЕНО: замість get_stage_display() використовуємо .name_de
+        "stage": profile.stage.name_de if profile.stage else "",
+        "business_model": profile.business_model.name_de if profile.business_model else (profile.business_model_other_text or ""),
     }
     result = run_pipeline(
         content, form, terms_from_profile(profile), get_client(),

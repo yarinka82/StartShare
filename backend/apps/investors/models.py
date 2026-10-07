@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 
 
+
 class InvestorMandate(models.Model):
     """What the investor is looking for. The values come from the SAME lists as the startup profile
     (apps/profiles/choices.py), so matching can compare codes exactly.

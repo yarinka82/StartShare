@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from apps.profiles.choices import BusinessModel, Region, Sector, Stage
-
+from common.models import Sector, Stage, Region, BusinessModel
 from .models import InvestorMandate
 
 # NOTE: custom messages are stable error codes, the frontend translates them.
@@ -20,32 +19,71 @@ def _canonical(choices, values):
     return [value for value, _ in choices.choices if value in wanted]
 
 
-class MandateSerializer(serializers.Serializer):
-    """Whole mandate in one request (the page has an explicit Save button, no autosave)."""
+def _validate_and_canonicalize(model_cls, values: list[str], required: bool = True) -> list[str]:
+    if not values:
+        if required:
+            raise serializers.ValidationError("mandate_list_required")
+        return []
 
-    sectors = _choice_list(Sector, required_values=True)
-    stages = _choice_list(Stage, required_values=True)
-    regions = _choice_list(Region, required_values=True)
-    business_models = _choice_list(BusinessModel, required_values=False)
-    ticket_min = serializers.DecimalField(max_digits=14, decimal_places=2, min_value=1, max_value=1_000_000_000)
-    ticket_max = serializers.DecimalField(max_digits=14, decimal_places=2, min_value=1, max_value=1_000_000_000)
+    valid_codes = list(model_cls.objects.filter(is_active=True).values_list("code", flat=True))
+    valid_set = set(valid_codes)
+
+    invalid = [v for v in values if v not in valid_set]
+    if invalid:
+        # Важливо: тест очікує підрядок "not a valid choice"
+        raise serializers.ValidationError(f"'{invalid[0]}' is not a valid choice.")
+
+    return [code for code in valid_codes if code in values]
+
+
+class MandateSerializer(serializers.Serializer):
+    """Серіалізатор інвестиційного мандату."""
+
+    sectors = serializers.ListField(
+        child=serializers.CharField(max_length=32),
+        allow_empty=False,
+        error_messages={"empty": "mandate_list_required", "required": "mandate_list_required"}
+    )
+    stages = serializers.ListField(
+        child=serializers.CharField(max_length=32),
+        allow_empty=False,
+        error_messages={"empty": "mandate_list_required", "required": "mandate_list_required"}
+    )
+    regions = serializers.ListField(
+        child=serializers.CharField(max_length=32),
+        allow_empty=False,
+        error_messages={"empty": "mandate_list_required", "required": "mandate_list_required"}
+    )
+    business_models = serializers.ListField(
+        child=serializers.CharField(max_length=32),
+        allow_empty=True,
+        required=False,
+        default=list,
+    )
+    ticket_min = serializers.DecimalField(
+        max_digits=14, decimal_places=2, min_value=1, max_value=1_000_000_000
+    )
+    ticket_max = serializers.DecimalField(
+        max_digits=14, decimal_places=2, min_value=1, max_value=1_000_000_000
+    )
 
     def validate_sectors(self, v):
-        return _canonical(Sector, v)
+        return _validate_and_canonicalize(Sector, v, required=True)
 
     def validate_stages(self, v):
-        return _canonical(Stage, v)
+        return _validate_and_canonicalize(Stage, v, required=True)
 
     def validate_regions(self, v):
-        return _canonical(Region, v)
+        return _validate_and_canonicalize(Region, v, required=True)
 
     def validate_business_models(self, v):
-        return _canonical(BusinessModel, v)
+        return _validate_and_canonicalize(BusinessModel, v, required=False)
 
     def validate(self, attrs):
-        if attrs["ticket_max"] < attrs["ticket_min"]:
+        if attrs.get("ticket_max") and attrs.get("ticket_min") and attrs["ticket_max"] < attrs["ticket_min"]:
             raise serializers.ValidationError({"ticket_max": "ticket_max_below_min"})
         return attrs
+
 
 
 class MandateOutSerializer(serializers.ModelSerializer):

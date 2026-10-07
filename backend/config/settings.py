@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "apps.accounts",
     "apps.startups",
+    "common",
     "apps.profiles",
     "apps.investors",
     "apps.analytics",

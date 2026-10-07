@@ -11,56 +11,56 @@ longer valid (such a profile is reported as "not filled" until the startup picks
 from django.db import models
 
 
-class Sector(models.TextChoices):
-    FINTECH = "fintech", "FinTech"
-    INSURTECH = "insurtech", "InsurTech"
-    HEALTHTECH_MEDTECH = "healthtech-medtech", "HealthTech & MedTech"
-    BIOTECH = "biotech", "BioTech"
-    EDTECH = "edtech", "EdTech"
-    PROPTECH_CONTECH = "proptech-contech", "PropTech & ConTech"
-    CLIMATETECH_ENERGY = "climatetech-energy", "ClimateTech & Energie"
-    MOBILITY_LOGISTICS = "mobility-logistics", "Mobilität & Logistik"
-    FOODTECH_AGRITECH = "foodtech-agritech", "FoodTech & AgriTech"
-    ECOMMERCE_RETAILTECH = "ecommerce-retailtech", "E-Commerce & RetailTech"
-    HR_TECH = "hr-tech", "HR Tech"
-    LEGALTECH_REGTECH = "legaltech-regtech", "LegalTech & RegTech"
-    CYBERSECURITY = "cybersecurity", "Cybersecurity"
-    AI_DATA = "ai-data", "KI & Daten"
-    ENTERPRISE_SOFTWARE = "enterprise-software", "Enterprise Software"
-    DEEPTECH_HARDWARE = "deeptech-hardware", "DeepTech & Hardware"
-    INDUSTRIE_4_0 = "industrie-4-0", "Industrie 4.0"
-    MEDIA_ENTERTAINMENT_GAMING = "media-entertainment-gaming", "Medien, Entertainment & Gaming"
-    TRAVEL_HOSPITALITY = "travel-hospitality", "Reisen & Gastgewerbe"
-    OTHER = "other", "Sonstiges"
+# class Sector(models.TextChoices):
+#     FINTECH = "fintech", "FinTech"
+#     INSURTECH = "insurtech", "InsurTech"
+#     HEALTHTECH_MEDTECH = "healthtech-medtech", "HealthTech & MedTech"
+#     BIOTECH = "biotech", "BioTech"
+#     EDTECH = "edtech", "EdTech"
+#     PROPTECH_CONTECH = "proptech-contech", "PropTech & ConTech"
+#     CLIMATETECH_ENERGY = "climatetech-energy", "ClimateTech & Energie"
+#     MOBILITY_LOGISTICS = "mobility-logistics", "Mobilität & Logistik"
+#     FOODTECH_AGRITECH = "foodtech-agritech", "FoodTech & AgriTech"
+#     ECOMMERCE_RETAILTECH = "ecommerce-retailtech", "E-Commerce & RetailTech"
+#     HR_TECH = "hr-tech", "HR Tech"
+#     LEGALTECH_REGTECH = "legaltech-regtech", "LegalTech & RegTech"
+#     CYBERSECURITY = "cybersecurity", "Cybersecurity"
+#     AI_DATA = "ai-data", "KI & Daten"
+#     ENTERPRISE_SOFTWARE = "enterprise-software", "Enterprise Software"
+#     DEEPTECH_HARDWARE = "deeptech-hardware", "DeepTech & Hardware"
+#     INDUSTRIE_4_0 = "industrie-4-0", "Industrie 4.0"
+#     MEDIA_ENTERTAINMENT_GAMING = "media-entertainment-gaming", "Medien, Entertainment & Gaming"
+#     TRAVEL_HOSPITALITY = "travel-hospitality", "Reisen & Gastgewerbe"
+#     OTHER = "other", "Sonstiges"
 
 
-class Stage(models.TextChoices):
-    PRE_SEED = "pre-seed", "Pre-Seed"
-    SEED = "seed", "Seed"
-    SERIES_A = "series-a", "Series A"
-    SERIES_B = "series-b", "Series B"
-    SERIES_C_PLUS = "series-c-plus", "Series C und später"
+# class Stage(models.TextChoices):
+#     PRE_SEED = "pre-seed", "Pre-Seed"
+#     SEED = "seed", "Seed"
+#     SERIES_A = "series-a", "Series A"
+#     SERIES_B = "series-b", "Series B"
+#     SERIES_C_PLUS = "series-c-plus", "Series C und später"
 
 
-class BusinessModel(models.TextChoices):
-    SAAS_SUBSCRIPTION = "saas-subscription", "SaaS & Abo-Modell"
-    MARKETPLACE_PLATFORM = "marketplace-platform", "Marktplatz & Plattform"
-    ECOMMERCE_D2C = "ecommerce-d2c", "E-Commerce & D2C"
-    HARDWARE_SALES = "hardware-sales", "Hardware-Verkauf"
-    LICENSING = "licensing", "Lizenzmodell"
-    SERVICES = "services", "Dienstleistung"
-    TRANSACTION_FEE = "transaction-fee", "Transaktionsmodell"
-    OTHER = "other", "Sonstiges"
+# class BusinessModel(models.TextChoices):
+#     SAAS_SUBSCRIPTION = "saas-subscription", "SaaS & Abo-Modell"
+#     MARKETPLACE_PLATFORM = "marketplace-platform", "Marktplatz & Plattform"
+#     ECOMMERCE_D2C = "ecommerce-d2c", "E-Commerce & D2C"
+#     HARDWARE_SALES = "hardware-sales", "Hardware-Verkauf"
+#     LICENSING = "licensing", "Lizenzmodell"
+#     SERVICES = "services", "Dienstleistung"
+#     TRANSACTION_FEE = "transaction-fee", "Transaktionsmodell"
+#     OTHER = "other", "Sonstiges"
 
 
-class Region(models.TextChoices):
-    """Investor mandate: where the investor is willing to invest (HARD filter, compared with the startup country).
-
-    PLACEHOLDER: the BA document does not define regions yet. The list has to be agreed together with the
-    country list. Matching (later) needs a region -> countries mapping; add it next to this class.
-    """
-
-    DACH = "dach", "DACH (Deutschland, Österreich, Schweiz)"
-    EU = "eu", "EU"
-    EUROPE = "europe", "Europa"
-    WORLDWIDE = "worldwide", "Weltweit"
+# class Region(models.TextChoices):
+#     """Investor mandate: where the investor is willing to invest (HARD filter, compared with the startup country).
+#
+#     PLACEHOLDER: the BA document does not define regions yet. The list has to be agreed together with the
+#     country list. Matching (later) needs a region -> countries mapping; add it next to this class.
+#     """
+#
+#     DACH = "dach", "DACH (Deutschland, Österreich, Schweiz)"
+#     EU = "eu", "EU"
+#     EUROPE = "europe", "Europa"
+#     WORLDWIDE = "worldwide", "Weltweit"

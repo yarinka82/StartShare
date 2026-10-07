@@ -1,4 +1,30 @@
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
+from apps.startups.models import StartupProfile
+from common.utils import get_private_storage, deck_upload_path
+
+
+
+class Deck(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"  # reserved for async virus scan (ClamAV)
+        OK = "ok", "OK"
+        REJECTED = "rejected", "Rejected"
+
+    profile = models.OneToOneField(StartupProfile, on_delete=models.CASCADE, related_name="deck")
+    file = models.FileField(upload_to=deck_upload_path, storage=get_private_storage, max_length=255)
+    original_name = models.CharField(max_length=255)
+    size = models.PositiveIntegerField()
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.OK)
+    uploaded_at = models.DateTimeField(auto_now=True)
+
+
+@receiver(post_delete, sender=Deck)
+def delete_deck_file(sender, instance, **kwargs):
+    if instance.file:
+        instance.file.delete(save=False)
 
 
 
@@ -9,7 +35,7 @@ class TeaserJob(models.Model):
         DRAFT_READY = "DRAFT_READY"
         FAILED = "FAILED"
     
-    deck = models.OneToOneField("profiles.Deck", on_delete=models.CASCADE, related_name="job")
+    deck = models.OneToOneField("Deck", on_delete=models.CASCADE, related_name="job")
     state = models.CharField(max_length=16, choices=State.choices, default=State.QUEUED)
     attempts = models.PositiveSmallIntegerField(default=0)
     draft = models.JSONField(null=True, blank=True)

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import include, path
-from apps.startups.views import ChoicesMetaView
+
+from apps.profiles.views import DictionariesView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -9,7 +10,7 @@ urlpatterns = [
     path("api/auth/", include("apps.accounts.urls")),
 
     # Довідники (сектори, стадії)
-    path("api/dictionaries/", ChoicesMetaView.as_view(), name="dictionaries"),
+    path("api/dictionaries/", DictionariesView.as_view(), name="dictionaries"),
 
     # Профіль та завантаження деку (/api/profile/ та /api/profile/deck/)
     path("api/profile/", include("apps.profiles.urls")),

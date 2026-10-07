@@ -1,86 +1,9 @@
-# from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-# from django.contrib.auth.models import PermissionsMixin
-# from django.db import models
-# from django.utils import timezone
-#
-#
-# class Role(models.TextChoices):
-#     STARTUP = "startup", "Startup"
-#     INVESTOR = "investor", "Investor"
-#
-#
-# class UserManager(BaseUserManager):
-#     use_in_migrations = True
-#
-#     def _create(self, email, password, **extra):
-#         if not email:
-#             raise ValueError("Email is required")
-#         user = self.model(email=email.strip().lower(), **extra)
-#         user.set_password(password)
-#         user.save(using=self._db)
-#         return user
-#
-#     def create_user(self, email, password=None, **extra):
-#         extra.setdefault("is_staff", False)
-#         extra.setdefault("is_superuser", False)
-#         return self._create(email, password, **extra)
-#
-#     def create_superuser(self, email, password=None, **extra):
-#         extra.setdefault("is_staff", True)
-#         extra.setdefault("is_superuser", True)
-#         extra.setdefault("role", Role.STARTUP)
-#         extra.setdefault("email_verified_at", timezone.now())
-#         return self._create(email, password, **extra)
-#
-#
-# class User(AbstractBaseUser, PermissionsMixin):
-#     email = models.EmailField(unique=True)
-#     role = models.CharField(max_length=20, choices=Role.choices)
-#     email_verified_at = models.DateTimeField(null=True, blank=True)
-#     is_active = models.BooleanField(default=True)
-#     is_staff = models.BooleanField(default=False)
-#     date_joined = models.DateTimeField(default=timezone.now)
-#
-#     objects = UserManager()
-#     USERNAME_FIELD = "email"
-#     REQUIRED_FIELDS = []
-#
-#     def __str__(self):
-#         return self.email
-#
-#     @property
-#     def is_email_verified(self):
-#         return self.email_verified_at is not None
-#
-#
-# class Consent(models.Model):
-#     """Which legal document (and which version) the user accepted, and when."""
-#
-#     class DocumentType(models.TextChoices):
-#         AGB = "agb", "AGB"
-#         DATENSCHUTZ = "datenschutz", "Datenschutz"
-#         INVESTOR_STATUS = "investor-status", "Investor status (text C)"
-#
-#     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="consents")
-#     document_type = models.CharField(max_length=20, choices=DocumentType.choices)
-#     document_version = models.CharField(max_length=40)
-#     accepted_at = models.DateTimeField(auto_now_add=True)
-#
-#     class Meta:
-#         indexes = [models.Index(fields=["user", "document_type"])]
-#
-#     def __str__(self):
-#         return f"{self.user_id}:{self.document_type}@{self.document_version}"
 
-
-# backend/apps/accounts/models.py
+from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
-from django.db.models import F, Q
-from django.db.models.functions import Lower, Now
 from django.utils import timezone
-from rest_framework import settings
 
 
 def created_at_field():
@@ -130,6 +53,7 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra)
 
 
+
 class User(AbstractBaseUser, PermissionsMixin):
     Role = UserRole
 
@@ -165,6 +89,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email_verified_at is not None
 
 
+
 class LegalDocumentCode(models.TextChoices):
     A = "A", "A — Erklärung des Startups"
     B = "B", "B — Hinweis auf dem Teaser"
@@ -175,6 +100,7 @@ class LegalDocumentCode(models.TextChoices):
     G = "G", "G — Hinweis KI"
     AGB = "AGB", "AGB"
     DSE = "DSE", "Datenschutzerklärung"
+
 
 
 class LegalDocument(models.Model):
@@ -198,6 +124,7 @@ class LegalDocument(models.Model):
         return f"{self.code} {self.language} v{self.version}"
 
 
+
 class UserConsentContext(models.TextChoices):
     REGISTRATION = "registration", "Registration (AGB, DSE)"
     TEASER_APPROVAL = "teaser_approval", "Teaser approval (A)"
@@ -212,7 +139,6 @@ class UserConsent(models.Model):
     context = models.CharField(max_length=24, choices=Context.choices)
     accepted_at = models.DateTimeField(default=timezone.now)
 
-    # 🚀 Додаємо ці дві властивості для 100% сумісності з тестами:
     @property
     def document_type(self):
         if not self.legal_document:

@@ -262,17 +262,15 @@ class Country(ReferenceModel):
         constraints = [models.CheckConstraint(condition=Q(code__regex=r"^[A-Z]{2}$"), name="chk_countries_code")]
 
 
-class Region(ReferenceModel):
-    """regions — федеральні землі Німеччини (ISO 3166-2, DE-BY)."""
 
-    code = models.CharField(max_length=6, primary_key=True)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT, db_column="country_code", related_name="regions")
+class Region(ReferenceModel):
+    """regions — географічний фокус інвестора (DACH, EU, Europe, Worldwide)."""
+
+    code = models.CharField(max_length=32, primary_key=True)
 
     class Meta(ReferenceModel.Meta):
         db_table = "regions"
-        constraints = [
-            models.CheckConstraint(condition=Q(Exact(Left("code", 2), F("country"))), name="chk_regions_code_country")
-        ]
+
 
 
 class Sector(ReferenceModel):
