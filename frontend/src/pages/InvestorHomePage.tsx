@@ -15,14 +15,25 @@ import ChipSelect from "../components/ChipSelect";
 const trimDecimal = (v: string) => v.replace(/\.00$/, "");
 
 const emptyForm = (): MandateInput => ({
-  sectors: [], stages: [], regions: [], business_models: [], ticket_min: "", ticket_max: "",
+  sector_codes: [],
+  stage_codes: [],
+  country_codes: [],
+  region_codes: [],
+  business_model_codes: [],
+  check_min_eur: "",
+  check_max_eur: "",
 });
 
 const toForm = (m: Mandate | null): MandateInput =>
   m
     ? {
-        sectors: m.sectors, stages: m.stages, regions: m.regions, business_models: m.business_models,
-        ticket_min: trimDecimal(m.ticket_min), ticket_max: trimDecimal(m.ticket_max),
+        sector_codes: m.sector_codes,
+        stage_codes: m.stage_codes,
+        country_codes: m.country_codes,
+        region_codes: m.region_codes,
+        business_model_codes: m.business_model_codes,
+        check_min_eur: trimDecimal(m.check_min_eur),
+        check_max_eur: trimDecimal(m.check_max_eur),
       }
     : emptyForm();
 
@@ -33,7 +44,7 @@ function StatusConfirm({ onDone }: { onDone: (s: InvestorState) => void }) {
   const [checked, setChecked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<ParsedError | null>(null);
-  const translation = t("investor.status.translation"); // empty for German
+  const translation = t("investor.status.translation");
   const { statement, loading, error } = useLegalText("C");
 
   async function confirm() {
@@ -62,7 +73,6 @@ function StatusConfirm({ onDone }: { onDone: (s: InvestorState) => void }) {
           </Alert>
         )}
 
-        {/* legal wording: always the approved German text, sourced from DB */}
         <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", bgcolor: "action.hover", p: 2, borderRadius: 1 }}>
           {loading ? (
             <Skeleton variant="text" />
@@ -113,22 +123,24 @@ function MandateForm({ dicts, initial }: { dicts: Dictionaries; initial: Mandate
   const { t, i18n } = useTranslation();
   const [form, setForm] = useState<MandateInput>(toForm(initial));
   const [baseline, setBaseline] = useState<MandateInput | null>(initial ? toForm(initial) : null);
-  const [updatedAt, setUpdatedAt] = useState<string | null>(initial?.updated_at ?? null);
+  const [createdAt, setCreatedAt] = useState<string | null>(initial?.created_at ?? null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<ParsedError | null>(null);
   const [savedMsg, setSavedMsg] = useState(false);
 
   const dirty = baseline === null || JSON.stringify(form) !== JSON.stringify(baseline);
   const fieldError = (name: string) => err?.fields[name]?.map((c) => errorText(t, c)).join(" ");
+
   const set = <K extends keyof MandateInput>(key: K, value: MandateInput[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
     setErr((e) => (e ? { ...e, fields: { ...e.fields, [key]: [] } } : e));
   };
-  const money = (key: "ticket_min" | "ticket_max", raw: string) => {
+
+  const money = (key: "check_min_eur" | "check_max_eur", raw: string) => {
     if (/^\d{0,12}[.,]?\d{0,2}$/.test(raw)) set(key, raw);
   };
 
-  const label = (kind: "sectors" | "stages" | "regions" | "businessModels") => (o: Option) =>
+  const label = (kind: "sectors" | "stages" | "countries" | "regions" | "businessModels") => (o: Option) =>
     t(`dict.${kind}.${o.code}`, { defaultValue: o.name });
 
   async function save() {
@@ -137,13 +149,13 @@ function MandateForm({ dicts, initial }: { dicts: Dictionaries; initial: Mandate
     try {
       const saved = await api.saveMandate({
         ...form,
-        ticket_min: form.ticket_min.replace(",", "."),
-        ticket_max: form.ticket_max.replace(",", "."),
+        check_min_eur: form.check_min_eur.replace(",", "."),
+        check_max_eur: form.check_max_eur.replace(",", "."),
       });
-      const normalized = toForm(saved); // the server keeps the canonical order
+      const normalized = toForm(saved);
       setForm(normalized);
       setBaseline(normalized);
-      setUpdatedAt(saved.updated_at);
+      setCreatedAt(saved.created_at);
       setSavedMsg(true);
     } catch (ex) {
       setErr(parseError(ex));
@@ -166,34 +178,49 @@ function MandateForm({ dicts, initial }: { dicts: Dictionaries; initial: Mandate
       <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
         <Stack spacing={3}>
           <Typography variant="h6" component="h2">{t("investor.mandate.hard")}</Typography>
+
+          {/* Секторы */}
           <ChipSelect
             required bulk label={t("investor.mandate.sectors")} options={dicts.sectors}
-            value={form.sectors} onChange={(v) => set("sectors", v)} optionLabel={label("sectors")}
-            error={!!fieldError("sectors")} helperText={fieldError("sectors")}
+            value={form.sector_codes} onChange={(v) => set("sector_codes", v)} optionLabel={label("sectors")}
+            error={!!fieldError("sector_codes")} helperText={fieldError("sector_codes")}
           />
+
+          {/* Стадии */}
           <ChipSelect
             required label={t("investor.mandate.stages")} options={dicts.stages}
-            value={form.stages} onChange={(v) => set("stages", v)} optionLabel={label("stages")}
-            error={!!fieldError("stages")} helperText={fieldError("stages")}
+            value={form.stage_codes} onChange={(v) => set("stage_codes", v)} optionLabel={label("stages")}
+            error={!!fieldError("stage_codes")} helperText={fieldError("stage_codes")}
           />
+
+          {/* Страны (Новое обязательное поле) */}
           <ChipSelect
-            required label={t("investor.mandate.regions")} options={dicts.regions}
-            value={form.regions} onChange={(v) => set("regions", v)} optionLabel={label("regions")}
-            error={!!fieldError("regions")} helperText={fieldError("regions")}
+            required label={t("investor.mandate.countries", "Länder")} options={dicts.countries}
+            value={form.country_codes} onChange={(v) => set("country_codes", v)} optionLabel={label("countries")}
+            error={!!fieldError("country_codes")} helperText={fieldError("country_codes")}
           />
+
+          {/* Регионы */}
+          <ChipSelect
+            label={t("investor.mandate.regions")} options={dicts.regions}
+            value={form.region_codes} onChange={(v) => set("region_codes", v)} optionLabel={label("regions")}
+            error={!!fieldError("region_codes")} helperText={fieldError("region_codes")}
+          />
+
+          {/* Чеки */}
           <Box>
             <Typography variant="subtitle2" gutterBottom>{t("investor.mandate.ticket")} *</Typography>
             <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
               <TextField
-                label={t("investor.mandate.ticketMin")} required value={form.ticket_min}
-                onChange={(e) => money("ticket_min", e.target.value)}
-                error={!!fieldError("ticket_min")} helperText={fieldError("ticket_min")}
+                label={t("investor.mandate.ticketMin")} required value={form.check_min_eur}
+                onChange={(e) => money("check_min_eur", e.target.value)}
+                error={!!fieldError("check_min_eur")} helperText={fieldError("check_min_eur")}
                 slotProps={{ htmlInput: { inputMode: "decimal" }, input: { endAdornment: ticketAdornment } }}
               />
               <TextField
-                label={t("investor.mandate.ticketMax")} required value={form.ticket_max}
-                onChange={(e) => money("ticket_max", e.target.value)}
-                error={!!fieldError("ticket_max")} helperText={fieldError("ticket_max")}
+                label={t("investor.mandate.ticketMax")} required value={form.check_max_eur}
+                onChange={(e) => money("check_max_eur", e.target.value)}
+                error={!!fieldError("check_max_eur")} helperText={fieldError("check_max_eur")}
                 slotProps={{ htmlInput: { inputMode: "decimal" }, input: { endAdornment: ticketAdornment } }}
               />
             </Box>
@@ -207,7 +234,7 @@ function MandateForm({ dicts, initial }: { dicts: Dictionaries; initial: Mandate
           <Typography variant="h6" component="h2">{t("investor.mandate.soft")}</Typography>
           <ChipSelect
             label={t("investor.mandate.businessModels")} options={dicts.business_models}
-            value={form.business_models} onChange={(v) => set("business_models", v)}
+            value={form.business_model_codes} onChange={(v) => set("business_model_codes", v)}
             optionLabel={label("businessModels")} helperText={t("investor.mandate.businessModelsHint")}
           />
         </Stack>
@@ -217,10 +244,10 @@ function MandateForm({ dicts, initial }: { dicts: Dictionaries; initial: Mandate
         <Button variant="contained" size="large" onClick={save} disabled={busy || !dirty}>
           {busy ? <CircularProgress size={22} color="inherit" /> : t("investor.mandate.save")}
         </Button>
-        {updatedAt && (
+        {createdAt && (
           <Typography variant="body2" color="text.secondary">
             {t("investor.mandate.lastSaved", {
-              date: new Date(updatedAt).toLocaleString(i18n.resolvedLanguage),
+              date: new Date(createdAt).toLocaleString(i18n.resolvedLanguage),
             })}
           </Typography>
         )}
@@ -252,7 +279,6 @@ export default function InvestorHomePage() {
         setDicts(d);
       })
       .catch((ex) => setLoadError(errorText(t, parseError(ex).detail)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loadError) return <Alert severity="error">{loadError}</Alert>;

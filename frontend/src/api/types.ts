@@ -48,14 +48,29 @@ export interface Profile {
 }
 
 export interface Mandate {
-  sectors: string[];
-  stages: string[];
-  regions: string[];
-  business_models: string[];
-  ticket_min: string;
-  ticket_max: string;
-  updated_at: string;
+  version: number;
+  is_current: boolean;
+  sector_codes: string[];
+  stage_codes: string[];
+  country_codes: string[];
+  region_codes: string[];
+  business_model_codes: string[];
+  check_min_eur: string;
+  check_max_eur: string;
+  source: string;
+  created_at: string;
 }
+
+export interface MandateInput {
+  sector_codes: string[];
+  stage_codes: string[];
+  country_codes: string[];
+  region_codes: string[];
+  business_model_codes: string[];
+  check_min_eur: string;
+  check_max_eur: string;
+}
+
 
 export interface InvestorState {
   status_confirmed: boolean;
@@ -71,5 +86,4 @@ export interface LegalDocItem {
   language: string;
 }
 
-/** What the mandate form sends (money as strings, lists as codes). */
-export type MandateInput = Omit<Mandate, "updated_at">;
+

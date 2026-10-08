@@ -5,10 +5,11 @@ Seeds all reference dictionaries into the database (idempotent):
 - Stages
 - Business Models
 - Regions
+- Investor Types
 """
 
 from django.core.management.base import BaseCommand
-from common.models import Country, Sector, Stage, BusinessModel, Region
+from common.models import BusinessModel, Country, InvestorType, Region, Sector, Stage
 
 # ------------------ 1. COUNTRIES ------------------
 COUNTRIES_INITIAL = [
@@ -19,7 +20,6 @@ COUNTRIES_INITIAL = [
     ("eu", "Andere EU-Länder", "Other EU Countries", 4),
     ("gb", "Großbritannien", "United Kingdom", 5),
     ("us", "Vereinigte Staaten", "United States", 6),
-    ("ua", "Ukraine", "Ukraine", 7),
     ("other", "Sonstiges", "Other", 99),
 ]
 
@@ -78,6 +78,18 @@ REGIONS_INITIAL = [
     ("eu", "Europäische Union (EU)", "European Union (EU)", 2),
     ("europe", "Europa (inkl. UK, Schweiz, Ukraine)", "Europe (incl. UK, Switzerland, Ukraine)", 3),
     ("worldwide", "Weltweit", "Worldwide", 4),
+]
+
+# ------------------ 6. INVESTOR TYPES ------------------
+INVESTOR_TYPES_INITIAL = [
+    # (code, name_de, name_en, sort_order)
+    ("business-angel", "Business Angel", "Business Angel", 1),
+    ("vc", "Venture Capital Fonds", "Venture Capital", 2),
+    ("family-office", "Family Office", "Family Office", 3),
+    ("corporate-vc", "Corporate VC (CVC)", "Corporate VC (CVC)", 4),
+    ("accelerator-incubator", "Accelerator / Inkubator", "Accelerator / Incubator", 5),
+    ("private-equity", "Private Equity", "Private Equity", 6),
+    ("other", "Sonstiges", "Other", 99),
 ]
 
 
@@ -151,6 +163,19 @@ class Command(BaseCommand):
                 },
             )
         self.stdout.write(self.style.SUCCESS(f"✓ Seeded {len(REGIONS_INITIAL)} Regions"))
+
+        # 6. Investor Types
+        for code, name_de, name_en, sort_order in INVESTOR_TYPES_INITIAL:
+            InvestorType.objects.update_or_create(
+                code=code,
+                defaults={
+                    "name_de": name_de,
+                    "name_en": name_en,
+                    "sort_order": sort_order,
+                    "is_active": True,
+                },
+            )
+        self.stdout.write(self.style.SUCCESS(f"✓ Seeded {len(INVESTOR_TYPES_INITIAL)} Investor Types"))
 
         self.stdout.write(self.style.SUCCESS("\nAll reference dictionaries successfully seeded! 🚀"))
 
