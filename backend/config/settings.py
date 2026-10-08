@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.startups",
     "common",
+    "apps.matching",
     "apps.profiles",
     "apps.investors",
     "apps.analytics",
