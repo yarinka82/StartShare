@@ -1,41 +1,12 @@
-# from django.conf import settings
-# from django.db import models
-#
-#
-#
-# class InvestorMandate(models.Model):
-#     """What the investor is looking for. The values come from the SAME lists as the startup profile
-#     (apps/profiles/choices.py), so matching can compare codes exactly.
-#
-#     List fields hold arrays of codes; they are validated against the choices in the serializer and stored
-#     in the canonical (list) order, so two mandates with the same selection are always equal.
-#     """
-#
-#     user = models.OneToOneField(
-#         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="investor_mandate"
-#     )
-#     # HARD filters (at least one value each)
-#     sectors = models.JSONField(default=list)
-#     stages = models.JSONField(default=list)
-#     regions = models.JSONField(default=list)
-#     ticket_min = models.DecimalField(max_digits=14, decimal_places=2)  # EUR
-#     ticket_max = models.DecimalField(max_digits=14, decimal_places=2)  # EUR
-#     # SOFT criterion (may be empty: then it does not influence the order)
-#     business_models = models.JSONField(default=list, blank=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-#
-#     def __str__(self):
-#         return f"Mandate of {self.user_id}"
-
-
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
 
-from common.models import Country, InvestorType
+from common.models import Country, InvestorType, DeclineReason
+
 
 
 class InvestorProfile(models.Model):
@@ -145,3 +116,46 @@ class Mandate(models.Model):
     
     def __str__(self):
         return f"{self.investor_profile.organization_name} (v{self.version})"
+
+    
+    
+class CriterionSuggestion(models.Model):
+    """Подсказка инвестору об изменении мандата на основе частых отказов (REQ-23)."""
+
+    investor_profile = models.ForeignKey(
+        InvestorProfile,
+        on_delete=models.PROTECT,
+        related_name="criterion_suggestions",
+    )
+    mandate = models.ForeignKey(
+        Mandate,
+        on_delete=models.PROTECT,
+        related_name="criterion_suggestions",
+    )
+    decline_reason = models.ForeignKey(
+        DeclineReason,
+        on_delete=models.PROTECT,
+        related_name="+",
+    )
+    # Например: "region", "stage", "ticket_size"
+    criterion = models.CharField(max_length=32)
+    decline_count = models.PositiveSmallIntegerField(default=1)
+
+    shown_at = models.DateTimeField(default=timezone.now)
+    accepted_at = models.DateTimeField(null=True, blank=True)
+    dismissed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "criterion_suggestions"
+        ordering = ["-shown_at"]
+        indexes = [
+            models.Index(fields=["investor_profile", "shown_at"], name="idx_crit_sugg_investor"),
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.accepted_at and self.dismissed_at:
+            raise ValidationError("Подсказка не может быть одновременно принята и отклонена.")
+
+    def __str__(self):
+        return f"Suggestion ({self.criterion}) for {self.investor_profile}"

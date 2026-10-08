@@ -1,12 +1,12 @@
-
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import  Q
 
 from apps.accounts.models import created_at_field, updated_at_field
 from common.models import Sector, Stage, Country, BusinessModel
 from common.utils import public_id_field
-
+from common.models import ReportType  # справочник типов нарушений
 
 
 class StartupProfileStatus(models.TextChoices):
@@ -192,5 +192,88 @@ class StartupPrivateDetails(models.Model):
 
     def __str__(self):
         return f"Contacts for Startup #{self.startup_profile_id} ({self.company_name})"
+    
+
+class ReportStatus(models.TextChoices):
+    OPEN = "OPEN", "Open"
+    IN_REVIEW = "IN_REVIEW", "In review"
+    RESOLVED = "RESOLVED", "Resolved"
+
+
+class ReportDecision(models.TextChoices):
+    NO_ACTION = "no_action", "No action"
+    PROFILE_HIDDEN = "profile_hidden", "Profile hidden"
+    PROFILE_REMOVED = "profile_removed", "Profile removed"
+
+
+class Report(models.Model):
+    """Жалобы на профили («Melden», DSA ст. 16)."""
+
+    startup_profile = models.ForeignKey(
+        StartupProfile,
+        on_delete=models.PROTECT,
+        related_name="reports",
+    )
+    reporter_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="reports_submitted",
+    )
+    report_type = models.ForeignKey(
+        ReportType,
+        on_delete=models.PROTECT,
+        related_name="+",
+    )
+    description = models.TextField()
+
+    status = models.CharField(
+        max_length=12,
+        choices=ReportStatus.choices,
+        default=ReportStatus.OPEN,
+    )
+    decision = models.CharField(
+        max_length=16,
+        choices=ReportDecision.choices,
+        null=True,
+        blank=True,
+    )
+    decision_note = models.TextField(null=True, blank=True)
+
+    decided_by_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="reports_decided",
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    reporter_notified_at = models.DateTimeField(null=True, blank=True)
+    startup_notified_at = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "reports"
+        ordering = ["-created_at"]
+        constraints = [
+            # Один пользователь не может спамить жалобами на один и тот же стартап
+            models.UniqueConstraint(
+                fields=["startup_profile", "reporter_user"],
+                name="uq_reports_reporter",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["startup_profile", "status"], name="idx_reports_profile_status"),
+            models.Index(fields=["status", "created_at"], name="idx_reports_status_created"),
+        ]
+
+    def clean(self):
+        super().clean()
+        if self.status == ReportStatus.RESOLVED and not self.decision:
+            raise ValidationError({"decision": "Для закрытой жалобы должно быть указано решение."})
+
+    def __str__(self):
+        return f"Report #{self.id} on {self.startup_profile} ({self.status})"
 
 

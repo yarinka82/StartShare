@@ -22,14 +22,15 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_celery_beat",
     "rest_framework",
-    "apps.accounts",
-    "apps.startups",
     "common",
-    "apps.matching",
-    "apps.profiles",
-    "apps.investors",
+    "apps.accounts",
     "apps.analytics",
     "apps.documents",
+    "apps.investors",
+    "apps.matching",
+    "apps.notifications",
+    "apps.profiles",
+    "apps.startups",
 ]
 
 MIDDLEWARE = [
