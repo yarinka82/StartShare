@@ -143,13 +143,17 @@ class TeaserSerializer(serializers.ModelSerializer):
             field.field_name: field.final_text or field.ai_text or ""
             for field in obj.fields.all()
         }
-
+    
     def get_risk_phrases(self, obj: Teaser) -> list:
-        """Собирает все рисковые фразы по всем полям тизера."""
+        """Собирает все рисковые фразы по всем полям тизера, добавляя имя поля."""
         risks = []
         for field in obj.fields.all():
             if field.risk_phrases and isinstance(field.risk_phrases, list):
-                risks.extend(field.risk_phrases)
+                for rp in field.risk_phrases:
+                    if isinstance(rp, dict):
+                        item = dict(rp)
+                        item.setdefault("field", field.field_name)
+                        risks.append(item)
         return risks
 
     def get_edited(self, obj: Teaser) -> list[str]:
