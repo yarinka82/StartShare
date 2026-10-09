@@ -56,10 +56,13 @@ export function useTeaser(deckId: number, autoFetch = true, api: TeaserApi = tea
   const approve = async (): Promise<string | null> => {
     try {
       setBusy(true);
+      // 1. Затверджуємо на бекенді
       await api.approveTeaser(deckId);
-      if (teaser) {
-        setTeaser({ ...teaser, status: "APPROVED" });
-      }
+
+      // 2. Автоматично затягуємо свіжі дані з бази:
+      const refreshed = await api.getTeaser(deckId);
+      setTeaser(refreshed);
+
       return null;
     } catch (err: any) {
       return err?.message || "Failed to approve teaser";

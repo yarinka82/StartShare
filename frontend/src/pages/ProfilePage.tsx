@@ -113,7 +113,6 @@ export default function ProfilePage() {
     }
   };
 
-
   useEffect(() => {
     Promise.all([api.getProfile(), api.dictionaries()])
       .then(([p, d]) => {

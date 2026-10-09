@@ -258,7 +258,7 @@ class StartupProfileSerializer(serializers.ModelSerializer):
                 validated_data["paused_at"] = None
             if new_status == "REMOVED":
                 validated_data["removed_at"] = now
-                validated_data["removed_by"] = StartupProfileRemovedBy.USER
+                validated_data["removed_by"] = StartupProfileRemovedBy.STARTUP
             # выхода из REMOVED нет, см. ниже
         
         if company_name is not None:
