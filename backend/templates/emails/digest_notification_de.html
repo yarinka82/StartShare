@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #0f172a; line-height: 1.5; margin: 0; padding: 20px; background-color: #f8fafc; }
+    .container { max-width: 600px; margin: 0 auto; padding: 32px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; }
+    .header { font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 16px; }
+    .badge { display: inline-block; background-color: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 9999px; font-size: 13px; font-weight: 600; margin-bottom: 16px; }
+    .btn { display: inline-block; background-color: #17407a; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0 8px 0; }
+    .footer { margin-top: 32px; padding-top: 16px; border-top: 1px dashed #cbd5e1; font-size: 11px; color: #64748b; line-height: 1.4; font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- ВИПРАВЛЕНО:Використано стандартний синтаксис Django для default -->
+    <div class="header">Guten Tag, {{ first_name|default:"Investor" }}!</div>
+
+    <div class="badge">Wöchentlicher Dealflow</div>
+
+    <p>
+      Ihr neuer wöchentlicher Teaser-Digest ist bereit. Basierend auf Ihrem Investitionsmandat haben wir
+      <strong>{{ card_count|default:"3" }} passende Startups</strong> identifiziert.
+    </p>
+
+    <p>
+      Alle Profile erfüllen Ihre Kriterien (Sektor, Stage, Ticket-Größe) und stehen Ihnen als vertrauliche Blind-Teaser zur Verfügung.
+    </p>
+
+    <div>
+      <a href="{{ digest_url }}" class="btn">Teaser im Dashboard ansehen</a>
+    </div>
+
+    <!-- РЕКОМЕНДОВАНИЙ ЮРИДИЧНИЙ ДИСКЛЕЙМЕР B -->
+    <div class="footer">
+      <strong>Rechtlicher Hinweis (Disclaimer):</strong> {{ disclaimer_b }}
+    </div>
+  </div>
+</body>
+</html>

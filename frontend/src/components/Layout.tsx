@@ -16,12 +16,60 @@ export default function Layout() {
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default", position: "relative", display: "flex", flexDirection: "column" }}>
       {signedOut && <AuthBackground />}
+
       <AppBar position="relative" elevation={0} sx={{ zIndex: 1, ...(signedOut && { bgcolor: "transparent" }) }}>
         <Toolbar sx={{ gap: 2 }}>
-          <Typography variant="h6" component={RouterLink} to="/" sx={{ flexGrow: 1, color: "inherit", textDecoration: "none" }}>
+          {/* 1. Логотип / Назва — тепер закривається одразу */}
+          <Typography
+            variant="h6"
+            component={RouterLink}
+            to="/"
+            sx={{ color: "inherit", textDecoration: "none", fontWeight: 800, letterSpacing: -0.5 }}
+          >
             {t("app.name")}
           </Typography>
+
+          {/* 2. Блок навігації між логотипом та мовами (займає вільний простір) */}
+          <Box sx={{ flexGrow: 1, display: "flex", gap: 1, ml: 2 }}>
+            {/* Навігація для інвестора */}
+            {user?.role === "investor" && (
+              <>
+                <Button
+                  component={RouterLink}
+                  to="/investor/feed"
+                  color="inherit"
+                  sx={{ textTransform: "none", fontWeight: 600 }}
+                >
+                  {t("nav.digest", "Дайджест")}
+                </Button>
+                <Button
+                  component={RouterLink}
+                  to="/investor"
+                  color="inherit"
+                  sx={{ textTransform: "none" }}
+                >
+                  {t("nav.mandate", "Мандат")}
+                </Button>
+              </>
+            )}
+
+            {/* Навігація для стартапу */}
+            {user?.role === "startup" && (
+              <Button
+                component={RouterLink}
+                to="/profile"
+                color="inherit"
+                sx={{ textTransform: "none", fontWeight: 600 }}
+              >
+                {t("nav.profile", "Мій профіль")}
+              </Button>
+            )}
+          </Box>
+
+          {/* 3. Перемикач мов */}
           <LanguageSwitcher />
+
+          {/* 4. Кнопка виходу */}
           {user && (
             <Button
               color="inherit"
@@ -30,41 +78,45 @@ export default function Layout() {
                 await logout();
                 navigate("/login");
               }}
+              sx={{ textTransform: "none" }}
             >
               {t("nav.logout")}
             </Button>
           )}
         </Toolbar>
       </AppBar>
+
       <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 }, position: "relative", zIndex: 1, flexGrow: 1 }}>
         <Outlet />
       </Container>
-        <Box
-          component="footer"
-          sx={{
-            position: "relative",
-            zIndex: 1,
-            py: 2,
-            textAlign: "center",
-            display: "flex",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            gap: 3,
-          }}
-        >
-          {(["agb", "datenschutz", "impressum", "kriterien"] as const).map((doc) => (
-            <Link
-              key={doc}
-              component={RouterLink}
-              to={`/legal/${doc}`}
-              variant="caption"
-              underline="hover"
-              sx={{ color: signedOut ? "rgba(255,255,255,0.8)" : "text.secondary" }}
-            >
-              {t(`footer.${doc}`)}
-            </Link>
-          ))}
-        </Box>
+
+      {/* Обов'язковий юридичний футер */}
+      <Box
+        component="footer"
+        sx={{
+          position: "relative",
+          zIndex: 1,
+          py: 2,
+          textAlign: "center",
+          display: "flex",
+          justifyContent: "center",
+          flexWrap: "wrap",
+          gap: 3,
+        }}
+      >
+        {(["agb", "datenschutz", "impressum", "kriterien"] as const).map((doc) => (
+          <Link
+            key={doc}
+            component={RouterLink}
+            to={`/legal/${doc}`}
+            variant="caption"
+            underline="hover"
+            sx={{ color: signedOut ? "rgba(255,255,255,0.8)" : "text.secondary" }}
+          >
+            {t(`footer.${doc}`)}
+          </Link>
+        ))}
+      </Box>
     </Box>
   );
 }

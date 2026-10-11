@@ -1,3 +1,4 @@
+from datetime import timezone
 from decimal import Decimal
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -11,7 +12,7 @@ from apps.analytics.models import EventName
 from common.models import InvestorType, Country
 
 # Импортируйте новые модели
-from .models import InvestorProfile, Mandate, MandateSource
+from .models import InvestorProfile, Mandate, MandateSource, Digest
 from .permissions import IsConfirmedInvestor, IsVerifiedInvestor, is_status_confirmed
 from .serializers import ConfirmStatusSerializer, MandateOutSerializer, MandateSerializer
 
@@ -188,3 +189,49 @@ class MandateView(APIView):
             track(EventName.MANDATE_CHANGED, request.user, source="self", changed=changed, **after)
 
         return Response(MandateOutSerializer(new_mandate).data)
+
+
+class InvestorFeedView(APIView):
+    """Повертає картки поточного тижневого дайджесту для інвестора."""
+    permission_classes = [IsConfirmedInvestor]
+
+    def get(self, request):
+        inv_profile = request.user.investor_profile
+        # Беремо останній надісланий дайджест
+        digest = Digest.objects.filter(investor_profile=inv_profile).order_by("-period_start").first()
+        if not digest:
+            return Response([])
+
+        # Фіксуємо перше відкриття в кабінеті (для аналітики за ТЗ)
+        if not digest.first_opened_at:
+            digest.first_opened_at = timezone.now()
+            digest.first_open_channel = Digest.Channel.CABINET
+            digest.save(update_fields=["first_opened_at", "first_open_channel"])
+
+        cards = digest.cards.select_related(
+            "introduction__startup_profile",
+            "introduction__teaser"
+        ).order_by("position")
+
+        data = []
+        for c in cards:
+            sp = c.introduction.startup_profile
+            teaser = c.introduction.teaser
+            data.append({
+                "id": str(c.introduction.public_id),
+                "card_id": c.id,
+                "position": c.position,
+                "sector": sp.sector,
+                "stage": sp.stage,
+                "region": getattr(sp.country, "name", "DACH"),
+                "target_amount": int(sp.round_amount_eur or 0),
+                "mrr": int(sp.mrr or 0) if sp.mrr else None,
+                "team_size": sp.team_size,
+                "headline": teaser.content.get("headline", ""),
+                "problem_solution": f"{teaser.content.get('problem', '')} {teaser.content.get('solution', '')}",
+                "team_summary": teaser.content.get("team", ""),
+                "match_reasons": c.match_reason_codes,
+                "action": c.introduction.status,
+            })
+
+        return Response(data)
