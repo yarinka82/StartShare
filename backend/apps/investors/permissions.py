@@ -3,6 +3,7 @@ from rest_framework.permissions import BasePermission
 from apps.accounts.models import UserConsent, UserRole
 
 
+
 def is_status_confirmed(user) -> bool:
     """Перевіряє, чи підтвердив інвестор статус B2B."""
     if not user or not user.is_authenticated:
@@ -22,10 +23,10 @@ def build_state(user) -> dict:
         .order_by("-accepted_at")
         .first()
     )
-    from .models import InvestorMandate
+    
     from .serializers import MandateOutSerializer
-
-    mandate = InvestorMandate.objects.filter(user=user).first()
+    from apps.investors.models import Mandate
+    mandate = Mandate.objects.filter(user=user).first()
     return {
         "status_confirmed": consent is not None,
         "status_confirmed_at": consent.accepted_at if consent else None,

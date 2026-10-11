@@ -3,6 +3,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+from celery.schedules import crontab
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -50,7 +51,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -119,8 +120,19 @@ CELERY_TASK_TIME_LIMIT = 300              # жёсткий лимит, подб�
 CELERY_TASK_SOFT_TIME_LIMIT = 270
 
 CELERY_BEAT_SCHEDULE = {
-    "purge-expired-decks": {"task": "apps.documents.tasks.purge_expired_decks", "schedule": 15 * 60},
-    "requeue-stuck-jobs": {"task": "apps.documents.tasks.requeue_stuck_jobs", "schedule": 5 * 60},
+    "purge-expired-decks": {
+        "task": "apps.documents.tasks.purge_expired_decks",
+        "schedule": 15 * 60,
+    },
+    "requeue-stuck-jobs": {
+        "task": "apps.documents.tasks.requeue_stuck_jobs",
+        "schedule": 5 * 60,
+    },
+    "send-weekly-digests": {
+        "task": "apps.investors.tasks.generate_weekly_digests",
+        # По понедельникам в 08:00 утра по Берлину:
+        "schedule": crontab(hour=8, minute=0, day_of_week=1),
+    },
 }
 
 TEASER_MAX_RETRIES = 2                    # число повторов вызова ШІ (шаг 7); решает backend
@@ -153,3 +165,4 @@ if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
     PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]  # fast tests only
+

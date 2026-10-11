@@ -86,4 +86,33 @@ export interface LegalDocItem {
   language: string;
 }
 
+export interface DigestCardDto {
+  id: string; // public_id знайомства (Introduction)
+  card_id: number;
+  position: number;
+  sector: string;
+  stage: string;
+  region: string;
+  target_amount: number;
+  mrr?: number;
+  team_size?: number;
+  headline: string;
+  problem_solution: string;
+  team_summary: string;
+  match_reasons: string[]; // ['sector', 'stage', 'region', 'check_size', 'business_model']
+  action: "none" | "interested" | "declined";
+}
+
+export interface MandateHistoryDto {
+  version: number;
+  is_current: boolean;
+  created_at: string;
+  check_min_eur: string;
+  check_max_eur: string;
+  sector_codes: string[];
+  stage_codes: string[];
+  country_codes: string[];
+  business_model_codes: string[];
+}
+
 

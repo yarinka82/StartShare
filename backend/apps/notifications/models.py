@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
-from apps.matching.models import Digest, Introduction
+from apps.investors.models import Introduction, Digest
 from apps.startups.models import StartupProfile
 
 

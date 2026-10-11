@@ -1,5 +1,15 @@
 import i18n from "../i18n";
-import type {Deck, Dictionaries, InvestorState, LegalDocItem, Mandate, MandateInput, Profile, User} from "./types";
+import type {
+  Deck,
+  Dictionaries,
+  DigestCardDto,
+  InvestorState,
+  LegalDocItem,
+  Mandate, MandateHistoryDto,
+  MandateInput,
+  Profile,
+  User
+} from "./types";
 
 export class ApiError extends Error {
   status: number;
@@ -113,5 +123,17 @@ export const api = {
   investorState: () => request<InvestorState>("/api/investor/"),
   confirmInvestorStatus: () => request<InvestorState>("/api/investor/confirm-status/", "POST", { accept: true }),
   saveMandate: (data: MandateInput) => request<Mandate>("/api/investor/mandate/", "PUT", data),
+
+  // ІНВЕСТОР:
+  getInvestorFeed: () => request<DigestCardDto[]>("/api/investor/feed/"),
+
+  respondToCard: (data: {
+    card_id: number;
+    action: "interested" | "declined";
+    investor_message?: string;
+    decline_reason?: string;
+  }) => request<void>("/api/investor/cards/action/", "POST", data),
+
+  getMandateHistory: () => request<MandateHistoryDto[]>("/api/investor/mandate/history/"),
 };
 

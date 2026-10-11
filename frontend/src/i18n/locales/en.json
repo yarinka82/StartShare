@@ -62,7 +62,10 @@
   },
 
   "nav": {
-    "logout": "Log out",
+    "digest": "Digest",
+    "mandate": "Mandate",
+    "profile": "My Profile",
+    "logout": "Logout",
     "language": "Language"
   },
 
@@ -72,6 +75,7 @@
     "loading": "Loading…",
     "saving": "Saving…",
     "save": "Save",
+    "close": "Close",
     "edit": "Edit",
     "email": "E-mail",
     "password": "Password",
@@ -271,9 +275,15 @@
   "investor": {
     "selectAll": "Select all",
     "clear": "Clear",
-
     "title": "Welcome",
     "text": "Your investor account is ready. Mandate settings and weekly teasers will be available in the next release.",
+    "goToFeed": "Go to Digest",
+    "cabinetTitle": "Investor Cabinet",
+    "cabinetSubtitle": "Weekly selections of 3–5 blind teasers tailored to your mandate.",
+    "mandateHistoryBtn": "Mandate History [B]",
+    "editMandateBtn": "Edit Mandate",
+    "tabDigest": "Current Digest (3–5 teasers)",
+    "emptyFeedAlert": "There are no new teasers for this week, or you have already reviewed all cards. The next digest will be generated on Monday at 08:00 (if 3–5 matching startups are available).",
 
     "status": {
       "title": "Investor Status Confirmation",
@@ -284,6 +294,12 @@
     },
 
     "mandate": {
+      "historyModalTitle": "Investment Mandate Version History",
+      "historyModalDesc": "Every criterion update creates a new version. Startup matches are strictly linked to the mandate version active at the time of the digest.",
+      "noHistory": "No version history available yet.",
+      "versionLabel": "Version {{version}}",
+      "currentVersionBadge": "Active version",
+      "ticketLabel": "Ticket",
       "title": "Investment Mandate",
       "intro": "Define your deal criteria. You will only receive blind teasers that match your mandate.",
       "hard": "Hard Criteria (Strict Filters)",
@@ -302,6 +318,34 @@
       "lastSaved": "Last saved: {{date}}"
     }
   },
+  "matching": {
+    "tags": {
+      "sector": "Sector",
+      "stage": "Funding Stage",
+      "region": "Target Region",
+      "ticket": "Ticket Size",
+      "businessModel": "Preferred Business Model"
+    },
+    "reasons": {
+      "sector": "Sector mismatch",
+      "stage": "Wrong funding stage",
+      "region": "Region mismatch",
+      "ticket": "Check size mismatch",
+      "team": "Team experience insufficient",
+      "metrics": "Metrics / Traction insufficient",
+      "other": "Other"
+    },
+    "interestedModalTitle": "Express Interest in Startup",
+    "interestedModalHint": "The startup will receive a request with your fund's name. You can include a brief personal note (optional):",
+    "messagePlaceholder": "E.g.: Interesting model, we would like to discuss unit economics...",
+    "sendInterestBtn": "Send Intro Request",
+    "declineTitle": "Why is this startup not a fit?",
+    "declineHint": "Your feedback helps fine-tune future weekly digests.",
+    "reasonLabel": "Reason",
+    "declineBtn": "Decline Startup"
+  },
+
+
 
   "dict": {
     "sectors": {

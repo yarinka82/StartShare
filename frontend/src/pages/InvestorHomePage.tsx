@@ -3,6 +3,8 @@ import {
   FormControlLabel, InputAdornment, Paper, Snackbar, Stack,
   Skeleton, TextField, Typography,
 } from "@mui/material";
+import DynamicFeedIcon from "@mui/icons-material/DynamicFeed";
+import { Link as RouterLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLegalText } from "../hooks/useLegalText";
@@ -167,101 +169,146 @@ function MandateForm({ dicts, initial }: { dicts: Dictionaries; initial: Mandate
   const ticketAdornment = <InputAdornment position="end">{t("common.eur")}</InputAdornment>;
 
   return (
-    <Stack spacing={3}>
+
+  <Stack spacing={3}>
+    {/* 1. ШАПКА З КНОПКОЮ ПЕРЕХОДУ В КАБІНЕТ / ДАЙДЖЕСТ */}
+    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 2 }}>
       <Box>
-        <Typography variant="h4" component="h1" gutterBottom>{t("investor.mandate.title")}</Typography>
+        <Typography
+          variant="h4"
+          component="h1"
+          gutterBottom
+          sx={{ fontWeight: 800, color: "#0b2142" }}
+        >
+          {t("investor.mandate.title")}
+        </Typography>
         <Typography color="text.secondary">{t("investor.mandate.intro")}</Typography>
       </Box>
 
-      {err?.detail && <Alert severity="error">{errorText(t, err.detail)}</Alert>}
+      {/* КНОПКА ПЕРЕХОДУ В КАБІНЕТ (ДАЙДЖЕСТ) */}
+      <Button
+        component={RouterLink}
+        to="/investor/feed"
+        variant="contained"
+        startIcon={<DynamicFeedIcon />}
+        sx={{
+          bgcolor: "#17407a",
+          textTransform: "none",
+          fontWeight: 700,
+          "&:hover": { bgcolor: "#0b2142" },
+        }}
+      >
+        {t("investor.goToFeed", "Перейти до дайджесту")}
+      </Button>
+    </Box>
 
-      <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
-        <Stack spacing={3}>
-          <Typography variant="h6" component="h2">{t("investor.mandate.hard")}</Typography>
+    {err?.detail && <Alert severity="error">{errorText(t, err.detail)}</Alert>}
 
-          {/* Секторы */}
-          <ChipSelect
-            required bulk label={t("investor.mandate.sectors")} options={dicts.sectors}
-            value={form.sector_codes} onChange={(v) => set("sector_codes", v)} optionLabel={label("sectors")}
-            error={!!fieldError("sector_codes")} helperText={fieldError("sector_codes")}
-          />
+    {/* ЖОРСТКІ КРИТЕРІЇ */}
+    <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
+      <Stack spacing={3}>
+        <Typography variant="h6" component="h2">{t("investor.mandate.hard")}</Typography>
 
-          {/* Стадии */}
-          <ChipSelect
-            required label={t("investor.mandate.stages")} options={dicts.stages}
-            value={form.stage_codes} onChange={(v) => set("stage_codes", v)} optionLabel={label("stages")}
-            error={!!fieldError("stage_codes")} helperText={fieldError("stage_codes")}
-          />
+        {/* Сектори */}
+        <ChipSelect
+          required bulk label={t("investor.mandate.sectors")} options={dicts.sectors}
+          value={form.sector_codes} onChange={(v) => set("sector_codes", v)} optionLabel={label("sectors")}
+          error={!!fieldError("sector_codes")} helperText={fieldError("sector_codes")}
+        />
 
-          {/* Страны (Новое обязательное поле) */}
-          <ChipSelect
-            required label={t("investor.mandate.countries", "Länder")} options={dicts.countries}
-            value={form.country_codes} onChange={(v) => set("country_codes", v)} optionLabel={label("countries")}
-            error={!!fieldError("country_codes")} helperText={fieldError("country_codes")}
-          />
+        {/* Стадії */}
+        <ChipSelect
+          required label={t("investor.mandate.stages")} options={dicts.stages}
+          value={form.stage_codes} onChange={(v) => set("stage_codes", v)} optionLabel={label("stages")}
+          error={!!fieldError("stage_codes")} helperText={fieldError("stage_codes")}
+        />
 
-          {/* Регионы */}
-          <ChipSelect
-            label={t("investor.mandate.regions")} options={dicts.regions}
-            value={form.region_codes} onChange={(v) => set("region_codes", v)} optionLabel={label("regions")}
-            error={!!fieldError("region_codes")} helperText={fieldError("region_codes")}
-          />
+        {/* Країни */}
+        <ChipSelect
+          required label={t("investor.mandate.countries", "Länder")} options={dicts.countries}
+          value={form.country_codes} onChange={(v) => set("country_codes", v)} optionLabel={label("countries")}
+          error={!!fieldError("country_codes")} helperText={fieldError("country_codes")}
+        />
 
-          {/* Чеки */}
-          <Box>
-            <Typography variant="subtitle2" gutterBottom>{t("investor.mandate.ticket")} *</Typography>
-            <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
-              <TextField
-                label={t("investor.mandate.ticketMin")} required value={form.check_min_eur}
-                onChange={(e) => money("check_min_eur", e.target.value)}
-                error={!!fieldError("check_min_eur")} helperText={fieldError("check_min_eur")}
-                slotProps={{ htmlInput: { inputMode: "decimal" }, input: { endAdornment: ticketAdornment } }}
-              />
-              <TextField
-                label={t("investor.mandate.ticketMax")} required value={form.check_max_eur}
-                onChange={(e) => money("check_max_eur", e.target.value)}
-                error={!!fieldError("check_max_eur")} helperText={fieldError("check_max_eur")}
-                slotProps={{ htmlInput: { inputMode: "decimal" }, input: { endAdornment: ticketAdornment } }}
-              />
-            </Box>
-            <Typography variant="caption" color="text.secondary">{t("investor.mandate.ticketHint")}</Typography>
+        {/* Регіони */}
+        <ChipSelect
+          label={t("investor.mandate.regions")} options={dicts.regions}
+          value={form.region_codes} onChange={(v) => set("region_codes", v)} optionLabel={label("regions")}
+          error={!!fieldError("region_codes")} helperText={fieldError("region_codes")}
+        />
+
+        {/* Чеки */}
+        <Box>
+          <Typography variant="subtitle2" gutterBottom>{t("investor.mandate.ticket")} *</Typography>
+          <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
+            <TextField
+              label={t("investor.mandate.ticketMin")} required value={form.check_min_eur}
+              onChange={(e) => money("check_min_eur", e.target.value)}
+              error={!!fieldError("check_min_eur")} helperText={fieldError("check_min_eur")}
+              slotProps={{ htmlInput: { inputMode: "decimal" }, input: { endAdornment: ticketAdornment } }}
+            />
+            <TextField
+              label={t("investor.mandate.ticketMax")} required value={form.check_max_eur}
+              onChange={(e) => money("check_max_eur", e.target.value)}
+              error={!!fieldError("check_max_eur")} helperText={fieldError("check_max_eur")}
+              slotProps={{ htmlInput: { inputMode: "decimal" }, input: { endAdornment: ticketAdornment } }}
+            />
           </Box>
-        </Stack>
-      </Paper>
-
-      <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
-        <Stack spacing={3}>
-          <Typography variant="h6" component="h2">{t("investor.mandate.soft")}</Typography>
-          <ChipSelect
-            label={t("investor.mandate.businessModels")} options={dicts.business_models}
-            value={form.business_model_codes} onChange={(v) => set("business_model_codes", v)}
-            optionLabel={label("businessModels")} helperText={t("investor.mandate.businessModelsHint")}
-          />
-        </Stack>
-      </Paper>
-
-      <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
-        <Button variant="contained" size="large" onClick={save} disabled={busy || !dirty}>
-          {busy ? <CircularProgress size={22} color="inherit" /> : t("investor.mandate.save")}
-        </Button>
-        {createdAt && (
-          <Typography variant="body2" color="text.secondary">
-            {t("investor.mandate.lastSaved", {
-              date: new Date(createdAt).toLocaleString(i18n.resolvedLanguage),
-            })}
-          </Typography>
-        )}
+          <Typography variant="caption" color="text.secondary">{t("investor.mandate.ticketHint")}</Typography>
+        </Box>
       </Stack>
+    </Paper>
 
-      <Snackbar open={savedMsg} autoHideDuration={3500} onClose={() => setSavedMsg(false)}
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                >
-        <Alert severity="success" onClose={() => setSavedMsg(false)} variant="filled">
-          {t("investor.mandate.saved")}
-        </Alert>
-      </Snackbar>
+    {/* М'ЯКІ КРИТЕРІЇ */}
+    <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
+      <Stack spacing={3}>
+        <Typography variant="h6" component="h2">{t("investor.mandate.soft")}</Typography>
+        <ChipSelect
+          label={t("investor.mandate.businessModels")} options={dicts.business_models}
+          value={form.business_model_codes} onChange={(v) => set("business_model_codes", v)}
+          optionLabel={label("businessModels")} helperText={t("investor.mandate.businessModelsHint")}
+        />
+      </Stack>
+    </Paper>
+
+    {/* КНОПКИ ВНИЗУ */}
+    <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
+      <Button variant="contained" size="large" onClick={save} disabled={busy || !dirty}>
+        {busy ? <CircularProgress size={22} color="inherit" /> : t("investor.mandate.save")}
+      </Button>
+
+      {/* Друга кнопка швидкого переходу */}
+      <Button
+        component={RouterLink}
+        to="/investor/feed"
+        variant="outlined"
+        size="large"
+        sx={{ textTransform: "none" }}
+      >
+        {t("investor.goToFeed", "Перейти до дайджесту")}
+      </Button>
+
+      {createdAt && (
+        <Typography variant="body2" color="text.secondary">
+          {t("investor.mandate.lastSaved", {
+            date: new Date(createdAt).toLocaleString(i18n.resolvedLanguage),
+          })}
+        </Typography>
+      )}
     </Stack>
-  );
+
+    <Snackbar
+      open={savedMsg}
+      autoHideDuration={3500}
+      onClose={() => setSavedMsg(false)}
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+    >
+      <Alert severity="success" onClose={() => setSavedMsg(false)} variant="filled">
+        {t("investor.mandate.saved")}
+      </Alert>
+    </Snackbar>
+  </Stack>
+);
 }
 
 /* ---------- page ---------- */

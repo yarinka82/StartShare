@@ -62,6 +62,9 @@
   },
 
   "nav": {
+    "digest": "Digest",
+    "mandate": "Mandat",
+    "profile": "Mein Profil",
     "logout": "Abmelden",
     "language": "Sprache"
   },
@@ -71,6 +74,7 @@
     "checkAgain": "Erneut prüfen",
     "loading": "Wird geladen…",
     "save": "Speichern",
+    "close": "Schließen",
     "saving": "Wird gespeichert…",
     "edit": "Bearbeiten",
     "email": "E-Mail",
@@ -269,40 +273,7 @@
     "copyright": "Start Share Plattform. Alle Rechte vorbehalten."
   },
 
-  "investor": {
-    "selectAll": "Alle auswählen",
-    "clear": "Zurücksetzen",
 
-    "title": "Willkommen",
-    "text": "Ihr Investor-Konto ist eingerichtet. Mandatskriterien und wöchentliche Teaser folgen im nächsten Release.",
-
-    "status": {
-      "title": "Bestätigung des Investorenstatus",
-      "intro": "Bitte bestätigen Sie vor dem Fortfahren, dass Sie als professioneller Investor handeln.",
-      "translationNote": "",
-      "translation": "",
-      "continue": "Weiter zum Mandat"
-    },
-
-    "mandate": {
-      "title": "Investitionsmandat",
-      "intro": "Definieren Sie Ihre Suchkriterien. Sie erhalten ausschließlich anonymisierte Teaser, die Ihrem Profil entsprechen.",
-      "hard": "Ausschlusskriterien (Hard Filters)",
-      "soft": "Präferenzen (Soft Filters)",
-      "sectors": "Branchen & Sektoren",
-      "stages": "Finanzierungsphasen",
-      "regions": "Zielregionen",
-      "ticket": "Ticketgröße",
-      "ticketMin": "Min. Ticket",
-      "ticketMax": "Max. Ticket",
-      "ticketHint": "Beträge in EUR. Angebote außerhalb dieser Spanne werden automatisch herausgefiltert.",
-      "businessModels": "Bevorzugte Geschäftsmodelle",
-      "businessModelsHint": "Wird verwendet, um passende Deals im wöchentlichen Digest zu priorisieren.",
-      "save": "Mandat speichern",
-      "saved": "Investitionsmandat erfolgreich gespeichert",
-      "lastSaved": "Zuletzt gespeichert: {{date}}"
-    }
-  },
 
   "dict": {
     "sectors": {
@@ -340,6 +311,80 @@
       "HARDWARE": "Hardware / Lizenz",
       "HYBRID": "Hybrid / Sonstiges"
     }
+  },
+
+"investor": {
+    "selectAll": "Alle auswählen",
+    "clear": "Zurücksetzen",
+    "title": "Willkommen",
+    "text": "Ihr Investorenkonto ist bereit. Mandatseinstellungen und wöchentliche Teaser stehen zur Verfügung.",
+    "goToFeed": "Zum Digest wechseln",
+    "cabinetTitle": "Investoren-Kabinett",
+    "cabinetSubtitle": "Wöchentliche Auswahlen von 3–5 Blind-Teasern gemäß Ihrem Mandat.",
+    "mandateHistoryBtn": "Mandatshistorie [B]",
+    "editMandateBtn": "Mandat bearbeiten",
+    "tabDigest": "Aktueller Digest (3–5 Teaser)",
+    "emptyFeedAlert": "Für diese Woche liegen keine neuen Teaser vor oder Sie haben bereits alle Profile bewertet. Der nächste Digest wird am Montag um 08:00 Uhr generiert (sofern 3–5 passende Startups vorliegen).",
+
+    "status": {
+      "title": "Bestätigung des Investorenstatus",
+      "intro": "Bitte bestätigen Sie vor dem Fortfahren, dass Sie als professioneller Investor handeln.",
+      "translationNote": "",
+      "translation": "",
+      "continue": "Weiter zum Mandat"
+    },
+
+    "mandate": {
+      "historyModalTitle": "Historie des Investitionsmandats",
+      "historyModalDesc": "Jede Änderung der Kriterien erstellt eine neue Version. Matchings werden fest mit der zum Zeitpunkt des Digests gültigen Version verknüpft.",
+      "noHistory": "Noch keine Versionshistorie vorhanden.",
+      "versionLabel": "Version {{version}}",
+      "currentVersionBadge": "Aktive Version",
+      "ticketLabel": "Ticket",
+      "title": "Investitionsmandat",
+      "intro": "Definieren Sie Ihre Kriterien. Sie erhalten ausschließlich Blind-Teaser, die Ihrem Mandat entsprechen.",
+      "hard": "Ausschlusskriterien (Hard Filters)",
+      "soft": "Präferenzen (Soft Filters)",
+      "sectors": "Branchen & Sektoren",
+      "stages": "Finanzierungsphasen",
+      "regions": "Zielregionen",
+      "ticket": "Ticketgröße",
+      "ticketMin": "Min. Ticket",
+      "ticketMax": "Max. Ticket",
+      "ticketHint": "Beträge in EUR. Angebote außerhalb dieser Spanne werden herausgefiltert.",
+      "businessModels": "Bevorzugte Geschäftsmodelle",
+      "businessModelsHint": "Wird verwendet, um passende Deals im wöchentlichen Digest zu priorisieren.",
+      "save": "Mandat speichern",
+      "saved": "Investitionsmandat erfolgreich gespeichert",
+      "lastSaved": "Zuletzt gespeichert: {{date}}"
+    }
+  },
+  "matching": {
+    "tags": {
+      "sector": "Branche",
+      "stage": "Finanzierungsphase",
+      "region": "Zielregion",
+      "ticket": "Ticketgröße",
+      "businessModel": "Bevorzugtes Geschäftsmodell"
+    },
+    "reasons": {
+      "sector": "Branche passt nicht",
+      "stage": "Falsche Phase",
+      "region": "Region passt nicht",
+      "ticket": "Ticketgröße unpassend",
+      "team": "Teamerfahrung unzureichend",
+      "metrics": "Kennzahlen / Traktion unzureichend",
+      "other": "Sonstiges"
+    },
+    "interestedModalTitle": "Interesse am Startup bekunden",
+    "interestedModalHint": "Das Startup erhält eine Anfrage mit dem Namen Ihres Fonds. Sie können eine kurze persönliche Nachricht beifügen (optional):",
+    "messagePlaceholder": "Z. B.: Interessanter Case, wir würden uns gerne über das Geschäftsmodell austauschen...",
+    "sendInterestBtn": "Intro-Anfrage senden",
+    "declineTitle": "Warum passt dieses Startup nicht?",
+    "declineHint": "Ihr Feedback optimiert die zukünftigen wöchentlichen Digests.",
+    "reasonLabel": "Grund",
+    "declineBtn": "Profil ablehnen"
   }
 }
+
 

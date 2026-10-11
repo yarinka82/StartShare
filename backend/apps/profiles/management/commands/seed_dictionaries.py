@@ -76,7 +76,7 @@ REGIONS_INITIAL = [
     # (code, name_de, name_en, sort_order)
     ("dach", "DACH (Deutschland, Österreich, Schweiz)", "DACH (Germany, Austria, Switzerland)", 1),
     ("eu", "Europäische Union (EU)", "European Union (EU)", 2),
-    ("europe", "Europa (inkl. UK, Schweiz, Ukraine)", "Europe (incl. UK, Switzerland, Ukraine)", 3),
+    ("europe", "Europa (inkl. UK, Schweiz)", "Europe (incl. UK, Switzerland)", 3),
     ("worldwide", "Weltweit", "Worldwide", 4),
 ]
 

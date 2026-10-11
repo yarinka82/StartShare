@@ -1,4 +1,3 @@
-
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ThumbDownOutlinedIcon from "@mui/icons-material/ThumbDownOutlined";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
@@ -11,7 +10,21 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import type { TFunction } from "i18next";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+
+// 1. Хелпер маппинга кодов (вынесен наружу, чтобы не создавать заново при каждом рендере)
+function formatMatchReasons(codes: string[], t: TFunction): string[] {
+  const labels: Record<string, string> = {
+    sector: t("matching.reasonSector", "Збіг за сектором"),
+    stage: t("matching.reasonStage", "Збіг за стадією фінансування"),
+    check_size: t("matching.reasonTicket", "Відповідний розмір чека"),
+    region: t("matching.reasonRegion", "Цільовий регіон"),
+    business_model: t("matching.reasonBusinessModel", "Бажана бізнес-модель"),
+  };
+  return codes.map((c) => labels[c] || c);
+}
 
 interface BlindTeaserProps {
   id: string;
@@ -24,7 +37,7 @@ interface BlindTeaserProps {
   headline: string;
   problemSolution: string;
   teamSummary: string;
-  matchReasons: string[]; // Например: ["Сектор: B2B SaaS", "Стадия: Seed", "Регион: DACH"]
+  matchReasons: string[]; // Массив кодов: ["sector", "stage", "region"]
   onInterested: (id: string) => void;
   onDecline: (id: string) => void;
 }
@@ -46,6 +59,12 @@ export default function BlindTeaserCard({
 }: BlindTeaserProps) {
   const { t } = useTranslation();
 
+  // 2. Преобразуем коды в переведённые строки
+  const formattedReasons = useMemo(
+    () => formatMatchReasons(matchReasons, t),
+    [matchReasons, t]
+  );
+
   return (
     <Paper
       elevation={2}
@@ -62,7 +81,15 @@ export default function BlindTeaserCard({
       }}
     >
       {/* 1. ШАПКА: Жесткие фильтры (ЧИПСЫ) */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
         <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
           <Chip label={sector} color="primary" variant="filled" size="small" sx={{ fontWeight: 600 }} />
           <Chip label={stage} variant="outlined" size="small" />
@@ -74,19 +101,29 @@ export default function BlindTeaserCard({
         </Typography>
       </Box>
 
-      {/* 2. СТРОКА: "Почему вы это видите" (ТЗ: прозрачный матчинг) */}
-      {matchReasons.length > 0 && (
-        <Box sx={{ bgcolor: "#f8fafc", p: 1.5, borderRadius: 1.5, borderLeft: "3px solid #17407a" }}>
-          <Typography variant="caption" sx={{ color: "text.secondary", display: "block", fontWeight: 600, mb: 0.25 }}>
+      {/* 2. СТРОКА: "Почему вы это видите" */}
+      {formattedReasons.length > 0 && (
+        <Box
+          sx={{
+            bgcolor: "#f8fafc",
+            p: 1.5,
+            borderRadius: 1.5,
+            borderLeft: "3px solid #17407a",
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{ color: "text.secondary", display: "block", fontWeight: 600, mb: 0.25 }}
+          >
             {t("matching.whyYouSeeThis", "Warum Sie dieses Profil sehen:")}
           </Typography>
           <Typography variant="body2" sx={{ fontSize: "0.8rem", color: "#334155" }}>
-            ✓ {matchReasons.join(" • ")}
+            ✓ {formattedReasons.join(" • ")}
           </Typography>
         </Box>
       )}
 
-      {/* 3. АНОНИМНЫЙ КОНТЕНТ (Сгенерированный ШИ) */}
+      {/* 3. АНОНИМНЫЙ КОНТЕНТ */}
       <Box>
         <Typography variant="h6" sx={{ fontWeight: 700, color: "#0f172a", mb: 1 }}>
           {headline}
@@ -103,7 +140,7 @@ export default function BlindTeaserCard({
               <Typography variant="body2" sx={{ fontWeight: 700 }}>€{mrrEur.toLocaleString()}</Typography>
             </Box>
           )}
-          {teamSize && (
+          {teamSize !== undefined && (
             <Box>
               <Typography variant="caption" color="text.secondary">Team</Typography>
               <Typography variant="body2" sx={{ fontWeight: 700 }}>{teamSize} FTE</Typography>
@@ -151,7 +188,7 @@ export default function BlindTeaserCard({
         </Button>
       </Stack>
 
-      {/* 5. ВОТ ЗДЕСЬ СТОИТ ДИСКЛЕЙМЕР B (Текст B) */}
+      {/* 5. ДИСКЛЕЙМЕР */}
       <Box
         sx={{
           display: "flex",
