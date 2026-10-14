@@ -60,9 +60,16 @@ export default function InvestorFeedPage() {
       setLoading(true);
       const data = await api.getInvestorFeed();
       // Показуємо тільки картки, на які ще немає відповіді
-      setCards(data.filter((c) => c.action === "none" || !c.action));
+      setCards(
+        data.filter(
+          (c) =>
+            !c.action ||
+            c.action === "none" ||
+            c.action.toUpperCase() === "SUGGESTED"
+        )
+      );
     } catch {
-      // помилка завантаження
+      // помилка
     } finally {
       setLoading(false);
     }

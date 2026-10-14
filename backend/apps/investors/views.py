@@ -1,18 +1,17 @@
-from datetime import timezone
-from decimal import Decimal
+from datetime import timedelta
+
+from django.utils import timezone
 from django.db import transaction
-from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from decimal import Decimal
 
 from apps.accounts.models import LegalDocument, LegalDocumentCode, UserConsent
 from apps.analytics.events import track
-from apps.analytics.models import EventName
-from common.models import InvestorType, Country
-
-# Импортируйте новые модели
-from .models import InvestorProfile, Mandate, MandateSource, Digest
+from apps.analytics.models import EventName, Event
+from common.models import InvestorType, Country, DeclineReason
+from .models import InvestorProfile, Mandate, MandateSource, Digest, DigestCard, Introduction
 from .permissions import IsConfirmedInvestor, IsVerifiedInvestor, is_status_confirmed
 from .serializers import ConfirmStatusSerializer, MandateOutSerializer, MandateSerializer
 
@@ -117,15 +116,23 @@ class ConfirmStatusView(APIView):
         return Response(build_state(request.user))
 
 
+
 class MandateView(APIView):
     """
-    PUT: Сохранение мандата.
-    Первое сохранение -> создание version=1 и событие MANDATE_SAVED.
-    Последующие изменения -> создание новой версии (version+1) и событие MANDATE_CHANGED.
+    GET: Отримання діючого мандату (is_current=True).
+    PUT: Збереження мандату з версіонуванням [B].
     """
-
     permission_classes = [IsConfirmedInvestor]
-
+    
+    def get(self, request):
+        profile = getattr(request.user, "investor_profile", None)
+        if not profile:
+            return Response(None)
+        current = Mandate.objects.filter(investor_profile=profile, is_current=True).first()
+        if not current:
+            return Response(None)
+        return Response(MandateOutSerializer(current).data)
+    
     def put(self, request):
         serializer = MandateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -191,6 +198,34 @@ class MandateView(APIView):
         return Response(MandateOutSerializer(new_mandate).data)
 
 
+
+class MandateHistoryView(APIView):
+    """GET /api/investor/mandate/history/: список усіх версій мандату інвестора."""
+    permission_classes = [IsConfirmedInvestor]
+    
+    def get(self, request):
+        profile = request.user.investor_profile
+        # Віддаємо історію від найновішої до найстарішої
+        mandates = Mandate.objects.filter(investor_profile=profile).order_by("-version")
+        
+        data = [
+            {
+                "version": m.version,
+                "is_current": m.is_current,
+                "created_at": m.created_at,
+                "check_min_eur": str(m.check_min_eur),
+                "check_max_eur": str(m.check_max_eur),
+                "sector_codes": m.sector_codes,
+                "stage_codes": m.stage_codes,
+                "country_codes": m.country_codes,
+                "business_model_codes": m.business_model_codes,
+            }
+            for m in mandates
+        ]
+        return Response(data)
+
+
+
 class InvestorFeedView(APIView):
     """Повертає картки поточного тижневого дайджесту для інвестора."""
     permission_classes = [IsConfirmedInvestor]
@@ -217,21 +252,101 @@ class InvestorFeedView(APIView):
         for c in cards:
             sp = c.introduction.startup_profile
             teaser = c.introduction.teaser
+            
+            teaser_content = {
+                field.field_name: field.final_text or field.ai_text or ""
+                for field in teaser.fields.all()
+            }
             data.append({
                 "id": str(c.introduction.public_id),
                 "card_id": c.id,
                 "position": c.position,
-                "sector": sp.sector,
-                "stage": sp.stage,
+                "sector": sp.sector.code if sp.sector else "",
+                "stage": sp.stage.code if sp.stage else "",
                 "region": getattr(sp.country, "name", "DACH"),
                 "target_amount": int(sp.round_amount_eur or 0),
-                "mrr": int(sp.mrr or 0) if sp.mrr else None,
+                "mrr": int(sp.mrr_eur or 0) if sp.mrr_eur else None,
                 "team_size": sp.team_size,
-                "headline": teaser.content.get("headline", ""),
-                "problem_solution": f"{teaser.content.get('problem', '')} {teaser.content.get('solution', '')}",
-                "team_summary": teaser.content.get("team", ""),
+
+                "headline": teaser_content.get("headline", ""),
+                "problem_solution": f"{teaser_content.get('problem', '')} {teaser_content.get('solution', '')}",
+                "team_summary": teaser_content.get("team", ""),
+                
                 "match_reasons": c.match_reason_codes,
                 "action": c.introduction.status,
             })
-
+        
         return Response(data)
+    
+    
+    
+class CardActionView(APIView):
+    """
+    POST /api/investor/cards/action/
+    Фіксує рішення інвестора у моделі Introduction (INTERESTED або DECLINED).
+    """
+    permission_classes = [IsConfirmedInvestor]
+
+    def post(self, request):
+        card_id = request.data.get("card_id")
+        action = request.data.get("action")  # "interested" або "declined"
+        message = (request.data.get("investor_message") or "").strip()[:500]
+        reason = (request.data.get("decline_reason") or "").strip()
+
+        if not card_id or action not in ("interested", "declined"):
+            return Response({"detail": "Invalid card_id or action."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Знаходимо картку дайджесту поточного інвестора разом із сутністю Introduction
+        card = DigestCard.objects.select_related("introduction", "digest").filter(
+            id=card_id,
+            digest__investor_profile__user=request.user
+        ).first()
+
+        if not card:
+            return Response({"detail": "Card not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        now = timezone.now()
+        intro = card.introduction
+
+        with transaction.atomic():
+            if action == "interested":
+                # 1. Фіксуємо статус «Цікаво» у моделі Introduction
+                intro.status = Introduction.Status.INTERESTED
+                intro.interested_at = now
+                intro.investor_message = message
+                # Встановлюємо 7 днів таймауту для відповіді стартапу
+                intro.request_expires_at = now + timedelta(days=7)
+                intro.save(update_fields=["status", "interested_at", "investor_message", "request_expires_at"])
+
+                # Логуємо аналітику
+                try:
+                    Event.objects.create(name=EventName.INTERESTED, user=request.user)
+                except Exception:
+                    pass
+
+            elif action == "declined":
+                # 2. Фіксуємо відхилення у моделі Introduction
+                intro.status = Introduction.Status.DECLINED
+                intro.declined_at = now
+                intro.declined_by = getattr(Introduction.DeclinedBy, "INVESTOR", "investor")
+
+                # Знаходимо або створюємо причину DeclineReason
+                if reason:
+                    try:
+                        dr, _ = DeclineReason.objects.get_or_create(
+                            code=reason,
+                            defaults={"name": reason.capitalize()}
+                        )
+                        intro.decline_reason = dr
+                    except Exception:
+                        pass
+
+                intro.save(update_fields=["status", "declined_at", "declined_by", "decline_reason"])
+
+                # Логуємо відмову з причиною
+                try:
+                    Event.objects.create(name=EventName.DECLINED, user=request.user)
+                except Exception:
+                    pass
+
+        return Response({"status": "ok", "action": action}, status=status.HTTP_200_OK)
