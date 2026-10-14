@@ -383,5 +383,28 @@
       "HARDWARE": "Hardware / License",
       "HYBRID": "Hybrid / Other"
     }
+  },
+  "dsa": {
+    "reportTooltip": "Report content (Art. 16 DSA)",
+    "modalTitle": "Notice of Illegal Content (Art. 16 DSA)",
+    "modalIntro": "Pursuant to Art. 16 of the Digital Services Act (DSA), you can report allegedly illegal or misleading information in this profile.",
+    "reasonLabel": "Notice Category *",
+    "explanationLabel": "Substantiated Explanation *",
+    "explanationPlaceholder": "Please describe why this content is illegal or misleading...",
+    "nameLabel": "Your Name",
+    "emailLabel": "Contact Email *",
+    "emailHint": "Required for statutory receipt confirmation (Art. 16(5) DSA)",
+    "goodFaithDeclaration": "I confirm in good faith that the information and allegations contained in this notice are accurate and complete (Art. 16(2)(d) DSA).",
+    "submitBtn": "Submit Notice (Report)",
+    "requiredFields": "Please fill out all required fields and check the good faith statement.",
+    "successMessage": "Thank you. Your notice has been received. A confirmation has been sent to your email.",
+    "reasons": {
+      "fraud_scam": "Fraud / False Statements",
+      "misleading_metrics": "Misleading Metrics / Fake Traction",
+      "ip_infringe": "Copyright Infringement / Plagiarism",
+      "illegal_content": "Illegal Content",
+      "other": "Other"
+    }
   }
+
 }

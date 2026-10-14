@@ -13,4 +13,6 @@ urlpatterns = [
     path("password-reset/", views.PasswordResetRequestView.as_view()),
     path("password-reset/confirm/", views.PasswordResetConfirmView.as_view()),
     path("legal-documents/", views.ActiveLegalDocumentsView.as_view(), name="legal-documents-active"),
+    path("export-data/", views.ExportUserDataView.as_view(), name="auth-export-data"),
+    path("delete-account/", views.DeleteAccountView.as_view(), name="auth-delete-account"),
 ]

@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from apps.documents.serializers import DeckSerializer
 from common.models import Sector, Stage, BusinessModel, Country
-from apps.startups.models import StartupProfile, StartupPrivateDetails, StartupProfileRemovedBy
+from apps.startups.models import StartupProfile, StartupPrivateDetails, StartupProfileRemovedBy, Report
 
 REQUIRED_FOR_COMPLETE = ("sector", "stage", "country", "amount_sought", "team_size")
 
@@ -267,3 +267,31 @@ class StartupProfileSerializer(serializers.ModelSerializer):
             details.save()
         
         return super().update(instance, validated_data)
+
+
+
+class ReportSubmitSerializer(serializers.ModelSerializer):
+    # Галочка сумлінності за ст. 16.2(d) DSA (валідується без зміни моделі)
+    declaration_good_faith = serializers.BooleanField(write_only=True)
+    report_type_code = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Report
+        fields = [
+            "report_type_code",
+            "description",
+            "declaration_good_faith",
+        ]
+
+    def validate_declaration_good_faith(self, value):
+        if not value:
+            raise serializers.ValidationError("Підтвердження сумлінності є обов'язковим за ст. 16 DSA.")
+        return value
+
+    def validate_description(self, value):
+        if len(value.strip()) < 10:
+            raise serializers.ValidationError("Будь ласка, детальніше опишіть причину скарги.")
+        return value.strip()
+    
+    
+    

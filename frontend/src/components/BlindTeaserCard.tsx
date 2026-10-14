@@ -1,6 +1,11 @@
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ThumbDownOutlinedIcon from "@mui/icons-material/ThumbDownOutlined";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
+import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import { useState } from "react";
+import ReportModal from "./ReportModal";
 import {
   Box,
   Button,
@@ -58,7 +63,7 @@ export default function BlindTeaserCard({
   onDecline,
 }: BlindTeaserProps) {
   const { t } = useTranslation();
-
+  const [reportOpen, setReportOpen] = useState(false);
   // 2. Преобразуем коды в переведённые строки
   const formattedReasons = useMemo(
     () => formatMatchReasons(matchReasons, t),
@@ -99,7 +104,21 @@ export default function BlindTeaserCard({
         <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#17407a" }}>
           €{(targetAmountEur / 1_000).toLocaleString()}k Seek
         </Typography>
+          {/* КНОПКА MELDEN (DSA ст. 16) */}
+          <Tooltip title={t("dsa.reportTooltip", "Profil melden (Art. 16 DSA)")}>
+            <IconButton size="small" color="default" onClick={() => setReportOpen(true)} sx={{ color: "#94a3b8", "&:hover": { color: "#dc2626" } }}>
+              <FlagOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
       </Box>
+
+        {/* Діалог скарги підключається внизу картки */}
+        <ReportModal
+          open={reportOpen}
+          onClose={() => setReportOpen(false)}
+          startupPublicId={id}
+        />
 
       {/* 2. СТРОКА: "Почему вы это видите" */}
       {formattedReasons.length > 0 && (

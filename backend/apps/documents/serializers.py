@@ -97,10 +97,10 @@ class DeckUploadSerializer(serializers.Serializer):
             if b"%%EOF" not in raw_bytes and b"trailer" not in raw_bytes and b"/Pages" not in raw_bytes:
                 raise serializers.ValidationError("deck_corrupted")
 
-            # Дополнительная валидация через PyMuPDF (fitz)
+            # Дополнительная валидация через PyMuPDF
             try:
-                import fitz
-                doc = fitz.open(stream=raw_bytes, filetype="pdf")
+                import pymupdf
+                doc = pymupdf.open(stream=raw_bytes, filetype="pdf")
                 if doc.is_encrypted or doc.needs_pass:
                     raise serializers.ValidationError("deck_password_protected")
             except serializers.ValidationError:

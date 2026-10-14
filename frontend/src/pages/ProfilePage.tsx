@@ -1,7 +1,6 @@
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlineOutlined";
 
-
 import {
   Alert, Box, Button, Chip,
   CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, MenuItem, Paper, Snackbar,
@@ -15,6 +14,7 @@ import { api } from "../api/client";
 import { errorText, parseError } from "../api/errors";
 import type { Deck, Dictionaries, Option, Profile } from "../api/types";
 import DeckUpload from "../components/DeckUpload";
+import PrivacyZone from "../components/PrivacyZone";
 
 
 type Values = {
@@ -365,6 +365,9 @@ return (
           />
         </Section>
       )}
+
+      {/*  7. ЗОНА DSGVO: ЕКСПОРТ (Art. 20) ТА ВИДАЛЕННЯ АКАУНТА (Art. 17) */}
+      <PrivacyZone />
 
       {/* Тост автозбереження */}
       <Snackbar

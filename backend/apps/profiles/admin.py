@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from apps.documents.models import TeaserField, Teaser, PitchDeck
+from apps.startups.admin import hide_startups_from_matching
 from apps.startups.models import StartupProfile
 from common.models import Country
 
@@ -16,13 +17,29 @@ admin.site.register(Country, DictionaryAdmin)
 
 @admin.register(StartupProfile)
 class StartupProfileAdmin(admin.ModelAdmin):
-    list_display = ["public_id", "get_company_name", "status", "user", "created_at"]
+    list_display = [
+        "public_id",
+        "get_company_name",
+        "status",
+        "user",
+        "is_hidden_from_matching",
+        "created_at",
+    ]
+    list_filter = ["status", "created_at"]
+    search_fields = ["public_id", "user__email", "private_details__company_name"]
+    readonly_fields = ["public_id", "created_at", "updated_at"]
+    actions = [hide_startups_from_matching]
 
-    @admin.display(description="Company Name")
+    @admin.display(description="Company Name", ordering="private_details__company_name")
     def get_company_name(self, obj):
         if hasattr(obj, "private_details") and obj.private_details:
             return obj.private_details.company_name
         return "—"
+
+    @admin.display(description="Hidden from matching", boolean=True)
+    def is_hidden_from_matching(self, obj):
+        return obj.moderation_hidden_at is not None
+
 
 
 @admin.register(PitchDeck)
