@@ -384,6 +384,28 @@
     "declineHint": "Ihr Feedback optimiert die zukünftigen wöchentlichen Digests.",
     "reasonLabel": "Grund",
     "declineBtn": "Profil ablehnen"
+  } ,
+  "dsa": {
+    "reportTooltip": "Inhalt melden (Art. 16 DSA)",
+    "modalTitle": "Inhalt melden (Art. 16 DSA)",
+    "modalIntro": "Gemäß Art. 16 Digital Services Act (DSA) können Sie mutmaßlich rechtswidrige oder irreführende Inhalte dieses Profils beanstanden.",
+    "reasonLabel": "Meldekategorie *",
+    "explanationLabel": "Begründung der Meldung *",
+    "explanationPlaceholder": "Bitte beschreiben Sie genau, warum dieser Inhalt rechtswidrig oder irreführend ist...",
+    "nameLabel": "Ihr Name",
+    "emailLabel": "Kontakt-E-Mail *",
+    "emailHint": "Für die gesetzliche Eingangsbestätigung (Art. 16 Abs. 5 DSA)",
+    "goodFaithDeclaration": "Ich bestätige nach bestem Wissen und Gewissen, dass die gemachten Angaben richtig und vollständig sind (Art. 16 Abs. 2 lit. d DSA).",
+    "submitBtn": "Meldung einreichen (Melden)",
+    "requiredFields": "Bitte füllen Sie alle Pflichtfelder aus und bestätigen Sie die Erklärung.",
+    "successMessage": "Vielen Dank! Ihre Meldung ist eingegangen. Eine Bestätigung wurde an Ihre E-Mail-Adresse gesendet.",
+    "reasons": {
+      "fraud_scam": "Betrug / Falsche Angaben",
+      "misleading_metrics": "Irreführende Kennzahlen / Traktion",
+      "ip_infringe": "Urheberrechtsverletzung / Plagiat",
+      "illegal_content": "Rechtswidrige Inhalte",
+      "other": "Sonstiges"
+    }
   }
 }
 

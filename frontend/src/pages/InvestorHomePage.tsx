@@ -13,6 +13,7 @@ import { api } from "../api/client";
 import { errorText, parseError, type ParsedError } from "../api/errors";
 import type { Dictionaries, InvestorState, Mandate, MandateInput, Option } from "../api/types";
 import ChipSelect from "../components/ChipSelect";
+import PrivacyZone from "../components/PrivacyZone";
 
 const trimDecimal = (v: string) => v.replace(/\.00$/, "");
 
@@ -296,6 +297,9 @@ function MandateForm({ dicts, initial }: { dicts: Dictionaries; initial: Mandate
         </Typography>
       )}
     </Stack>
+
+    {/* ДЛЯ ІНВЕСТОРА: ЗОНА DSGVO (Експорт мандатів та видалення акаунта) */}
+    <PrivacyZone />
 
     <Snackbar
       open={savedMsg}

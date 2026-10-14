@@ -194,10 +194,12 @@ class StartupPrivateDetails(models.Model):
         return f"Contacts for Startup #{self.startup_profile_id} ({self.company_name})"
     
 
+
 class ReportStatus(models.TextChoices):
     OPEN = "OPEN", "Open"
     IN_REVIEW = "IN_REVIEW", "In review"
     RESOLVED = "RESOLVED", "Resolved"
+
 
 
 class ReportDecision(models.TextChoices):
@@ -263,10 +265,7 @@ class Report(models.Model):
                 name="uq_reports_reporter",
             ),
         ]
-        indexes = [
-            models.Index(fields=["startup_profile", "status"], name="idx_reports_profile_status"),
-            models.Index(fields=["status", "created_at"], name="idx_reports_status_created"),
-        ]
+
 
     def clean(self):
         super().clean()

@@ -19,6 +19,7 @@ from apps.documents.models import (
     TeaserStatus,
 )
 from apps.documents.teaser.pipeline import build_draft
+from apps.startups.models import StartupProfileRemovedBy, StartupProfile
 
 logger = logging.getLogger(__name__)
 
@@ -164,6 +165,21 @@ def purge_expired_decks():
         deck.save(update_fields=["deleted_at", "deletion_reason", "storage_key"])
 
     logger.info("Purged %d expired pitch deck files.", expired_decks.count())
+    
+    expired_drafts = StartupProfile.objects.filter(
+        status="DRAFT",
+        draft_expires_at__isnull=False,
+        draft_expires_at__lte=now,
+    )
+    
+    count_drafts = expired_drafts.update(
+        status="REMOVED",
+        removed_at=now,
+        removed_by=StartupProfileRemovedBy.SYSTEM,
+    )
+    if count_drafts:
+        logger.info("Purged %d expired startup drafts (DRAFT -> REMOVED).", count_drafts)
+
 
 
 @shared_task

@@ -1,9 +1,12 @@
+import json
+
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.core import signing
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
+from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
@@ -28,6 +31,7 @@ from .serializers import (
     ResendVerificationSerializer,
     VerifyEmailSerializer,
 )
+from ..startups.models import StartupProfileRemovedBy
 
 User = get_user_model()
 
@@ -124,6 +128,7 @@ class VerifyEmailView(PublicPostView):
         return Response({"detail": "verified"})
 
 
+
 class ResendVerificationView(PublicPostView):
     throttle_scope = "resend"
 
@@ -136,6 +141,7 @@ class ResendVerificationView(PublicPostView):
         if user:
             send_verification_email(user)
         return Response({"detail": "check_email"})  # same answer in every case
+
 
 
 class LoginView(PublicPostView):
@@ -155,6 +161,7 @@ class LoginView(PublicPostView):
         return Response(MeSerializer(user).data)
 
 
+
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -163,11 +170,13 @@ class LogoutView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         return Response(MeSerializer(request.user).data)
+
 
 
 class PasswordResetRequestView(PublicPostView):
@@ -180,6 +189,7 @@ class PasswordResetRequestView(PublicPostView):
         if user:
             send_password_reset_email(user)
         return Response({"detail": "check_email"})
+
 
 
 class PasswordResetConfirmView(PublicPostView):
@@ -226,3 +236,141 @@ class ActiveLegalDocumentsView(APIView):
                     "language": d.language,
                 }
         return Response(result)
+
+
+
+class ExportUserDataView(APIView):
+    """
+    GET /api/auth/export-data/
+    Вивантаження всіх персональних даних користувача в JSON (Art. 20 DSGVO).
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        # 1. Загальні дані акаунта
+        export_data = {
+            "account": {
+                "id": str(user.id),
+                "email": user.email,
+                "role": user.role,
+                "preferred_language": user.preferred_language,
+                "created_at": user.created_at.isoformat() if hasattr(user, "created_at") else None,
+                "email_verified_at": user.email_verified_at.isoformat() if user.email_verified_at else None,
+            },
+            # 2. Журнал юридичних згод (AGB, DSE, декларації)
+            "legal_consents": [
+                {
+                    "document_code": c.legal_document.code,
+                    "document_title": c.legal_document.title,
+                    "version": c.legal_document.version,
+                    "context": c.context,
+                    "accepted_at": c.accepted_at.isoformat(),
+                }
+                for c in UserConsent.objects.filter(user=user).select_related("legal_document")
+            ],
+        }
+
+        # 3. Дані в залежності від ролі:
+        if user.role == "startup":
+            profile = getattr(user, "startup_profile", getattr(user, "startupprofile", None))
+            if profile:
+                export_data["startup_profile"] = {
+                    "public_id": str(profile.public_id),
+                    "status": profile.status,
+                    "sector": str(profile.sector_id),
+                    "stage": str(profile.stage_id),
+                    "country": str(profile.country_id),
+                    "business_model": str(profile.business_model_id),
+                    "round_amount_eur": str(profile.round_amount_eur),
+                    "mrr_eur": str(profile.mrr_eur) if profile.mrr_eur else None,
+                    "team_size": profile.team_size,
+                    "created_at": profile.created_at.isoformat(),
+                }
+
+        elif user.role == "investor":
+            inv_profile = getattr(user, "investor_profile", None)
+            if inv_profile:
+                from apps.investors.models import Mandate
+                mandates = Mandate.objects.filter(investor_profile=inv_profile).order_by("-version")
+                export_data["investor_mandates_history"] = [
+                    {
+                        "version": m.version,
+                        "is_current": m.is_current,
+                        "check_min_eur": str(m.check_min_eur),
+                        "check_max_eur": str(m.check_max_eur),
+                        "sector_codes": m.sector_codes,
+                        "stage_codes": m.stage_codes,
+                        "country_codes": m.country_codes,
+                        "created_at": m.created_at.isoformat(),
+                    }
+                    for m in mandates
+                ]
+
+        # Формуємо JSON-файл для завантаження
+        response = HttpResponse(
+            json.dumps(export_data, indent=2, ensure_ascii=False),
+            content_type="application/json; charset=utf-8",
+        )
+        response["Content-Disposition"] = f'attachment; filename="startshare_data_export_{user.id}.json"'
+        return response
+    
+
+    
+class DeleteAccountView(APIView):
+    """
+    POST /api/auth/delete-account/
+    Повне видалення акаунта та анонімізація за Art. 17 DSGVO.
+    Вимагає передачі поточного пароля {"password": "..."}.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        password = request.data.get("password")
+        if not password:
+            return Response({"password": "Для видалення акаунта необхідно підтвердити пароль."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+        if not user.check_password(password):
+            return Response({"password": "Невірний пароль."}, status=status.HTTP_400_BAD_REQUEST)
+
+        now = timezone.now()
+
+        with transaction.atomic():
+            # 1. Якщо це стартап — очищаємо приватні дані, стираємо деки та переводимо в REMOVED
+            profile = getattr(user, "startup_profile", getattr(user, "startupprofile", None))
+            if profile:
+                profile.status = "REMOVED"
+                profile.removed_at = now
+                profile.removed_by = StartupProfileRemovedBy.STARTUP
+                profile.save()
+
+                # Стираємо конфіденційні назви компанії
+                if hasattr(profile, "private_details"):
+                    profile.private_details.delete()
+
+                # Фізично видаляємо завантажені файли презентацій з диска
+                for deck in profile.pitch_decks.all():
+                    if deck.file:
+                        deck.file.delete(save=False)
+                    deck.deleted_at = now
+                    deck.save(update_fields=["file", "deleted_at"])
+
+            # 2. Якщо це інвестор — архівуємо мандати
+            inv_profile = getattr(user, "investor_profile", None)
+            if inv_profile:
+                inv_profile.mandates.all().update(is_current=False)
+
+            # 3. Анонімізуємо самого користувача (Art. 17 DSGVO)
+            # Замінюємо реальний e-mail на знеособлений хеш, вимикаємо вхід
+            user.email = f"deleted_{user.id}_{int(now.timestamp())}@anonymized.invalid"
+            user.is_active = False
+            user.deleted_at = now
+            user.set_unusable_password()
+            user.save(update_fields=["email", "is_active", "deleted_at", "password"])
+
+            # 4. Завершуємо сесію
+            logout(request)
+
+        return Response({"status": "deleted", "detail": "Account successfully erased."}, status=status.HTTP_200_OK)
