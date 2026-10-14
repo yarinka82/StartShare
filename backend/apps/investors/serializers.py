@@ -49,7 +49,7 @@ class MandateSerializer(serializers.Serializer):
 
     # Опциональные критерии (Soft filters)
     region_codes = serializers.ListField(
-        child=serializers.CharField(max_length=6),
+        child=serializers.CharField(max_length=32),
         allow_empty=True,
         required=False,
         default=list,
