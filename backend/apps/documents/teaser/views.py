@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from apps.analytics.models import EventName
 from apps.analytics.services import track
 
-from apps.profiles.models import Deck
+from apps.profiles.models import Deck, StartupProfile
 
 from ..models import Teaser, TeaserJob
 from .contract import FIELD_NAMES
@@ -130,6 +130,7 @@ class TeaserApproveView(APIView):
         teaser = _teaser_for(request, pk)
         if teaser.status == Teaser.Status.APPROVED:
             return _respond(teaser)
+        transitioned_to_live = False
         with transaction.atomic():
             try:
                 teaser = _locked(teaser.pk)
@@ -143,7 +144,15 @@ class TeaserApproveView(APIView):
             teaser.declaration_a_accepted_at = now
             teaser.approved_at = now
             teaser.save()
+
+            profile = teaser.job.deck.profile
+            if profile.status in (StartupProfile.Status.DRAFT, StartupProfile.Status.PAUSED):
+                profile.status = StartupProfile.Status.LIVE
+                profile.save(update_fields=["status", "updated_at"])
+                transitioned_to_live = True
         track(EventName.TEASER_APPROVED, user=request.user)
+        if transitioned_to_live:
+            track(EventName.WENT_LIVE, user=request.user)
         return _respond(teaser)
 
 

@@ -178,10 +178,13 @@ class TeaserEditTests(TestCase):
         self.assertIsNotNone(r.data["approved_at"])
         self.assertIsNotNone(r.data["declaration_a_accepted_at"])
         self.assertEqual(self.events("teaser_approved").count(), 1)
+        self.assertEqual(self.user.startup_profile.status, StartupProfile.Status.LIVE)
+        self.assertEqual(self.events("went_live").count(), 1)
 
         again = self.approve()                                       # повтор: 200 и без нового события
         self.assertEqual(again.status_code, 200)
         self.assertEqual(self.events("teaser_approved").count(), 1)
+        self.assertEqual(self.events("went_live").count(), 1)
 
         self.assertEqual(self.edit(team="Neu").status_code, 409)     # после затверждения всё заперто
         self.assertEqual(self.review("team").status_code, 409)

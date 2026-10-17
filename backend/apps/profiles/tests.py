@@ -4,7 +4,7 @@ import os
 from django.core.cache import cache
 from django.core.management import call_command
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import override_settings
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from pypdf import PdfWriter
 from rest_framework.test import APIClient, APITestCase
@@ -12,6 +12,7 @@ from rest_framework.test import APIClient, APITestCase
 from apps.accounts.models import User
 from apps.profiles.choices import BusinessModel, Sector, Stage
 from apps.profiles.models import Country, Deck, StartupProfile
+from apps.profiles.storage import AzureBlobPrivateStorage, delete_deck
 
 
 def make_pdf(password=None, pages=1):
@@ -216,3 +217,27 @@ class DeckTests(APITestCase):
         self.assertEqual(c.get("/api/profile/deck/download/").status_code, 404)  # sees only own deck
         self.assertEqual(c.get("/api/profile/deck/").status_code, 404)
         self.assertIn(APIClient().get("/api/profile/deck/download/").status_code, (401, 403))
+
+
+class BlobStorageTests(TestCase):
+    @override_settings(
+        AZURE_BLOB_ACCOUNT_NAME="demo",
+        AZURE_BLOB_ACCOUNT_KEY="secret",
+        AZURE_BLOB_CONTAINER_NAME="startshare-private",
+    )
+    def test_azure_blob_storage_has_no_public_url(self):
+        self.assertIsNone(AzureBlobPrivateStorage().url)
+
+    @override_settings(
+        AZURE_BLOB_ACCOUNT_NAME="demo",
+        AZURE_BLOB_ACCOUNT_KEY="secret",
+        AZURE_BLOB_CONTAINER_NAME="startshare-private",
+    )
+    def test_delete_deck_is_idempotent(self):
+        user = make_user("blob@example.com")
+        profile = StartupProfile.objects.create(user=user)
+        deck = Deck.objects.create(profile=profile, file="decks/keep.pdf", original_name="keep.pdf", size=1)
+        with override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend"):
+            self.assertTrue(delete_deck(profile.pk))
+            self.assertFalse(Deck.objects.filter(pk=deck.pk).exists())
+            self.assertTrue(delete_deck(profile.pk))

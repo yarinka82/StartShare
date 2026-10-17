@@ -121,15 +121,58 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 TEASER_MAX_RETRIES = 2                    # число повторов вызова ШІ (шаг 7); решает backend
-TEASER_LLM_PROVIDER = "gemini_free"
+LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "fake")
+TEASER_LLM_PROVIDER = LLM_PROVIDER
 TEASER_GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-TEASER_GEMINI_MODEL = "gemini-3.7-flash"
+TEASER_GEMINI_MODEL = os.environ.get("TEASER_GEMINI_MODEL", "gemini-3.7-flash")
+AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
+AZURE_OPENAI_API_KEY = os.environ.get("AZURE_OPENAI_API_KEY", "")
+AZURE_OPENAI_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "")
+# Deprecated alias kept only for backwards compatibility. The source of truth is VendorCompliance.
+TEASER_AVV_SIGNED = False
+ALLOWED_REGIONS = ["eu", "sweden-central", "west-europe"]
+
+# --- External providers / AVV-DPA registry ---
+# All external providers that process personal or business data must be recorded here.
+# Until a valid DPA/AVV is signed and the contract is approved, the provider is blocked.
+EXTERNAL_PROVIDER_CONFIGS = {
+    "azure_openai": {
+        "enabled": False,
+        "region": "eu",
+        "dpa_signed": False,
+        "dpa_valid_until": None,
+        "no_model_training": False,
+        "allowed_data_types": ["ai_prompt", "startup_profile", "investor_profile", "pitch_deck"],
+        "notes": "Set to true only after Azure OpenAI DPA/AVV is signed.",
+    },
+    "postmark": {
+        "enabled": False,
+        "region": "eu",
+        "dpa_signed": False,
+        "dpa_valid_until": None,
+        "no_model_training": True,
+        "allowed_data_types": ["email_address", "user_id", "notification_type"],
+        "notes": "Set to true only after Postmark DPA/AVV is signed.",
+    },
+    "azure_blob": {
+        "enabled": False,
+        "region": "eu",
+        "dpa_signed": False,
+        "dpa_valid_until": None,
+        "no_model_training": True,
+        "allowed_data_types": ["pitch_deck", "document_upload", "startup_profile"],
+        "notes": "Set to true only after Azure Blob DPA/AVV is signed.",
+    },
+}
 
 
 # --- E-mail ---
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@example.com")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+BREVO_API_URL = os.environ.get("BREVO_API_URL", "https://api.brevo.com/v3")
+BREVO_API_KEY = os.environ.get("BREVO_API_KEY", "")
+BREVO_OPEN_TRACKING_ENABLED = os.environ.get("BREVO_OPEN_TRACKING_ENABLED", "false").lower() in {"1", "true", "yes", "on"}
 EMAIL_VERIFY_MAX_AGE = 48 * 60 * 60  # seconds
 
 # --- Legal documents: bump a version to require re-acceptance later ---
@@ -143,6 +186,10 @@ LEGAL_DOCUMENT_VERSIONS = {
 PRIVATE_MEDIA_ROOT = Path(os.environ.get("PRIVATE_MEDIA_ROOT", BASE_DIR / "private_media"))
 if "test" in sys.argv:
     PRIVATE_MEDIA_ROOT = Path(tempfile.mkdtemp(prefix="deck-test-"))
+AZURE_BLOB_ACCOUNT_NAME = os.environ.get("AZURE_BLOB_ACCOUNT_NAME", "")
+AZURE_BLOB_ACCOUNT_KEY = os.environ.get("AZURE_BLOB_ACCOUNT_KEY", "")
+AZURE_BLOB_CONTAINER_NAME = os.environ.get("AZURE_BLOB_CONTAINER_NAME", "startshare-private")
+AZURE_BLOB_ENDPOINT_SUFFIX = os.environ.get("AZURE_BLOB_ENDPOINT_SUFFIX", "core.windows.net")
 DECK_MAX_BYTES = int(os.environ.get("DECK_MAX_MB", "20")) * 1024 * 1024
 # Also set client_max_body_size (nginx) a bit above DECK_MAX_BYTES.
 

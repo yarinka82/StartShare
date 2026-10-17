@@ -3,10 +3,17 @@ from unittest.mock import patch
 
 from django.core import mail
 from django.core.cache import cache
+from django.core.management import call_command
 from rest_framework.test import APIClient, APITestCase
 from rest_framework.throttling import ScopedRateThrottle
 
-from .models import Consent, User
+from django.test import SimpleTestCase, TestCase, override_settings
+
+from apps.documents.teaser.llm import AzureOpenAIClient, LLMError, get_client
+
+from .compliance import ProviderBlocked, VendorComplianceError, assert_provider_allowed, vendor_allowed
+from .email_backend import BrevoEmailBackend
+from .models import Consent, User, VendorCompliance
 
 PASSWORD = "correct-horse-battery"
 
@@ -21,6 +28,246 @@ def reg_payload(**over):
     }
     data.update(over)
     return data
+
+
+class VendorComplianceTests(TestCase):
+    @override_settings(
+        ALLOWED_REGIONS=["eu", "sweden-central", "west-europe"],
+        EXTERNAL_PROVIDER_CONFIGS={
+            "azure_openai": {
+                "enabled": True,
+                "dpa_signed": True,
+                "dpa_valid_until": "2999-12-31",
+                "no_model_training": True,
+                "allowed_data_types": ["ai_prompt"],
+            }
+        },
+    )
+    def test_vendor_allowed_when_contract_is_valid(self):
+        self.assertTrue(vendor_allowed("azure_openai", "ai_prompt", vendor_type="ai"))
+
+    @override_settings(
+        ALLOWED_REGIONS=["eu", "sweden-central", "west-europe"],
+        EXTERNAL_PROVIDER_CONFIGS={
+            "azure_openai": {
+                "enabled": True,
+                "dpa_signed": False,
+                "dpa_valid_until": "2999-12-31",
+                "no_model_training": True,
+                "allowed_data_types": ["ai_prompt"],
+            }
+        },
+    )
+    def test_vendor_blocked_without_dpa(self):
+        self.assertFalse(vendor_allowed("azure_openai", "ai_prompt", vendor_type="ai"))
+
+    @override_settings(ALLOWED_REGIONS=["eu", "sweden-central", "west-europe"])
+    def test_assert_provider_allowed_requires_db_registration(self):
+        with self.assertRaises(ProviderBlocked):
+            assert_provider_allowed("missing_vendor")
+
+    @override_settings(ALLOWED_REGIONS=["eu", "sweden-central", "west-europe"])
+    def test_assert_provider_allowed_blocks_missing_dpa(self):
+        VendorCompliance.objects.create(
+            provider_name="azure_openai",
+            name="azure_openai",
+            vendor_type="ai",
+            provider_type="ai",
+            region="sweden-central",
+            dpa_signed=False,
+            no_model_training=True,
+            allowed_data_types=["ai_prompt"],
+        )
+        with self.assertRaises(ProviderBlocked):
+            assert_provider_allowed("azure_openai")
+
+    @override_settings(ALLOWED_REGIONS=["eu", "sweden-central", "west-europe"])
+    def test_assert_provider_allowed_blocks_expired_dpa(self):
+        VendorCompliance.objects.create(
+            provider_name="azure_openai",
+            name="azure_openai",
+            vendor_type="ai",
+            provider_type="ai",
+            region="sweden-central",
+            dpa_signed=True,
+            dpa_valid_until="2000-01-01",
+            no_model_training=True,
+            allowed_data_types=["ai_prompt"],
+        )
+        with self.assertRaises(ProviderBlocked):
+            assert_provider_allowed("azure_openai")
+
+    @override_settings(ALLOWED_REGIONS=["eu", "sweden-central", "west-europe"])
+    def test_assert_provider_allowed_blocks_foreign_region(self):
+        VendorCompliance.objects.create(
+            provider_name="foreign_ai",
+            name="foreign_ai",
+            vendor_type="ai",
+            provider_type="ai",
+            region="us-east",
+            dpa_signed=True,
+            dpa_valid_until="2999-12-31",
+            no_model_training=True,
+            allowed_data_types=["ai_prompt"],
+        )
+        with self.assertRaises(ProviderBlocked):
+            assert_provider_allowed("foreign_ai")
+
+    @override_settings(ALLOWED_REGIONS=["eu", "sweden-central", "west-europe"])
+    def test_assert_provider_allowed_blocks_llm_without_no_model_training(self):
+        VendorCompliance.objects.create(
+            provider_name="bad_llm",
+            name="bad_llm",
+            vendor_type="ai",
+            provider_type="ai",
+            region="sweden-central",
+            dpa_signed=True,
+            dpa_valid_until="2999-12-31",
+            no_model_training=False,
+            allowed_data_types=["ai_prompt"],
+        )
+        with self.assertRaises(ProviderBlocked):
+            assert_provider_allowed("bad_llm")
+
+    @override_settings(ALLOWED_REGIONS=["eu", "sweden-central", "west-europe"])
+    def test_assert_provider_allowed_allows_valid_provider(self):
+        VendorCompliance.objects.create(
+            provider_name="azure_openai",
+            name="azure_openai",
+            vendor_type="ai",
+            provider_type="ai",
+            region="sweden-central",
+            dpa_signed=True,
+            dpa_valid_until="2999-12-31",
+            no_model_training=True,
+            allowed_data_types=["ai_prompt"],
+        )
+        assert_provider_allowed("azure_openai")
+
+    @override_settings(ALLOWED_REGIONS=["eu", "sweden-central", "west-europe"])
+    def test_ai_notice_enabled_uses_db_source_of_truth(self):
+        from .compliance import is_ai_notice_enabled
+
+        VendorCompliance.objects.create(
+            provider_name="azure_openai",
+            name="azure_openai",
+            vendor_type="ai",
+            provider_type="ai",
+            region="sweden-central",
+            dpa_signed=True,
+            dpa_valid_until="2999-12-31",
+            no_model_training=True,
+            allowed_data_types=["ai_prompt"],
+        )
+        self.assertTrue(is_ai_notice_enabled())
+
+        VendorCompliance.objects.filter(provider_name="azure_openai").update(dpa_signed=False)
+        self.assertFalse(is_ai_notice_enabled())
+
+    @override_settings(LLM_PROVIDER="fake", DEBUG=False, ALLOWED_REGIONS=["eu", "sweden-central", "west-europe"])
+    def test_fake_provider_is_forbidden_in_production(self):
+        with self.assertRaises(LLMError):
+            get_client()
+
+    @override_settings(
+        LLM_PROVIDER="azure_openai",
+        AZURE_OPENAI_ENDPOINT="https://example.invalid",
+        AZURE_OPENAI_API_KEY="secret",
+        AZURE_OPENAI_DEPLOYMENT="gpt-test",
+        ALLOWED_REGIONS=["eu", "sweden-central", "west-europe"],
+    )
+    def test_azure_client_blocks_before_network_call_without_dpa(self):
+        client = AzureOpenAIClient("https://example.invalid", "secret", "gpt-test")
+        vendor = VendorCompliance.objects.create(
+            provider_name="azure_openai",
+            name="azure_openai",
+            vendor_type="ai",
+            provider_type="ai",
+            region="sweden-central",
+            dpa_signed=False,
+            no_model_training=True,
+            allowed_data_types=["ai_prompt"],
+        )
+        with self.assertRaises(LLMError):
+            client.generate_json(system="s", user="u", schema={"type": "object"})
+
+    @override_settings(
+        EMAIL_BACKEND="apps.accounts.email_backend.BrevoEmailBackend",
+        BREVO_API_URL="https://api.brevo.example/v3",
+        BREVO_API_KEY="secret",
+        BREVO_OPEN_TRACKING_ENABLED=False,
+        ALLOWED_REGIONS=["eu", "sweden-central", "west-europe"],
+    )
+    def test_brevo_backend_blocks_without_dpa(self):
+        VendorCompliance.objects.create(
+            provider_name="brevo",
+            name="brevo",
+            vendor_type="email",
+            provider_type="email",
+            region="eu",
+            dpa_signed=False,
+            no_model_training=True,
+            allowed_data_types=["email_address"],
+        )
+
+        with patch("apps.accounts.email_backend.requests.post") as mock_post:
+            sent = BrevoEmailBackend().send_messages([mail.EmailMessage("subj", "body", to=["a@example.com"])])
+        self.assertEqual(sent, 0)
+        mock_post.assert_not_called()
+
+    @override_settings(
+        EMAIL_BACKEND="apps.accounts.email_backend.BrevoEmailBackend",
+        BREVO_API_URL="https://api.brevo.example/v3",
+        BREVO_API_KEY="secret",
+        BREVO_OPEN_TRACKING_ENABLED=False,
+        ALLOWED_REGIONS=["eu", "sweden-central", "west-europe"],
+    )
+    def test_brevo_backend_disables_tracking_and_sends_with_gate(self):
+        VendorCompliance.objects.create(
+            provider_name="brevo",
+            name="brevo",
+            vendor_type="email",
+            provider_type="email",
+            region="eu",
+            dpa_signed=True,
+            dpa_valid_until="2999-12-31",
+            no_model_training=True,
+            allowed_data_types=["email_address"],
+        )
+
+        with patch("apps.accounts.email_backend.requests.post") as mock_post:
+            mock_post.return_value.raise_for_status.return_value = None
+            mock_post.return_value.status_code = 200
+            sent = BrevoEmailBackend().send_messages([mail.EmailMessage("subj", "body", to=["a@example.com"])])
+
+        self.assertEqual(sent, 1)
+        payload = mock_post.call_args.kwargs["json"]
+        self.assertFalse(payload["trackOpen"])
+        self.assertEqual(payload["trackedLinks"], "disabled")
+        self.assertNotIn("open_tracking", payload)
+
+    def test_seed_vendors_creates_default_records(self):
+        call_command("seed_vendors")
+        created_names = {v.provider_name for v in VendorCompliance.objects.all()}
+        self.assertTrue({"azure_openai", "azure_blob", "brevo"}.issubset(created_names))
+        for vendor in VendorCompliance.objects.filter(provider_name__in=["azure_openai", "azure_blob", "brevo"]):
+            self.assertFalse(vendor.dpa_signed)
+            self.assertTrue(vendor.is_active)
+
+    def test_seed_vendors_is_idempotent_and_preserves_manual_data(self):
+        obj, _ = VendorCompliance.objects.get_or_create(
+            provider_name="brevo",
+            defaults={"name": "brevo", "vendor_type": "email", "provider_type": "email", "dpa_signed": True, "notes": "custom"},
+        )
+        obj.dpa_signed = True
+        obj.notes = "custom"
+        obj.save()
+
+        call_command("seed_vendors")
+        vendor = VendorCompliance.objects.get(provider_name="brevo")
+        self.assertTrue(vendor.dpa_signed)
+        self.assertEqual(vendor.notes, "custom")
+        self.assertEqual(VendorCompliance.objects.filter(provider_name="brevo").count(), 1)
 
 
 class RegistrationTests(APITestCase):

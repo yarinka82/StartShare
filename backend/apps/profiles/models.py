@@ -7,10 +7,14 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
 from .choices import BusinessModel, Sector, Stage
+from .storage import AzureBlobPrivateStorage, get_storage_backend
 
 
 def get_private_storage():
     """Deck files live outside MEDIA_ROOT and are never served directly."""
+    backend = get_storage_backend()
+    if isinstance(backend, AzureBlobPrivateStorage):
+        return backend
     return FileSystemStorage(location=settings.PRIVATE_MEDIA_ROOT)
 
 
