@@ -70,3 +70,24 @@ def generate_weekly_digests():
             generated_count += 1
 
     return f"Generated {generated_count} weekly digests."
+
+
+
+@shared_task
+def expire_stale_intro_requests():
+    """
+    Запускається щоночі.
+    Переводить прострочені запити (через 7 днів) зі статусу INTERESTED у EXPIRED.
+    """
+    now = timezone.now()
+    stale_intros = Introduction.objects.filter(
+        status=Introduction.Status.INTERESTED,
+        request_expires_at__isnull=False,
+        request_expires_at__lte=now,
+    )
+    count = stale_intros.update(
+        status="EXPIRED",
+        expired_at=now,
+    )
+    return f"Expired {count} intro requests."
+

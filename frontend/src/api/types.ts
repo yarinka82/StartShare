@@ -1,10 +1,11 @@
-export type Role = "startup" | "investor";
+export type Role = "startup" | "investor" | "staff";
 
 export interface User {
-  id: number;
+  id: string;
   email: string;
   role: Role;
-  email_verified: boolean;
+  is_verified?: boolean;
+  preferred_language?: string;
 }
 
 /** One list value. `code` is what is stored and sent to the API; `name` is a fallback label. */
@@ -115,4 +116,20 @@ export interface MandateHistoryDto {
   business_model_codes: string[];
 }
 
+export interface ReportPayload {
+  reason_category: string;
+  explanation: string;
+  reporter_name: string;
+  reporter_email: string;
+  declaration_good_faith: boolean;
+}
+
+export interface StartupIntroDto {
+  id: string; // public_id запиту знайомства
+  investor_name: string;
+  investor_type: string;
+  message: string;
+  interested_at: string;
+  expires_at: string;
+}
 

@@ -15,6 +15,7 @@ import { errorText, parseError } from "../api/errors";
 import type { Deck, Dictionaries, Option, Profile } from "../api/types";
 import DeckUpload from "../components/DeckUpload";
 import PrivacyZone from "../components/PrivacyZone";
+import StartupIntrosSection from "../components/StartupIntrosSection";
 
 
 type Values = {
@@ -293,6 +294,8 @@ return (
         </Alert>
       )}
 
+
+
       {meta.status !== "PAUSED" && meta.status !== "REMOVED" && (
         meta.is_complete ? (
           <Alert severity="success">{t("profile.complete")}</Alert>
@@ -302,6 +305,10 @@ return (
           </Alert>
         )
       )}
+
+      {/* ВХІДНІ ЗАПИТИ ВІД ІНВЕСТОРІВ (З'являються автоматично при наявності) */}
+      <StartupIntrosSection />
+
 
       {/* 3. СЕКЦІЯ 1: ОСНОВНІ ДАНІ */}
       <Section title={t("profile.sections.basics")}>

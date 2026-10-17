@@ -10,6 +10,7 @@ import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 import RegisterPage from "./pages/RegisterPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import StaffDashboardPage from "./pages/StaffDashboardPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 
 export default function App() {
@@ -28,8 +29,17 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<HomeRedirect />} />
 
-        {/* Юридичні сторінки (AGB, Datenschutz, Impressum, Kriterien / Текст F) */}
-        <Route path="/legal/:doc" element={<LegalPage />} />
+    {/* Юридичні сторінки (AGB, Datenschutz, Impressum, Kriterien / Текст F) */}
+    <Route path="/legal/:doc" element={<LegalPage />} />
+
+        <Route
+          path="/staff/dashboard"
+          element={
+            <RequireRole role="staff">
+              <StaffDashboardPage />
+            </RequireRole>
+          }
+        />
 
         {/* 1. ПОТІК СТАРТАПУ: Анкета + Завантаження деку + Редактор тизера ШІ (все в ProfilePage) */}
         <Route

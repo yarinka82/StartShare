@@ -2,7 +2,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { AppBar, Box, Button, Container, Link, Toolbar, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink, Outlet, useNavigate } from "react-router-dom";
-
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { useAuth } from "../auth/AuthContext";
 import AuthBackground from "./AuthBackground";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -65,6 +65,18 @@ export default function Layout() {
               </Button>
             )}
           </Box>
+
+            {user?.role === "staff" && (
+              <Button
+                component={RouterLink}
+                to="/staff/dashboard"
+                color="error"
+                startIcon={<AdminPanelSettingsIcon />}
+                sx={{ textTransform: "none", fontWeight: 700 }}
+              >
+                {t("nav.staffPanel", "Адмін-панель")}
+              </Button>
+            )}
 
           {/* 3. Перемикач мов */}
           <LanguageSwitcher />

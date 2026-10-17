@@ -1,7 +1,5 @@
 from rest_framework import serializers
 
-from common.models import Country
-from ..documents.serializers import DeckSerializer
 from ..startups.models import StartupProfile
 
 

@@ -1,7 +1,8 @@
 from django.contrib import admin
+from django.utils import timezone
 
 from apps.documents.models import TeaserField, Teaser, PitchDeck
-from apps.startups.admin import hide_startups_from_matching
+
 from apps.startups.models import StartupProfile
 from common.models import Country
 
@@ -18,27 +19,40 @@ admin.site.register(Country, DictionaryAdmin)
 @admin.register(StartupProfile)
 class StartupProfileAdmin(admin.ModelAdmin):
     list_display = [
+        "id",
         "public_id",
-        "get_company_name",
         "status",
-        "user",
-        "is_hidden_from_matching",
+        "sector",
+        "stage",
+        "country",
+        "round_amount_eur",
+        "moderation_hidden_at",
         "created_at",
     ]
-    list_filter = ["status", "created_at"]
-    search_fields = ["public_id", "user__email", "private_details__company_name"]
-    readonly_fields = ["public_id", "created_at", "updated_at"]
-    actions = [hide_startups_from_matching]
+    list_filter = ["status", "sector", "stage", "country", "created_at"]
+    search_fields = [
+        "public_id",
+        "private_details__company_name",
+        "user__email",  # ← проверьте имя связи
+    ]
+    actions = ["hide_startups_from_matching", "unhide_startups_from_matching"]
 
-    @admin.display(description="Company Name", ordering="private_details__company_name")
-    def get_company_name(self, obj):
-        if hasattr(obj, "private_details") and obj.private_details:
-            return obj.private_details.company_name
-        return "—"
+    @admin.action(description="🚨 Приховати стартап з видачі (moderation_hidden_at)")
+    def hide_startups_from_matching(self, request, queryset):
+        now = timezone.now()
+        updated = queryset.update(moderation_hidden_at=now)
+        self.message_user(
+            request,
+            f"Успішно приховано {updated} стартап(ів) з видачі інвесторів.",
+        )
 
-    @admin.display(description="Hidden from matching", boolean=True)
-    def is_hidden_from_matching(self, obj):
-        return obj.moderation_hidden_at is not None
+    @admin.action(description="✅ Розблокувати стартап (повернути у видачу)")
+    def unhide_startups_from_matching(self, request, queryset):
+        updated = queryset.update(moderation_hidden_at=None)
+        self.message_user(
+            request,
+            f"Розблоковано {updated} стартап(ів). Вони знову доступні в матчингу.",
+        )
 
 
 

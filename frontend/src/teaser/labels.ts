@@ -21,7 +21,7 @@ export const BLOCKER_MESSAGES = new Proxy({} as Record<string, string>, {
  * Автоматично перекладає системні помилки деку
  */
 export const ERROR_MESSAGES = new Proxy({} as Record<string, string>, {
-  get: (_, prop: string) => i18n.t(`teaser.errors.${prop}`, { defaultValue: prop }),
+  get: (_, prop: string) => i18n.t(`errors.${prop}`, { defaultValue: prop }),
 });
 
 /**

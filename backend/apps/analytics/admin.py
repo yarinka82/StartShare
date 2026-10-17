@@ -6,7 +6,7 @@ from .models import Event
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    # Если вы оставили ForeignKey на user, замените "user_id" обратно на "user"
+    
     list_display = (
         "created_at",
         "name",
