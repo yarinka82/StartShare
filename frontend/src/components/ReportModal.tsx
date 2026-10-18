@@ -21,6 +21,8 @@ import {
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
+import { api } from "../api/client";
+import { errorText, parseError } from "../api/errors";
 
 interface Props {
   open: boolean;
@@ -58,22 +60,14 @@ export default function ReportModal({ open, onClose, startupPublicId }: Props) {
 
     try {
       setBusy(true);
-      const res = await fetch(`/api/startups/${startupPublicId}/report/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          reason_category: reason,
-          explanation: explanation.trim(),
-          reporter_name: name.trim(),
-          reporter_email: email.trim(),
-          declaration_good_faith: goodFaith,
-        }),
-      });
 
-      if (!res.ok) {
-        const body = await res.json();
-        throw new Error(body.detail || "Error submitting report");
-      }
+      await api.submitReport(startupPublicId, {
+        reason_category: reason,
+        explanation: explanation.trim(),
+        reporter_name: name.trim(),
+        reporter_email: email.trim(),
+        declaration_good_faith: goodFaith,
+      });
 
       setSuccess(true);
       setTimeout(() => {
@@ -81,7 +75,9 @@ export default function ReportModal({ open, onClose, startupPublicId }: Props) {
         onClose();
       }, 2000);
     } catch (err: any) {
-      setError(err?.message || "Fehler beim Absenden.");
+      // Автоматичний парсинг помилок з бекенду
+      const p = parseError(err);
+      setError(p.detail || errorText(t, p.detail) || "Помилка при надсиланні скарги.");
     } finally {
       setBusy(false);
     }

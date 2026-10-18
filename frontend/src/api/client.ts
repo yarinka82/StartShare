@@ -7,7 +7,7 @@ import type {
   LegalDocItem,
   Mandate, MandateHistoryDto,
   MandateInput,
-  Profile,
+  Profile, ReportPayload, StartupIntroDto,
   User
 } from "./types";
 
@@ -112,6 +112,13 @@ export const api = {
   getActiveLegalDocs: (lang = "de") =>
     request<Record<string, LegalDocItem>>(`/api/auth/legal-documents/?lang=${lang}`),
 
+    toggleUserActive: (userId: number) =>
+    request<{ id: number; is_active: boolean }>(
+      `/api/auth/staff/users/${userId}/toggle-active/`,
+      "POST"
+    ),
+
+
   // profile
   dictionaries: () => request<Dictionaries>("/api/dictionaries/"),
   getProfile: () => request<Profile>("/api/profile/"),
@@ -124,8 +131,14 @@ export const api = {
   confirmInvestorStatus: () => request<InvestorState>("/api/investor/confirm-status/", "POST", { accept: true }),
   saveMandate: (data: MandateInput) => request<Mandate>("/api/investor/mandate/", "PUT", data),
 
-  // ІНВЕСТОР:
   getInvestorFeed: () => request<DigestCardDto[]>("/api/investor/feed/"),
+
+  submitReport: (startupPublicId: string, data: ReportPayload) =>
+    request<{ status: string; report_id: string }>(
+      `/api/startups/${startupPublicId}/report/`,
+      "POST",
+      data
+    ),
 
   respondToCard: (data: {
     card_id: number;
@@ -135,5 +148,15 @@ export const api = {
   }) => request<void>("/api/investor/cards/action/", "POST", data),
 
   getMandateHistory: () => request<MandateHistoryDto[]>("/api/investor/mandate/history/"),
+
+   getStartupIntros: () => request<StartupIntroDto[]>("/api/startups/intros/"),
+
+  respondToStartupIntro: (id: string, action: "freigabe" | "nein") =>
+    request<{ status: string; decision: string }>(
+      `/api/startups/intros/${id}/respond/`,
+      "POST",
+      { action }
+    ),
+
 };
 

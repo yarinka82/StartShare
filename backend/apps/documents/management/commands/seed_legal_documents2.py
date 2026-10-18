@@ -95,7 +95,41 @@ Start Share, Sitz in Deutschland.
 """,
         "2026-10-01",
     ),
+    # ------------------ Impressum ------------------
+    (
+        LegalDocumentCode.IMPRESSUM,
+        Language.DE,
+        "Impressum",
+        """Impressum
 
+Angaben gemäß § 5 DDG
+
+Start Share (Platzhalter – bitte vor dem Produktivbetrieb durch die tatsächlichen Angaben des Betreibers ersetzen)
+Musterstraße 1
+12345 Musterstadt
+Deutschland
+
+Vertreten durch:
+Max Mustermann (Geschäftsführer)
+
+Kontakt:
+Telefon: +49 30 12345678
+E-Mail: info@example.com
+
+Registereintrag:
+Registergericht: Amtsgericht Musterstadt
+Registernummer: HRB 000000
+
+Umsatzsteuer-ID gemäß § 27a UStG:
+DE000000000
+
+Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:
+Max Mustermann, Musterstraße 1, 12345 Musterstadt
+""",
+        "2026-10-01",
+    ),
+    
+ 
     # ------------------ A: Startup declaration ------------------
     (
         LegalDocumentCode.A,
@@ -195,4 +229,4 @@ class Command(BaseCommand):
         )
         
         
-##  python manage.py seed_legal_documents
+##  python manage.py seed_legal_documents2

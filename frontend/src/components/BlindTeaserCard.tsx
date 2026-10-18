@@ -102,7 +102,7 @@ export default function BlindTeaserCard({
         </Stack>
 
         <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#17407a" }}>
-          €{(targetAmountEur / 1_000).toLocaleString()}k Seek
+          €{targetAmountEur != null ? Math.round(Number(targetAmountEur) / 1_000).toLocaleString() : 0}k Seek
         </Typography>
           {/* КНОПКА MELDEN (DSA ст. 16) */}
           <Tooltip title={t("dsa.reportTooltip", "Profil melden (Art. 16 DSA)")}>
@@ -153,18 +153,20 @@ export default function BlindTeaserCard({
 
         {/* Метрики в плашке */}
         <Box sx={{ display: "flex", gap: 3, py: 1.5, px: 2, bgcolor: "#f1f5f9", borderRadius: 2, mb: 2 }}>
-          {mrrEur !== undefined && (
-            <Box>
-              <Typography variant="caption" color="text.secondary">MRR</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>€{mrrEur.toLocaleString()}</Typography>
-            </Box>
-          )}
-          {teamSize !== undefined && (
-            <Box>
-              <Typography variant="caption" color="text.secondary">Team</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>{teamSize} FTE</Typography>
-            </Box>
-          )}
+        {mrrEur != null && (
+          <Box>
+            <Typography variant="caption" color="text.secondary">MRR</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              €{Number(mrrEur).toLocaleString()}
+            </Typography>
+          </Box>
+        )}
+            {teamSize != null && (
+              <Box>
+                <Typography variant="caption" color="text.secondary">Team</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>{teamSize} FTE</Typography>
+              </Box>
+            )}
         </Box>
 
         <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary", textTransform: "uppercase" }}>

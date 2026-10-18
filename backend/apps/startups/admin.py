@@ -4,54 +4,56 @@ from django.utils import timezone
 from apps.startups.models import Report, ReportStatus
 
 
-@admin.action(description="🚨 Заблокувати профіль стартапу (приховати з матчингу)")
-def hide_startups_from_matching(modeladmin, request, queryset):
-    now = timezone.now()
-    updated = queryset.update(moderation_hidden_at=now)
-    modeladmin.message_user(
-        request,
-        f"Успішно приховано {updated} стартапів з видачі інвесторів.",
-    )
-
-
 @admin.register(Report)
-class StartupReportAdmin(admin.ModelAdmin):
+class ReportAdmin(admin.ModelAdmin):
+    # 🚀 ВИПРАВЛЕНО: точні поля з вашої моделі Report
     list_display = [
         "id",
         "startup_profile",
         "report_type",
-        "reporter_email_display",
+        "get_reporter_email",
         "status",
+        "decision",
         "created_at",
     ]
-    list_filter = ["status", "report_type", "created_at"]
-    search_fields = [
-        "reporter_user__email",
-        "description",
-        "startup_profile__company_name",
-    ]
-    readonly_fields = ["created_at", "updated_at", "decided_at"]
-    actions = ["mark_resolved_and_hide_profile"]
+    list_filter = ["status", "decision", "report_type", "created_at"]
+    search_fields = ["reporter_user__email", "description", "startup_profile__public_id"]
+    readonly_fields = ["created_at", "updated_at"]
 
-    @admin.display(description="Reporter email", ordering="reporter_user__email")
-    def reporter_email_display(self, obj):
-        return obj.reporter_user.email if obj.reporter_user_id else "—"
+    @admin.display(description="Reporter Email")
+    def get_reporter_email(self, obj):
+        return obj.reporter_user.email if obj.reporter_user else "-"
 
-    @admin.action(description="Підтвердити порушення та приховати стартап")
-    def mark_resolved_and_hide_profile(self, request, queryset):
+    actions = ["action_hide_profile", "action_remove_profile"]
+
+    @admin.action(description="Приховати стартап з матчингу (Profile Hidden)")
+    def action_hide_profile(self, request, queryset):
         now = timezone.now()
         for report in queryset:
             report.status = ReportStatus.RESOLVED
-            report.decided_at = now
+            report.decision = "profile_hidden"
             report.decided_by_user = request.user
-            report.save(update_fields=["status", "decided_at", "decided_by_user"])
+            report.decided_at = now
+            report.save()
 
-            # Приховуємо стартап з усіх алгоритмів матчингу
             sp = report.startup_profile
             sp.moderation_hidden_at = now
             sp.save(update_fields=["moderation_hidden_at"])
+        self.message_user(request, "Профілі приховано з пошуку інвесторів.")
 
-        self.message_user(
-            request,
-            "Скарги схвалено, відповідні стартапи вилучені з матчингу.",
-        )
+    @admin.action(description="Повністю видалити стартап (Profile Removed)")
+    def action_remove_profile(self, request, queryset):
+        now = timezone.now()
+        for report in queryset:
+            report.status = ReportStatus.RESOLVED
+            report.decision = "profile_removed"
+            report.decided_by_user = request.user
+            report.decided_at = now
+            report.save()
+
+            sp = report.startup_profile
+            sp.status = "REMOVED"
+            sp.removed_at = now
+            sp.removed_by = "staff"
+            sp.save(update_fields=["status", "removed_at", "removed_by"])
+        self.message_user(request, "Стартапи заблоковано та переведено в статус REMOVED.")

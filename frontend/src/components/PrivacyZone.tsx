@@ -52,7 +52,7 @@ export default function PrivacyZone() {
   return (
     <Paper variant="outlined" sx={{ p: 3, mt: 3, borderRadius: 2, borderColor: "#cbd5e1", bgcolor: "#f8fafc" }}>
       <Typography variant="h6" sx={{ fontWeight: 700, color: "#0b2142", mb: 0.5 }}>
-        {t("privacy.zoneTitle", "Дані та конфіденційність (DSGVO / GDPR)")}
+        {t("privacy.zoneTitle")}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
         {t("privacy.zoneDesc", "Керуйте своїми персональними даними відповідно до європейських стандартів Art. 17 та Art. 20 DSGVO.")}

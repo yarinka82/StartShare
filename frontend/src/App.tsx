@@ -7,10 +7,17 @@ import InvestorFeedPage from "./pages/InvestorFeedPage";
 import InvestorHomePage from "./pages/InvestorHomePage";
 import LegalPage from "./pages/LegalPage";
 import LoginPage from "./pages/LoginPage";
-import ProfilePage from "./pages/ProfilePage";
 import RegisterPage from "./pages/RegisterPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import StaffDashboardPage from "./pages/StaffDashboardPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
+import CompanyPage from "./profile/CompanyPage";
+import ProfileLayout from "./profile/ProfileLayout";
+import OverviewPage from "./profile/OverviewPage";
+import DeckPage from "./profile/DeckPage";
+import IntrosPage from "./profile/IntrosPage";
+import PrivacyPage from "./profile/PrivacyPage";
+import TeaserSectionPage from "./profile/TeaserSectionPage";
 
 export default function App() {
   return (
@@ -28,18 +35,27 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<HomeRedirect />} />
 
-        {/* Юридичні сторінки (AGB, Datenschutz, Impressum, Kriterien / Текст F) */}
-        <Route path="/legal/:doc" element={<LegalPage />} />
+    {/* Юридичні сторінки (AGB, Datenschutz, Impressum, Kriterien / Текст F) */}
+    <Route path="/legal/:doc" element={<LegalPage />} />
 
-        {/* 1. ПОТІК СТАРТАПУ: Анкета + Завантаження деку + Редактор тизера ШІ (все в ProfilePage) */}
         <Route
-          path="/profile"
+          path="/staff/dashboard"
           element={
-            <RequireRole role="startup">
-              <ProfilePage />
+            <RequireRole role="staff">
+              <StaffDashboardPage />
             </RequireRole>
           }
         />
+
+        {/* 1. ПОТІК СТАРТАПУ: Анкета + Завантаження деку + Редактор тизера ШІ (все в ProfilePage) */}
+        <Route path="/profile" element={<RequireRole role="startup"><ProfileLayout /></RequireRole>}>
+          <Route index element={<OverviewPage />} />
+          <Route path="company" element={<CompanyPage />} />
+          <Route path="deck" element={<DeckPage />} />
+          <Route path="teaser" element={<TeaserSectionPage />} />
+          <Route path="intros" element={<IntrosPage />} />
+          <Route path="privacy" element={<PrivacyPage />} />
+        </Route>
 
         {/* 2. ПОТІК ІНВЕСТОРА: */}
         {/* а) Налаштування мандату та підтвердження статусу B2B (Текст C) */}

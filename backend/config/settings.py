@@ -133,6 +133,10 @@ CELERY_BEAT_SCHEDULE = {
         # По понедельникам в 08:00 утра по Берлину:
         "schedule": crontab(hour=8, minute=0, day_of_week=1),
     },
+    "expire-stale-intro-requests": {
+        "task": "apps.investors.tasks.expire_stale_intro_requests",
+        "schedule": crontab(hour=4, minute=0),
+    },
 }
 
 TEASER_MAX_RETRIES = 2                    # число повторов вызова ШІ (шаг 7); решает backend
@@ -165,4 +169,6 @@ if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
     PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]  # fast tests only
+
+
 
