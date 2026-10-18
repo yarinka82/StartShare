@@ -170,3 +170,5 @@ if "test" in sys.argv:
     CELERY_TASK_EAGER_PROPAGATES = True
     PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]  # fast tests only
 
+
+

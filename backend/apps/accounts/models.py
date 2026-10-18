@@ -100,13 +100,14 @@ class LegalDocumentCode(models.TextChoices):
     G = "G", "G — Hinweis KI"
     AGB = "AGB", "AGB"
     DSE = "DSE", "Datenschutzerklärung"
+    IMPRESSUM = "IMPRESSUM", "Impressum"
 
 
 
 class LegalDocument(models.Model):
     Code = LegalDocumentCode
 
-    code = models.CharField(max_length=8, choices=Code.choices)
+    code = models.CharField(max_length=10, choices=Code.choices)
     language = models.CharField(max_length=2, choices=Language.choices)
     version = models.IntegerField(default=1)
     title = models.CharField(max_length=200)

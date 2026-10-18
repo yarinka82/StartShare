@@ -143,12 +143,37 @@
     "placeholder": "The legally binding texts for this document are currently being finalized."
   },
   "profile": {
+    "dangerZone": "Delete startup profile",
     "pausedAlert": "Your profile is paused. Investors will not see your teaser in the weekly digest.",
     "removedAlert": "Your profile has been removed (REMOVED). Visibility to investors is disabled.",
+    "deckLockedHint": "While the profile is LIVE, the pitch deck cannot be changed. Please pause your profile on the 'Overview' page.",
     "actions": {
       "pause": "Pause (PAUSE)",
       "resume": "Activate (LIVE)",
-      "remove": "Delete profile"
+      "remove": "Delete profile",
+      "restore": "Restore profile"
+    },
+    "nav": {
+      "overview": "Overview",
+      "company": "Company Details",
+      "deck": "Pitch Deck",
+      "teaser": "Blind Teaser",
+      "intros": "Investor Requests",
+      "privacy": "Privacy & GDPR"
+    },
+    "hints": {
+      "basics": "Sector, stage, country and amount sought",
+      "metrics": "Current metrics and growth (MRR, team size)",
+      "deck": "PDF only, up to {{max}} MB",
+      "teaser": "Review the AI draft and confirm field by field"
+    },
+    "overview": {
+      "status": "Profile status",
+      "readiness": "Profile readiness",
+      "readinessHint": "Complete the steps so your profile reaches investors",
+      "stepData": "Fill in company data",
+      "stepDeck": "Upload pitch deck",
+      "stepLive": "Approve teaser and publish profile"
     },
     "sections": {
       "basics": "Basic Information",
@@ -234,10 +259,10 @@
     "unexpected": "An unexpected error occurred during AI analysis. Please try again later."
   },
   "footer": {
-    "agb": "AGB",
+    "agb": "Terms",
     "datenschutz": "Privacy",
     "impressum": "Legal Notice",
-    "kriterien": "Profilauswahl (DSA)"
+    "kriterien": "Selection Criteria (DSA)"
   },
   "authPromo": {
     "badge": "Regulated B2B Matching Platform",
@@ -442,14 +467,38 @@
       }
     }
   },
-    "freigabeRequests": {
-      "sectionTitle": "Incoming Intro Requests (Approval)",
-      "expiresIn": "Valid until",
-      "investorMessageLabel": "Investor's message:",
-      "textD": "is interested in your profile. Your contact details will only be shared after your approval.",
-      "freigabeBtn": "✓ Approve (Share Contacts)",
-      "declineBtn": "Decline",
-      "freigabeSuccessToast": "Contacts successfully shared! Both parties have received an email with the contact details and legal notice (Text E).",
-      "declineSuccessToast": "The investor's request was declined."
+  "freigabeRequests": {
+    "emptyTitle": "No requests yet",
+    "emptyText": "When an investor expresses interest in your profile, the request will appear here. Your contact details will only be shared after your approval.",
+    "sectionTitle": "Incoming Intro Requests (Approval)",
+    "expiresIn": "Valid until",
+    "investorMessageLabel": "Investor's message:",
+    "textD": "is interested in your profile. Your contact details will only be shared after your approval.",
+    "freigabeBtn": "✓ Approve (Share Contacts)",
+    "declineBtn": "Decline",
+    "freigabeSuccessToast": "Contacts successfully shared! Both parties have received an email with the contact details and legal notice (Text E).",
+    "declineSuccessToast": "The investor's request was declined."
+  },
+  "privacy": {
+    "zoneTitle": "Data & Privacy (GDPR)",
+    "zoneDesc": "Manage your personal data in accordance with European standards (Art. 17 and Art. 20 GDPR).",
+    "exportTitle": "Data export",
+    "exportHint": "Art. 20 GDPR",
+    "exportText": "Download a copy of all your data in JSON format.",
+    "exportBtn": "Export my data (JSON)",
+    "pauseTitle": "Just want to hide your profile?",
+    "pauseText": "Pause your profile: investors won't see it, but all your data is kept. You can resume visibility at any time.",
+    "pauseBtn": "Go to profile status",
+    "deleteTitle": "Delete account",
+    "deleteHint": "Art. 17 GDPR · cannot be undone",
+    "deleteText": "Your personal data will be permanently anonymised, access will be blocked, and your profile and teaser will no longer be shown to investors. Account recovery is not possible.",
+    "deleteAccountBtn": "Delete account permanently",
+    "deleteConfirmTitle": "Permanent account deletion",
+    "deleteDialog": {
+      "title": "Permanently delete account?",
+      "text": "Your account and all associated personal data will be irretrievably deleted (Art. 17 GDPR). This action cannot be undone.",
+      "confirm": "Delete account",
+      "cancel": "Cancel"
     }
   }
+}

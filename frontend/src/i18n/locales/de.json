@@ -144,11 +144,28 @@
   },
   "profile": {
     "pausedAlert": "Ihr Profil ist pausiert. Investoren sehen Ihren Teaser nicht im wöchentlichen Digest.",
+
     "removedAlert": "Ihr Profil wurde entfernt (REMOVED). Die Sichtbarkeit für Investoren ist deaktiviert.",
+    "deckLockedHint": "Solange Ihr Profil LIVE geschaltet ist, kann das Pitch Deck nicht geändert werden. Bitte pausieren Sie das Profil unter „Übersicht“.",
     "actions": {
       "pause": "Pausieren (PAUSE)",
       "resume": "Aktivieren (LIVE)",
-      "remove": "Profil löschen"
+      "remove": "Profil löschen",
+      "restore": "Profil wiederherstellen"
+    },
+    "nav": {
+      "overview": "Übersicht",
+      "company": "Unternehmensdaten",
+      "deck": "Pitch Deck",
+      "teaser": "Blind-Teaser",
+      "intros": "Investorenanfragen",
+      "privacy": "Datenschutz & DSGVO"
+    },
+    "hints": {
+      "basics": "Branche, Phase, Land und gesuchte Summe",
+      "metrics": "Aktuelle Kennzahlen und Wachstum (MRR, Teamgröße)",
+      "deck": "Nur PDF, bis zu {{max}} MB",
+      "teaser": "KI-Entwurf prüfen und Feld für Feld bestätigen"
     },
     "sections": {
       "basics": "Basisangaben",
@@ -171,6 +188,14 @@
     },
     "title": "Startup-Profil",
     "intro": "Füllen Sie Ihr Profil aus und laden Sie Ihr Pitch Deck hoch. Alles wird automatisch als Entwurf gespeichert.",
+    "overview": {
+      "status": "Profilstatus",
+      "readiness": "Profil-Vollständigkeit",
+      "readinessHint": "Schließen Sie die Schritte ab, damit Ihr Profil Investoren erreicht",
+      "stepData": "Unternehmensdaten ausfüllen",
+      "stepDeck": "Pitch Deck hochladen",
+      "stepLive": "Teaser freigeben und Profil veröffentlichen"
+    },
     "status": {
       "DRAFT": "Entwurf",
       "LIVE": "Live",
@@ -194,6 +219,7 @@
       "business_model": "Geschäftsmodell"
     },
     "companyHelper": "Nur intern sichtbar. Wird Investoren nicht angezeigt.",
+    "dangerZone": "Startup-Profil löschen",
     "optional": "optional",
     "missing": "Für ein vollständiges Profil fehlt noch:",
     "complete": "Ihr Profil ist vollständig. Die nächsten Schritte (Teaser und Veröffentlichung) folgen in einem späteren Release."
@@ -442,16 +468,41 @@
       }
     }
   },
-    "freigabeRequests": {
-      "sectionTitle": "Eingehende Intro-Anfragen (Freigabe)",
-      "expiresIn": "Gültig bis",
-      "investorMessageLabel": "Nachricht des Investors:",
-      "textD": "hat Interesse an Ihrem Profil. Ihre Kontaktdaten werden erst nach Ihrer Freigabe weitergegeben.",
-      "freigabeBtn": "✓ Freigabe (Kontakte freigeben)",
-      "declineBtn": "Ablehnen",
-      "freigabeSuccessToast": "Kontakte erfolgreich freigegeben! Beide Parteien haben eine E-Mail mit den Kontaktdaten und rechtlichem Hinweis (Text E) erhalten.",
-      "declineSuccessToast": "Anfrage des Investors wurde abgelehnt."
+  "freigabeRequests": {
+    "emptyTitle": "Noch keine Anfragen",
+    "emptyText": "Sobald ein Investor Interesse an Ihrem Profil bekundet, erscheint die Anfrage hier. Ihre Kontaktdaten werden erst nach Ihrer Freigabe weitergegeben.",
+    "sectionTitle": "Eingehende Intro-Anfragen (Freigabe)",
+    "expiresIn": "Gültig bis",
+    "investorMessageLabel": "Nachricht des Investors:",
+    "textD": "hat Interesse an Ihrem Profil. Ihre Kontaktdaten werden erst nach Ihrer Freigabe weitergegeben.",
+    "freigabeBtn": "✓ Freigabe (Kontakte freigeben)",
+    "declineBtn": "Ablehnen",
+    "freigabeSuccessToast": "Kontakte erfolgreich freigegeben! Beide Parteien haben eine E-Mail mit den Kontaktdaten und rechtlichem Hinweis (Text E) erhalten.",
+    "declineSuccessToast": "Anfrage des Investors wurde abgelehnt."
+  },
+  "privacy": {
+    "zoneTitle": "Daten & Datenschutz (DSGVO)",
+    "zoneDesc": "Verwalten Sie Ihre personenbezogenen Daten gemäß den europäischen Standards (gemäß Art. 17 und Art. 20 DSGVO).",
+    "exportTitle": "Datenexport",
+    "exportHint": "Art. 20 DSGVO",
+    "exportText": "Laden Sie eine Kopie aller Ihrer Daten im JSON-Format herunter.",
+    "exportBtn": "Meine Daten exportieren (JSON)",
+    "pauseTitle": "Möchten Sie Ihr Profil nur ausblenden?",
+    "pauseText": "Pausieren Sie Ihr Profil: Investoren sehen es nicht, alle Ihre Daten bleiben jedoch erhalten. Sie können die Sichtbarkeit jederzeit wieder aktivieren.",
+    "pauseBtn": "Zum Profilstatus wechseln",
+    "deleteTitle": "Konto löschen",
+    "deleteHint": "Art. 17 DSGVO · unwiderruflich",
+    "deleteText": "Ihre personenbezogenen Daten werden dauerhaft anonymisiert, der Zugang wird gesperrt und Profil sowie Teaser werden Investoren nicht mehr angezeigt. Eine Wiederherstellung des Kontos ist nicht möglich.",
+    "deleteAccountBtn": "Konto endgültig löschen",
+    "deleteConfirmTitle": "Endgültige Kontolöschung",
+    "deleteDialog": {
+      "title": "Konto dauerhaft löschen?",
+      "text": "Ihr Konto und alle zugehörigen personenbezogenen Daten werden unwiderruflich gelöscht (Art. 17 DSGVO). Diese Aktion kann nicht rückgängig gemacht werden.",
+      "confirm": "Konto löschen",
+      "cancel": "Abbrechen"
     }
   }
+}
+
 
 
