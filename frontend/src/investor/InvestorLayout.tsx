@@ -8,7 +8,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import SidebarLayout, { type SidebarItem } from "../components/SidebarLayout";
 import { InvestorProvider, useInvestor } from "./InvestorProvider";
 import StatusConfirm from "./StatusConfirm";
-import {FeedProvider, useFeed} from "./FeedСontext";
+import {FeedProvider, useFeed} from "./FeedContext";
 
 /** Navigation of a confirmed investor; the feed icon shows how many teasers wait for an answer. */
 function ConfirmedShell() {

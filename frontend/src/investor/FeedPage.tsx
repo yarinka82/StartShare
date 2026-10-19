@@ -11,7 +11,7 @@ import BlindTeaserCard from "../components/BlindTeaserCard";
 import EmptyState from "../components/EmptyState";
 import { FOOTER_HEIGHT } from "../components/footerConfig";
 import MandateHistoryModal from "../components/MandateHistoryModal";
-import {useFeed} from "./FeedСontext";
+import {useFeed} from "./FeedContext";
 
 
 const DECLINE_REASONS = [
