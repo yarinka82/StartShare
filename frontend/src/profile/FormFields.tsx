@@ -9,10 +9,11 @@ export function SelectField({ name, items, kind, optional = false }: {
   name: Name; items: Option[]; kind: DictKind; optional?: boolean;
 }) {
   const { t } = useTranslation();
-  const { values, fieldErrors, change } = useProfile();
+  const { values, fieldErrors, readOnly, change } = useProfile();
   return (
     <TextField
       data-field={name}
+      disabled={readOnly}
       select
       label={t(`profile.fields.${name}`) + (optional ? ` (${t("profile.optional")})` : "")}
       // a value that was removed from the approved list is shown as "not chosen"
@@ -35,10 +36,11 @@ export function NumberField({ name, eur, percent, optional, required }: {
   name: Name; eur?: boolean; percent?: boolean; optional?: boolean; required?: boolean;
 }) {
   const { t } = useTranslation();
-  const { values, fieldErrors, change } = useProfile();
+  const { values, fieldErrors, readOnly, change } = useProfile();
   return (
     <TextField
       data-field={name}
+      disabled={readOnly}
       label={t(`profile.fields.${name}`) + (optional ? ` (${t("profile.optional")})` : "")}
       value={values[name]} required={required}
       onChange={(e) => change(name, e.target.value)}

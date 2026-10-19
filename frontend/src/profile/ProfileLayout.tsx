@@ -17,7 +17,8 @@ import { useTranslation } from "react-i18next";
 import { Link as RouterLink, Outlet, useLocation } from "react-router-dom";
 import { IntrosProvider, useIntros } from "./IntrosContext";
 import { ProfileProvider, useProfile, type Meta } from "./ProfileProvider";
-import { missingCompany } from "./Sections";
+import {missingCompany} from "../components/Sections";
+
 
 type NavStatus = "done" | "todo" | "locked" | null;
 type NavItem = {

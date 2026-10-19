@@ -3,8 +3,7 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { HomeRedirect, PublicOnly, RequireRole } from "./auth/guards";
 import Layout from "./components/Layout";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import InvestorFeedPage from "./pages/InvestorFeedPage";
-import InvestorHomePage from "./pages/InvestorHomePage";
+import FeedPage from "./investor/FeedPage";
 import LegalPage from "./pages/LegalPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -16,8 +15,10 @@ import ProfileLayout from "./profile/ProfileLayout";
 import OverviewPage from "./profile/OverviewPage";
 import DeckPage from "./profile/DeckPage";
 import IntrosPage from "./profile/IntrosPage";
-import PrivacyPage from "./profile/PrivacyPage";
 import TeaserSectionPage from "./profile/TeaserSectionPage";
+import InvestorLayout from "./investor/InvestorLayout";
+import MandatePage from "./investor/MandatePage";
+import PrivacyPage from "./components/PrivacyPage";
 
 export default function App() {
   return (
@@ -54,28 +55,15 @@ export default function App() {
           <Route path="deck" element={<DeckPage />} />
           <Route path="teaser" element={<TeaserSectionPage />} />
           <Route path="intros" element={<IntrosPage />} />
-          <Route path="privacy" element={<PrivacyPage />} />
+          <Route path="privacy" element={<PrivacyPage audience="startup" />} />
         </Route>
 
         {/* 2. ПОТІК ІНВЕСТОРА: */}
-        {/* а) Налаштування мандату та підтвердження статусу B2B (Текст C) */}
-        <Route
-          path="/investor"
-          element={
-            <RequireRole role="investor">
-              <InvestorHomePage />
-            </RequireRole>
-          }
-        />
-        {/* б) Стрічка підібраних тизерів зі сліпими картками (BlindTeaserCard + Текст B) */}
-        <Route
-          path="/investor/feed"
-          element={
-            <RequireRole role="investor">
-              <InvestorFeedPage />
-            </RequireRole>
-          }
-        />
+        <Route path="/investor" element={<RequireRole role="investor"><InvestorLayout /></RequireRole>}>
+          <Route index element={<MandatePage />} />
+          <Route path="feed" element={<FeedPage />} />
+          <Route path="privacy" element={<PrivacyPage audience="investor" />} />
+        </Route>
 
         {/* Редирект на головну для всіх неіснуючих сторінок */}
         <Route path="*" element={<Navigate to="/" replace />} />

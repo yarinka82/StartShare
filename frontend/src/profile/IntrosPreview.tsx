@@ -3,7 +3,8 @@ import { Button, List, ListItemButton, ListItemText } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import { useIntros } from "./IntrosContext";
-import SectionCard from "./SectionCard";
+import SectionCard from "../components/SectionCard";
+
 
 /** Overview block: shown only while there are requests waiting for a decision. */
 export default function IntrosPreview() {

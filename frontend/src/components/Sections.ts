@@ -1,5 +1,5 @@
+import {Meta} from "../profile/ProfileProvider";
 
-import type { Meta } from "./ProfileProvider";
 
 export const COMPANY_FIELDS = [
   "company_name", "sector", "stage", "business_model", "country",

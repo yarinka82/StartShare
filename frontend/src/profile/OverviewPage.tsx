@@ -8,9 +8,10 @@ import {
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import IntrosPreview from "./IntrosPreview";
-import SectionCard from "./SectionCard";
 import { useProfile } from "./ProfileProvider";
-import { missingCompany } from "./Sections";
+import {missingCompany} from "../components/Sections";
+import SectionCard from "../components/SectionCard";
+
 
 export default function OverviewPage() {
   const { t } = useTranslation();

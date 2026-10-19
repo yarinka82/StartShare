@@ -4,11 +4,11 @@ import { useTranslation } from "react-i18next";
 import type { Deck } from "../api/types";
 import DeckUpload from "../components/DeckUpload";
 import { useProfile } from "./ProfileProvider";
-import SectionCard from "./SectionCard";
+import SectionCard from "../components/SectionCard";
 
 export default function DeckPage() {
   const { t } = useTranslation();
-  const { meta, refreshMeta } = useProfile();
+  const { meta, readOnly, refreshMeta } = useProfile();
   const locked = meta.status === "LIVE";
 
   return (
@@ -23,7 +23,7 @@ export default function DeckPage() {
         hint={t("profile.hints.deck", "Презентація, на основі якої ШІ готує тизер")}
         icon={<DescriptionOutlinedIcon fontSize="small" />}
       >
-        <DeckUpload deck={meta.deck as Deck | null} onChanged={refreshMeta} locked={locked} />
+        <DeckUpload deck={meta.deck as Deck | null} onChanged={refreshMeta} locked={locked || readOnly} />
       </SectionCard>
     </Stack>
   );

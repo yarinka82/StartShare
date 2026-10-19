@@ -68,6 +68,7 @@
     "language": "Sprache"
   },
   "common": {
+    "retry": "Erneut versuchen",
     "tryAgain": "Erneut versuchen",
     "checkAgain": "Erneut prüfen",
     "loading": "Wird geladen…",
@@ -144,7 +145,6 @@
   },
   "profile": {
     "pausedAlert": "Ihr Profil ist pausiert. Investoren sehen Ihren Teaser nicht im wöchentlichen Digest.",
-
     "removedAlert": "Ihr Profil wurde entfernt (REMOVED). Die Sichtbarkeit für Investoren ist deaktiviert.",
     "deckLockedHint": "Solange Ihr Profil LIVE geschaltet ist, kann das Pitch Deck nicht geändert werden. Bitte pausieren Sie das Profil unter „Übersicht“.",
     "actions": {
@@ -313,6 +313,9 @@
     "selectAll": "Alle auswählen",
     "clear": "Zurücksetzen",
     "title": "Willkommen",
+    "digestCount": "Im aktuellen Digest: {{count}}",
+    "feedLoadError": "Digest konnte nicht geladen werden.",
+    "emptyFeedTitle": "Noch keine neuen Teaser",
     "text": "Ihr Investorenkonto ist bereit. Mandatseinstellungen und wöchentliche Teaser stehen zur Verfügung.",
     "goToFeed": "Zum Digest wechseln",
     "cabinetTitle": "Investoren-Kabinett",
@@ -338,7 +341,9 @@
       "title": "Investitionsmandat",
       "intro": "Definieren Sie Ihre Kriterien. Sie erhalten ausschließlich Blind-Teaser, die Ihrem Mandat entsprechen.",
       "hard": "Ausschlusskriterien (Hard Filters)",
+      "hardHint": "Startups, die diese Kriterien nicht erfüllen, werden Ihnen nicht angezeigt",
       "soft": "Präferenzen (Soft Filters)",
+      "softHint": "Diese Präferenzen beeinflussen die Reihenfolge der Startups im Digest, schließen aber keine Profile aus",
       "sectors": "Branchen & Sektoren",
       "stages": "Finanzierungsphasen",
       "regions": "Zielregionen",
@@ -362,6 +367,13 @@
       "ticket": "Ticketgröße",
       "businessModel": "Bevorzugtes Geschäftsmodell"
     },
+    "matchLabels": {
+      "sector": "Passende Branche",
+      "stage": "Passende Finanzierungsphase",
+      "ticket": "Passende Ticketgröße",
+      "region": "Passende Zielregion",
+      "businessModel": "Passendes Geschäftsmodell"
+    },
     "reasons": {
       "sector": "Branche passt nicht",
       "stage": "Falsche Phase",
@@ -371,6 +383,10 @@
       "metrics": "Kennzahlen / Traktion unzureichend",
       "other": "Sonstiges"
     },
+    "whyYouSeeThis": "Das passt zu Ihrem Mandat:",
+    "respondError": "Antwort konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+    "interestSent": "Anfrage an das Startup gesendet.",
+    "declineSent": "Startup abgelehnt.",
     "interestedModalTitle": "Interesse am Startup bekunden",
     "interestedModalHint": "Das Startup erhält eine Anfrage mit dem Namen Ihres Fonds. Sie können eine kurze persönliche Nachricht beifügen (optional):",
     "messagePlaceholder": "Z. B.: Interessanter Case, wir würden uns gerne über das Geschäftsmodell austauschen...",
@@ -493,6 +509,8 @@
     "deleteTitle": "Konto löschen",
     "deleteHint": "Art. 17 DSGVO · unwiderruflich",
     "deleteText": "Ihre personenbezogenen Daten werden dauerhaft anonymisiert, der Zugang wird gesperrt und Profil sowie Teaser werden Investoren nicht mehr angezeigt. Eine Wiederherstellung des Kontos ist nicht möglich.",
+    "deleteTextInvestor": "Ihre personenbezogenen Daten werden dauerhaft anonymisiert, der Zugang wird gesperrt und Ihr Mandat wird nicht mehr für das Startup-Matching verwendet. Eine Wiederherstellung des Kontos ist nicht möglich.",
+    "deleteConfirmWarning": "Diese Aktion ist unwiderruflich. Ihre personenbezogenen Daten werden dauerhaft anonymisiert, der Zugang wird gesperrt und die Sitzung beendet. Geben Sie zur Bestätigung Ihr aktuelles Passwort ein:",
     "deleteAccountBtn": "Konto endgültig löschen",
     "deleteConfirmTitle": "Endgültige Kontolöschung",
     "deleteDialog": {

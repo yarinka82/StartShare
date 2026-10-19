@@ -6,13 +6,13 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { NumberField, SelectField } from "./FormFields";
 import { useProfile } from "./ProfileProvider";
-import SectionCard from "./SectionCard";
+import SectionCard from "../components/SectionCard";
 
 const grid = { display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } } as const;
 
 export default function CompanyPage() {
   const { t } = useTranslation();
-  const { values, dicts, fieldErrors, change } = useProfile();
+  const { values, dicts, fieldErrors, readOnly, change } = useProfile();
   const { state } = useLocation() as { state: { focus?: string } | null };
 
   // arriving from the checklist: scroll to and focus the first missing field
@@ -35,6 +35,7 @@ export default function CompanyPage() {
           <TextField
             label={t("profile.fields.company_name") + ` (${t("profile.optional")})`}
             value={values.company_name}
+            disabled={readOnly}
             onChange={(e) => change("company_name", e.target.value)}
             helperText={t("profile.companyHelper")}
             slotProps={{ htmlInput: { maxLength: 200 } }}
@@ -60,6 +61,7 @@ export default function CompanyPage() {
           <NumberField name="growth_percent" percent optional />
           <TextField
             data-field="growth_period"
+            disabled={readOnly}
             select
             label={t("profile.fields.growth_period")}
             value={values.growth_period}

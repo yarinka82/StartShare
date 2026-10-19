@@ -58,6 +58,8 @@ type ProfileContextValue = {
   values: Values;
   meta: Meta;
   dicts: Dictionaries;
+  /** profile has status REMOVED: forms are locked until it is restored */
+  readOnly: boolean;
   saveState: SaveState;
   fieldErrors: Record<string, string>;
   change: (name: Name, raw: string) => void;
@@ -176,7 +178,20 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   // never lose edits when the provider unmounts (leaving the whole profile area)
   useEffect(() => () => { void flush(); }, [flush]);
 
+  // closing / reloading the tab while an autosave is pending or running would lose the last edits
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (dirty.current.size > 0 || saveState === "saving") {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [saveState]);
+
   const change = useCallback((name: Name, value: string) => {
+    if (metaRef.current?.status === "REMOVED") return;
     if (name === "team_size" && !/^\d{0,6}$/.test(value)) return;
     if (DECIMALS.includes(name) && !/^-?\d{0,12}[.,]?\d{0,2}$/.test(value)) return;
     setValues((v) => (v ? { ...v, [name]: value } : v));
@@ -194,7 +209,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const ctx = useMemo<ProfileContextValue | null>(
     () =>
       values && meta && dicts
-        ? { values, meta, dicts, saveState, fieldErrors, change, flush, refreshMeta, togglePause, removeProfile }
+        ? { values, meta, dicts, readOnly: meta.status === "REMOVED", saveState, fieldErrors, change, flush, refreshMeta, togglePause, removeProfile }
         : null,
     [values, meta, dicts, saveState, fieldErrors, change, flush, refreshMeta, togglePause, removeProfile],
   );

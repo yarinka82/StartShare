@@ -14,7 +14,7 @@ export default function Layout() {
   const { user, loading, logout } = useAuth();
   const signedOut = !loading && !user;
   const { pathname } = useLocation();
-  const wide = pathname.startsWith("/profile");
+  const wide = pathname.startsWith("/profile") || pathname.startsWith("/investor");
   const navigate = useNavigate();
 
   return (

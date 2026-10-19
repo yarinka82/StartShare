@@ -1,4 +1,3 @@
-
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DownloadIcon from "@mui/icons-material/Download";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
@@ -11,7 +10,11 @@ import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import SectionCard from "./SectionCard";
 
-export default function PrivacyPage() {
+type PrivacyPageProps = {
+  audience: "investor" | "startup";
+};
+
+export default function PrivacyPage({ audience }: PrivacyPageProps)  {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
@@ -68,17 +71,19 @@ export default function PrivacyPage() {
         </Button>
       </SectionCard>
 
-      <SectionCard
-        title={t("privacy.pauseTitle", "Потрібно лише приховати профіль?")}
-        icon={<VisibilityOffOutlinedIcon fontSize="small" />}
-      >
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {t("privacy.pauseText", "Поставте профіль на паузу: інвестори його не бачитимуть, а всі ваші дані збережуться. Відновити показ можна в будь-який момент.")}
-        </Typography>
-        <Button variant="outlined" component={RouterLink} to="/profile" sx={{ textTransform: "none" }}>
-          {t("privacy.pauseBtn", "Перейти до статусу профілю")}
-        </Button>
-      </SectionCard>
+      {audience === "startup" && (
+        <SectionCard
+          title={t("privacy.pauseTitle", "Потрібно лише приховати профіль?")}
+          icon={<VisibilityOffOutlinedIcon fontSize="small" />}
+        >
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {t("privacy.pauseText", "Поставте профіль на паузу: інвестори його не бачитимуть, а всі ваші дані збережуться. Відновити показ можна в будь-який момент.")}
+          </Typography>
+          <Button variant="outlined" component={RouterLink} to="/profile" sx={{ textTransform: "none" }}>
+            {t("privacy.pauseBtn", "Перейти до статусу профілю")}
+          </Button>
+        </SectionCard>
+      )}
 
       <SectionCard
         tone="danger"
@@ -87,7 +92,9 @@ export default function PrivacyPage() {
         icon={<DeleteForeverIcon fontSize="small" color="error" />}
       >
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {t("privacy.deleteText", "Ваші персональні дані буде назавжди знеособлено, вхід заблоковано, а профіль і тизер більше не показуватимуться інвесторам. Відновити акаунт неможливо.")}
+          {audience === "startup"
+            ? t("privacy.deleteText", "Ваші персональні дані буде назавжди знеособлено, вхід заблоковано, а профіль і тизер більше не показуватимуться інвесторам. Відновити акаунт неможливо.")
+            : t("privacy.deleteTextInvestor", "Ваші персональні дані буде назавжди знеособлено, вхід заблоковано, а ваш мандат більше не використовуватиметься для підбору стартапів. Відновити акаунт неможливо.")}
         </Typography>
         <Button color="error" variant="outlined" startIcon={<DeleteForeverIcon />} onClick={() => setOpen(true)} sx={{ textTransform: "none" }}>
           {t("privacy.deleteAccountBtn", "Видалити акаунт назавжди")}

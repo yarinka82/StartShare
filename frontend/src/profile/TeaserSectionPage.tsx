@@ -7,11 +7,27 @@ import EmptyState from "../components/EmptyState";
 import { TeaserPage } from "../teaser";
 import "../teaser/editor.css";
 import { useProfile } from "./ProfileProvider";
-import SectionCard from "./SectionCard";
+import SectionCard from "../components/SectionCard";
+
 
 export default function TeaserSectionPage() {
   const { t } = useTranslation();
-  const { meta, refreshMeta } = useProfile();
+  const { meta, readOnly, refreshMeta } = useProfile();
+
+  if (readOnly) {
+    return (
+      <EmptyState
+        icon={<AutoAwesomeOutlinedIcon />}
+        title={t("profile.teaserRemoved.title", "Профіль видалено")}
+        text={t("profile.teaserRemoved.text", "Відновіть профіль на сторінці «Огляд», щоб знову редагувати тизер.")}
+        action={
+          <Button variant="contained" component={RouterLink} to="/profile">
+            {t("profile.teaserRemoved.action", "До огляду")}
+          </Button>
+        }
+      />
+    );
+  }
 
   if (!meta.deck) {
     return (

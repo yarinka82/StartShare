@@ -1,6 +1,8 @@
+import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
+import RocketLaunchOutlinedIcon from "@mui/icons-material/RocketLaunchOutlined";
 import {
-  Alert, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, FormLabel, Link,
-  Radio, RadioGroup, Stack, TextField,
+  Alert, Button, Checkbox, CircularProgress, FormControl, FormControlLabel, FormHelperText, FormLabel,
+  Link, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography,
 } from "@mui/material";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -45,7 +47,7 @@ export default function RegisterPage() {
 
   const fieldError = (name: string) => err?.fields[name]?.map((c) => errorText(t, c)).join(" ");
   const mismatch = password2 !== "" && password !== password2;
-  const canSubmit = agb && ds && !!email && !!password && password === password2 && !busy;
+  const canSubmit = agb && ds && !!email.trim() && !!password && password === password2 && !busy;
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -53,7 +55,7 @@ export default function RegisterPage() {
     setBusy(true);
     setErr(null);
     try {
-      await api.register({ email, password, role, accept_agb: agb, accept_datenschutz: ds });
+      await api.register({ email: email.trim(), password, role, accept_agb: agb, accept_datenschutz: ds });
       setDone(true);
     } catch (ex) {
       setErr(parseError(ex));
@@ -66,7 +68,10 @@ export default function RegisterPage() {
     return (
       <FormCard title={t("register.doneTitle")}>
         <Alert severity="success">{t("register.doneText")}</Alert>
-        <Button component={RouterLink} to="/login">
+        <Typography variant="body2" color="text.secondary">
+          {t("register.doneEmail", { email: email.trim(), defaultValue: "Лист надіслано на {{email}}. Перевірте також папку «Спам»." })}
+        </Typography>
+        <Button component={RouterLink} to="/login" variant="outlined" sx={{ textTransform: "none" }}>
           {t("common.backToLogin")}
         </Button>
       </FormCard>
@@ -79,27 +84,36 @@ export default function RegisterPage() {
         <Stack spacing={2}>
           {err?.detail && <Alert severity="error">{errorText(t, err.detail)}</Alert>}
 
-          <FormControl error={!!fieldError("role")}>
-            <FormLabel id="role-label">{t("register.iAm")}</FormLabel>
-            <RadioGroup row aria-labelledby="role-label" value={role} onChange={(e) => setRole(e.target.value)}>
-              <FormControlLabel value="startup" control={<Radio />} label={t("roles.startup")} />
-              <FormControlLabel value="investor" control={<Radio />} label={t("roles.investor")} />
-            </RadioGroup>
+          <FormControl error={!!fieldError("role")} fullWidth>
+            <FormLabel id="role-label" sx={{ mb: 1 }}>{t("register.iAm")}</FormLabel>
+            <ToggleButtonGroup
+              exclusive fullWidth color="primary" value={role} aria-labelledby="role-label"
+              onChange={(_, v: string | null) => { if (v) setRole(v); }}
+            >
+              <ToggleButton value="startup" sx={{ textTransform: "none", py: 1.2, gap: 1 }}>
+                <RocketLaunchOutlinedIcon fontSize="small" /> {t("roles.startup")}
+              </ToggleButton>
+              <ToggleButton value="investor" sx={{ textTransform: "none", py: 1.2, gap: 1 }}>
+                <AccountBalanceOutlinedIcon fontSize="small" /> {t("roles.investor")}
+              </ToggleButton>
+            </ToggleButtonGroup>
+            {fieldError("role") && <FormHelperText>{fieldError("role")}</FormHelperText>}
           </FormControl>
 
           <TextField
-            label={t("common.email")} type="email" autoComplete="email" required
+            label={t("common.email")} name="email" type="email" autoComplete="email" required
             value={email} onChange={(e) => setEmail(e.target.value)}
             error={!!fieldError("email")} helperText={fieldError("email")}
+            slotProps={{ htmlInput: { inputMode: "email", autoCapitalize: "none", autoCorrect: "off", spellCheck: false } }}
           />
           <PasswordField
-            label={t("common.password")} autoComplete="new-password" required
+            label={t("common.password")} name="password" autoComplete="new-password" required
             visible={showPw} onVisibleChange={setShowPw}
             value={password} onChange={(e) => setPassword(e.target.value)}
             error={!!fieldError("password")} helperText={fieldError("password") ?? t("register.passwordHelper")}
           />
           <PasswordField
-            label={t("register.confirmPassword")} autoComplete="new-password" required
+            label={t("register.confirmPassword")} name="password2" autoComplete="new-password" required
             visible={showPw} onVisibleChange={setShowPw}
             value={password2} onChange={(e) => setPassword2(e.target.value)}
             error={mismatch} helperText={mismatch ? t("register.passwordMismatch") : undefined}
@@ -120,10 +134,13 @@ export default function RegisterPage() {
             {fieldError("accept_datenschutz") && <FormHelperText>{fieldError("accept_datenschutz")}</FormHelperText>}
           </FormControl>
 
-          <Button type="submit" variant="contained" size="large" disabled={!canSubmit}>
+          <Button
+            type="submit" variant="contained" size="large" disabled={!canSubmit}
+            startIcon={busy ? <CircularProgress size={18} color="inherit" /> : undefined}
+          >
             {t("register.submit")}
           </Button>
-          <Button component={RouterLink} to="/login">
+          <Button component={RouterLink} to="/login" sx={{ textTransform: "none" }}>
             {t("register.haveAccount")}
           </Button>
         </Stack>

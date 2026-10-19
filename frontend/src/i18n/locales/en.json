@@ -62,7 +62,7 @@
   "nav": {
     "staffPanel": "Admin Area",
     "digest": "Digest",
-    "mandate": "Mandat",
+    "mandate": "Mandate",
     "profile": "My Profile",
     "logout": "Log out",
     "language": "Language"
@@ -71,6 +71,7 @@
     "tryAgain": "Try again",
     "checkAgain": "Check again",
     "loading": "Loading…",
+    "retry": "Retry",
     "save": "Save",
     "saved": "Saved",
     "close": "Close",
@@ -312,6 +313,9 @@
     "selectAll": "Select all",
     "clear": "Reset",
     "title": "Welcome",
+    "digestCount": "In the current digest: {{count}}",
+    "feedLoadError": "Could not load the digest.",
+    "emptyFeedTitle": "No new teasers yet",
     "text": "Your investor account is ready. Mandate settings and weekly teasers are available.",
     "goToFeed": "Go to Digest",
     "cabinetTitle": "Investor Cabinet",
@@ -337,7 +341,9 @@
       "title": "Investment Mandate",
       "intro": "Define your criteria. You will receive only blind teasers that match your mandate.",
       "hard": "Exclusion Criteria (Hard Filters)",
+      "hardHint": "Startups that do not meet these criteria will not be shown to you",
       "soft": "Preferences (Soft Filters)",
+      "softHint": "These preferences affect the ranking of startups in your digest but do not exclude any profiles",
       "sectors": "Industries & Sectors",
       "stages": "Funding Stages",
       "regions": "Target Regions",
@@ -361,6 +367,13 @@
       "ticket": "Ticket Size",
       "businessModel": "Preferred Business Model"
     },
+    "matchLabels": {
+      "sector": "Sector match",
+      "stage": "Funding stage match",
+      "ticket": "Suitable ticket size",
+      "region": "Target region match",
+      "businessModel": "Preferred business model"
+    },
     "reasons": {
       "sector": "Industry does not match",
       "stage": "Wrong Stage",
@@ -370,6 +383,10 @@
       "metrics": "Insufficient metrics / traction",
       "other": "Other"
     },
+    "whyYouSeeThis": "This matches your mandate:",
+    "respondError": "Could not send the response. Please try again.",
+    "interestSent": "Request sent to the startup.",
+    "declineSent": "Startup declined.",
     "interestedModalTitle": "Express Interest in Startup",
     "interestedModalHint": "The startup will receive a request with your fund's name. You can add a short personal message (optional):",
     "messagePlaceholder": "E.g.: Interesting case, we would like to discuss the business model...",
@@ -494,6 +511,8 @@
     "deleteText": "Your personal data will be permanently anonymised, access will be blocked, and your profile and teaser will no longer be shown to investors. Account recovery is not possible.",
     "deleteAccountBtn": "Delete account permanently",
     "deleteConfirmTitle": "Permanent account deletion",
+    "deleteTextInvestor": "Your personal data will be permanently anonymised, access will be blocked, and your mandate will no longer be used for startup matching. Account recovery is not possible.",
+    "deleteConfirmWarning": "This action is irreversible. Your personal data will be permanently anonymised, access will be blocked, and the session will be terminated. Enter your current password to confirm:",
     "deleteDialog": {
       "title": "Permanently delete account?",
       "text": "Your account and all associated personal data will be irretrievably deleted (Art. 17 GDPR). This action cannot be undone.",
