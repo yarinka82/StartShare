@@ -11,8 +11,7 @@ import BlindTeaserCard from "../components/BlindTeaserCard";
 import EmptyState from "../components/EmptyState";
 import { FOOTER_HEIGHT } from "../components/footerConfig";
 import MandateHistoryModal from "../components/MandateHistoryModal";
-import {useFeed} from "./FeedContext";
-
+import { useFeed } from "./FeedContext";
 
 const DECLINE_REASONS = [
   { code: "sector", labelKey: "matching.reasons.sector" },
@@ -33,12 +32,10 @@ export default function FeedPage() {
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
 
-  // "Interested": optional message of up to 500 characters
   const [interestedModalOpen, setInterestedModalOpen] = useState(false);
   const [activeCardId, setActiveCardId] = useState<number | null>(null);
   const [investorMessage, setInvestorMessage] = useState("");
 
-  // "No": reason for declining
   const [declineModalOpen, setDeclineModalOpen] = useState(false);
   const [declineReason, setDeclineReason] = useState("sector");
 
@@ -70,7 +67,7 @@ export default function FeedPage() {
       setActiveCardId(null);
       setToast({ severity: "success", message: t("matching.interestSent", "Запит надіслано стартапу.") });
     } catch (e) {
-      failToast(e); // dialog stays open so the message is not lost
+      failToast(e);
     } finally {
       setBusy(false);
     }
@@ -101,29 +98,46 @@ export default function FeedPage() {
   };
 
   return (
-    <Stack spacing={3}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 2 }}>
-        <Box>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, color: "#0b2142" }}>
-            {t("investor.cabinetTitle", "Кабінет інвестора")}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {t("investor.cabinetSubtitle", "Щотижневі підбірки 3–5 сліпих тизерів за вашим мандатом.")}
-          </Typography>
-        </Box>
-        <Button variant="outlined" size="small" startIcon={<HistoryIcon />} onClick={() => setHistoryOpen(true)} sx={{ textTransform: "none" }}>
-          {t("investor.mandateHistoryBtn", "Історія мандату [B]")}
-        </Button>
-      </Box>
+<Stack spacing={3}>
+      {/* ШАПКА З ЛІВИМ ВИРІВНЮВАННЯМ УСІХ ЕЛЕМЕНТІВ */}
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 0.5 }}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 800, color: "#0b2142" }}>
+          {t("investor.cabinetTitle", "Кабінет інвестора")}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {t("investor.cabinetSubtitle", "Щотижневі підбірки 3–5 сліпих тизерів за вашим мандатом.")}
+        </Typography>
 
-      {!loading && !loadError && cards.length > 0 && (
-        <Box>
-          <Chip
-            label={t("investor.digestCount", { count: cards.length, defaultValue: "У поточному дайджесті: {{count}}" })}
-            color="primary" variant="outlined" sx={{ fontWeight: 700 }}
-          />
-        </Box>
-      )}
+        {/* ЛІВИЙ БЛОК: Кількість карток + Історія мандату в один рядок */}
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", flexWrap: "wrap", mt: 1.5 }}>
+          {!loading && !loadError && cards.length > 0 && (
+            <Chip
+              label={t("investor.digestCount", { count: cards.length, defaultValue: "У поточному дайджесті: {{count}}" })}
+              color="primary"
+              variant="outlined"
+              sx={{ fontWeight: 700 }}
+            />
+          )}
+
+          {/* Кнопка історії зліва поруч із бейджем */}
+          <Button
+            variant="text"
+            size="small"
+            startIcon={<HistoryIcon />}
+            onClick={() => setHistoryOpen(true)}
+            sx={{
+              textTransform: "none",
+              color: "text.secondary",
+              fontWeight: 600,
+              fontSize: "0.85rem",
+              px: 1,
+              "&:hover": { color: "#17407a", bgcolor: "rgba(23, 64, 122, 0.05)" },
+            }}
+          >
+            {t("investor.mandateHistoryBtn", "Історія версій мандату")}
+          </Button>
+        </Stack>
+      </Box>
 
       <Box sx={{ maxWidth: 720 }}>
         {loading ? (
@@ -168,9 +182,22 @@ export default function FeedPage() {
             ))}
           </Stack>
         )}
+
+        {/*/!* АКУРАТНЕ РОЗМІЩЕННЯ ПІД СТРІЧКОЮ НАД ФУТЕРОМ / БІЛЯ DATENSCHUTZ *!/*/}
+        {/*<Box sx={{ display: "flex", justifyContent: "center", pt: 3 }}>*/}
+        {/*  <Button*/}
+        {/*    variant="text"*/}
+        {/*    size="small"*/}
+        {/*    startIcon={<HistoryIcon />}*/}
+        {/*    onClick={() => setHistoryOpen(true)}*/}
+        {/*    sx={{ color: "text.secondary", textTransform: "none", fontSize: "0.82rem", "&:hover": { color: "#17407a" } }}*/}
+        {/*  >*/}
+        {/*    {t("investor.mandateHistoryBtn", "Історія версій мандату")}*/}
+        {/*  </Button>*/}
+        {/*</Box>*/}
       </Box>
 
-      {/* "Interested": message to the founder, up to 500 characters */}
+      {/* Діалог «Цікаво» */}
       <Dialog open={interestedModalOpen} onClose={() => !busy && setInterestedModalOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, color: "#0b2142" }}>
           {t("matching.interestedModalTitle", "Виявити інтерес до стартапу")}
@@ -200,7 +227,7 @@ export default function FeedPage() {
         </DialogActions>
       </Dialog>
 
-      {/* "No": reason, feedback for the next digests */}
+      {/* Діалог «Ні» */}
       <Dialog open={declineModalOpen} onClose={() => !busy && setDeclineModalOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, color: "#0b2142" }}>
           {t("matching.declineTitle", "Чому цей проєкт не підійшов?")}

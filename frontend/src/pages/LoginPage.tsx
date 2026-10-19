@@ -137,7 +137,7 @@ export default function LoginPage() {
             direction="row" useFlexGap
             sx={{ pt: 1, columnGap: 1, flexWrap: "wrap", justifyContent: "space-between", alignItems: "center" }}
           >
-            <Button component={RouterLink} to="/forgot-password" size="small" sx={{ textTransform: "none", color: "text.secondary" }}>
+            <Button component={RouterLink} to="/forgot-password" state={{ email: email.trim() }} size="small" sx={{ textTransform: "none", color: "text.secondary" }}>
               {t("login.forgot")}
             </Button>
             <Button component={RouterLink} to="/register" size="small" sx={{ textTransform: "none", fontWeight: 600, color: "#17407a" }}>
