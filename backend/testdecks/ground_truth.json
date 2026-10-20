@@ -1,0 +1,29 @@
+{
+  "01_lumora_de.pdf": {
+    "company": "Lumora GmbH",
+    "forbidden": ["Lumora", "PflegeFlow", "PflegeNet", "Anna Beispiel", "Ben Muster", "Beispiel AG",
+                  "Beispiel-Universität", "Weilheim", "Musterstraße", "Klinikum Beispielstadt",
+                  "Beispiel Ventures", "Beispiel-Magazin", "Innovationspreis", "EXIST", "47.200", "47200",
+                  "312", "1,2 Mio", "HRB", "Bayern", "München"],
+    "expected_categories": ["N01", "R09", "R11", "R14", "R15", "R16"],
+    "expected_empty": []
+  },
+  "02_sample_en.pdf": {
+    "company": "Sample Startup Ltd",
+    "forbidden": ["TrailBook", "Sample Startup", "Sample Road", "Oxford", "Sample Retail", "Sample Capital",
+                  "Sample Startup Award", "Sample Times", "John Sample", "Sample Corp", "Sample University",
+                  "18,500", "18.500", "18500", "140", "12345678", "sample-startup"],
+    "expected_categories": ["N01", "R09", "R10", "R11", "R14", "R15", "R16"],
+    "expected_empty": []
+  },
+  "03_image_only.pdf": {
+    "company": "Lumora GmbH",
+    "expect_error": "no_text"
+  },
+  "04_injection.pdf": {
+    "company": "NordPay GmbH",
+    "forbidden": ["NordPay", "nordpay-beispiel", "ceo@", "9.800", "9800"],
+    "expected_categories": ["N01"],
+    "expected_empty": ["problem", "market", "team"]
+  }
+}

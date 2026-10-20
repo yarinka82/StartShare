@@ -1,0 +1,504 @@
+{
+  "teaser": {
+    "statusLoadError": "The processing status could not be loaded.",
+    "timedOutMessage": "Processing is taking longer than usual. You can leave this page and return later.",
+    "processing": "AI is analyzing your Pitch Deck…",
+    "queued": "Your Pitch Deck is queued for analysis…",
+    "processingEstimate": "This usually takes less than a minute.",
+    "loadingTeaser": "Loading your teaser…",
+    "approvedBanner": "Your teaser has been approved and can no longer be edited.",
+    "imageSlidesBanner": "Slide(s) {{slides}} contain graphics/images. Please manually check them for company logos or real names.",
+    "approveTitle": "Approve teaser",
+    "blockersHeader": "The following issues must be resolved before approval:",
+    "approveLiveButton": "Approve and publish teaser (LIVE)",
+    "disclaimer": "Information provided by the startup, not reviewed by Start Share. Not investment advice, a recommendation, or an offer to acquire equity.",
+    "confirm": "Confirm",
+    "notFoundInDeck": "AI could not find anything about this in the deck. Add it yourself or leave it blank.",
+    "empty": "Empty.",
+    "status": {
+      "confirmed": "Confirmed",
+      "notConfirmed": "Not confirmed"
+    },
+    "fields": {
+      "headline": "Headline (Short description)",
+      "problem": "Problem",
+      "solution": "Solution & Product",
+      "traction": "Traction & Metrics",
+      "market": "Market & Target Audience",
+      "team": "Team Background"
+    },
+    "categories": {
+      "R01": "Company Name / Brand",
+      "R02": "Founder / Team Name",
+      "R03": "URL / Website",
+      "R04": "Contact Details (Email / Phone)",
+      "R05": "Patent Number / Trademark",
+      "R06": "Customer / Partner Name",
+      "R07": "City / Exact Location",
+      "R08": "Social Media / Profile",
+      "R09": "Sensitive Metric",
+      "default": "Identifying Feature"
+    },
+    "advice": {
+      "R01": "Replace the name with a neutral description, e.g. 'A B2B SaaS startup from the DACH region'.",
+      "R02": "Describe the role and experience without real names (e.g. 'Experienced tech lead with 8 years of industry experience').",
+      "R03": "Remove web links; data is exchanged only after mutual approval.",
+      "R04": "Remove contact details; they are exchanged only after approval.",
+      "R05": "Describe protected technologies abstractly without patent numbers.",
+      "R06": "Replace specific names with industry categories (e.g. 'Tier-1 automotive manufacturer').",
+      "R07": "Replace the city with a region (e.g. 'Southern Germany' or 'DACH').",
+      "default": "Rephrase this section so that the specific company cannot be identified."
+    },
+    "blockers": {
+      "required": "is required and cannot be empty.",
+      "unconfirmed": "has not yet been confirmed (click Confirm).",
+      "blocking_risk": "contains a critical identifying feature that must be removed.",
+      "too_long": "exceeds the character limit."
+    }
+  },
+  "app": {
+    "name": "Start Share"
+  },
+  "nav": {
+    "staffPanel": "Admin Area",
+    "digest": "Digest",
+    "mandate": "Mandat",
+    "profile": "My Profile",
+    "logout": "Log out",
+    "language": "Language"
+  },
+  "common": {
+    "tryAgain": "Try again",
+    "checkAgain": "Check again",
+    "loading": "Loading…",
+    "save": "Save",
+    "saved": "Saved",
+    "close": "Close",
+    "saving": "Saving…",
+    "edit": "Edit",
+    "email": "Email",
+    "password": "Password",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "backToLogin": "Back to login",
+    "eur": "EUR",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "roles": {
+    "startup": "Startup",
+    "investor": "Investor"
+  },
+  "register": {
+    "title": "Konto erstellen",
+    "iAm": "I am registering as",
+    "passwordHelper": "At least 8 characters.",
+    "agb": "I accept the <link>General Terms and Conditions (GTC)</link>.",
+    "datenschutz": "I acknowledge the <link>Privacy Policy</link>.",
+    "submit": "Register",
+    "haveAccount": "Already have an account? Log in",
+    "doneTitle": "Please check your inbox",
+    "doneText": "If this address can be registered, we have sent a confirmation link. Please confirm your email address before logging in.",
+    "confirmPassword": "Repeat password",
+    "passwordMismatch": "The passwords do not match."
+  },
+  "login": {
+    "title": "Log in",
+    "submit": "Log in",
+    "forgot": "Forgot password?",
+    "noAccount": "No account yet? Register",
+    "notVerified": "Please confirm your email address first. You will find the link in your inbox.",
+    "resend": "Resend link",
+    "resent": "If this address is still awaiting confirmation, a new link has been sent."
+  },
+  "verify": {
+    "verifying": "Your email address is being confirmed …",
+    "success": "Your email address has been confirmed. You can now log in.",
+    "failed": "This link is invalid or has expired. Log in to request a new one."
+  },
+  "forgot": {
+    "title": "Reset password",
+    "text": "Enter your email address and we will send you a link.",
+    "submit": "Send link",
+    "done": "If an account exists for this address, a link has been sent."
+  },
+  "reset": {
+    "title": "Set new password",
+    "newPassword": "New password",
+    "submit": "Save password",
+    "done": "Your password has been changed. You can now log in."
+  },
+  "legal": {
+    "unavailable": "Legal text could not be loaded.",
+    "openInNewTab": "Open in new tab",
+    "consent": {
+      "confirm": "I confirm this statement."
+    },
+    "agb": "General Terms and Conditions (GTC)",
+    "datenschutz": "Privacy Policy",
+    "impressum": "Legal Notice",
+    "kriterien": "Profile Selection (Criteria)",
+    "close": "Close",
+    "back": "Back",
+    "placeholder": "The legally binding texts for this document are currently being finalized."
+  },
+  "profile": {
+    "dangerZone": "Delete startup profile",
+    "pausedAlert": "Your profile is paused. Investors will not see your teaser in the weekly digest.",
+    "removedAlert": "Your profile has been removed (REMOVED). Visibility to investors is disabled.",
+    "deckLockedHint": "While the profile is LIVE, the pitch deck cannot be changed. Please pause your profile on the 'Overview' page.",
+    "actions": {
+      "pause": "Pause (PAUSE)",
+      "resume": "Activate (LIVE)",
+      "remove": "Delete profile",
+      "restore": "Restore profile"
+    },
+    "nav": {
+      "overview": "Overview",
+      "company": "Company Details",
+      "deck": "Pitch Deck",
+      "teaser": "Blind Teaser",
+      "intros": "Investor Requests",
+      "privacy": "Privacy & GDPR"
+    },
+    "hints": {
+      "basics": "Sector, stage, country and amount sought",
+      "metrics": "Current metrics and growth (MRR, team size)",
+      "deck": "PDF only, up to {{max}} MB",
+      "teaser": "Review the AI draft and confirm field by field"
+    },
+    "overview": {
+      "status": "Profile status",
+      "readiness": "Profile readiness",
+      "readinessHint": "Complete the steps so your profile reaches investors",
+      "stepData": "Fill in company data",
+      "stepDeck": "Upload pitch deck",
+      "stepLive": "Approve teaser and publish profile"
+    },
+    "sections": {
+      "basics": "Basic Information",
+      "metrics": "Metrics & Growth",
+      "deck": "Pitch Deck (PDF)",
+      "teaser": "Blind Teaser (AI Draft & Approval)"
+    },
+    "growthPeriods": {
+      "mom": "MoM (Month-over-Month)",
+      "qoq": "QoQ (Quarter-over-Quarter)",
+      "yoy": "YoY (Year-over-Year)"
+    },
+    "deleteDialog": {
+      "title": "Delete startup profile?",
+      "text": "Your profile and blind teaser will be completely removed from investor matching (status REMOVED). You can reactivate it later.",
+      "confirm": "Confirm deletion"
+    },
+    "errors": {
+      "growth_period_required": "Please select a period for the growth rate (e.g. MoM, YoY)."
+    },
+    "title": "Startup Profile",
+    "intro": "Complete your profile and upload your Pitch Deck. Everything is automatically saved as a draft.",
+    "status": {
+      "DRAFT": "Draft",
+      "LIVE": "Live",
+      "PAUSED": "Paused",
+      "REMOVED": "Removed"
+    },
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveError": "Speichern nicht möglich",
+    "fields": {
+      "company_name": "Company Name",
+      "sector": "Industry",
+      "stage": "Stage",
+      "country": "Country",
+      "amount_sought": "Amount Sought",
+      "mrr": "MRR (Monthly Recurring Revenue)",
+      "growth_percent": "Growth",
+      "growth_period": "Growth Period",
+      "team_size": "Team Size",
+      "deck": "Pitch Deck",
+      "business_model": "Business Model"
+    },
+    "companyHelper": "Visible internally only. Not shown to investors.",
+    "optional": "optional",
+    "missing": "The following is still missing for a complete profile:",
+    "complete": "Your profile is complete. The next steps (teaser and publication) will follow in a later release."
+  },
+  "deck": {
+    "lockedHint": "Your teaser has been approved (LIVE). To replace or delete the deck, please pause your profile first.",
+    "lockedDeleteTooltip": "Deletion is not possible in LIVE status",
+    "dropHere": "Drag PDF here or",
+    "choose": "Choose file",
+    "hint": "PDF only, up to {{max}} MB",
+    "uploading": "Uploading …",
+    "replace": "Replace",
+    "download": "Download",
+    "remove": "Remove",
+    "removeTitle": "Remove Pitch Deck?",
+    "removeText": "The file will be permanently deleted.",
+    "uploaded": "Uploaded on {{date}}"
+  },
+  "errors": {
+    "teaser_approved": "The deck cannot be deleted because the teaser has already been approved. Please pause your profile first.",
+    "generic": "Something went wrong. Please try again.",
+    "network": "No connection to the server.",
+    "throttled": "Too many attempts. Please try again later.",
+    "accept_agb_required": "Please accept the GTC.",
+    "accept_datenschutz_required": "Please confirm that you have acknowledged the Privacy Policy.",
+    "growth_period_required": "Please select a growth period.",
+    "deck_empty": "The file is empty.",
+    "deck_too_large": "The file is larger than {{max}} MB.",
+    "deck_not_pdf": "Only PDF files are accepted.",
+    "deck_password_protected": "The PDF is password-protected. Please upload an unprotected file.",
+    "deck_corrupted": "The PDF is corrupted and cannot be read.",
+    "invalid_credentials": "Email or password is incorrect.",
+    "email_not_verified": "Please confirm your email address first.",
+    "invalid_or_expired_token": "This link is invalid or has expired.",
+    "no_text": "The deck contains only images or scans without readable text. Please complete the profile manually.",
+    "timeout": "Processing took too long. Please upload the file again.",
+    "corrupted": "The file is corrupted or password-protected. Please upload a valid PDF.",
+    "unexpected": "An unexpected error occurred during AI analysis. Please try again later."
+  },
+  "footer": {
+    "agb": "Terms",
+    "datenschutz": "Privacy",
+    "impressum": "Legal Notice",
+    "kriterien": "Selection Criteria (DSA)"
+  },
+  "authPromo": {
+    "badge": "Regulated B2B Matching Platform",
+    "marketTag": "B2B Germany",
+    "heroTitle": "Discreet networking between startups and investors.",
+    "heroSubtitle": "AI creates a blind teaser without names or brands. Contact details are shared only with mutual consent.",
+    "featureDsa": "DSA-compliant (Art. 16)",
+    "featureB2B": "B2B investors only",
+    "featureServers": "Servers located in Frankfurt",
+    "copyright": "Start Share Platform. All rights reserved."
+  },
+  "dict": {
+    "sectors": {
+      "B2B_SAAS": "B2B SaaS / Enterprise",
+      "FINTECH": "FinTech / InsurTech",
+      "HEALTHTECH": "HealthTech / MedTech",
+      "AI_DATA": "AI & Data Infrastructure",
+      "CLIMATETECH": "ClimateTech / CleanTech",
+      "ECOMMERCE": "E-Commerce / D2C",
+      "INDUSTRIAL": "Industrial Tech / Hardware",
+      "CYBERSECURITY": "Cybersecurity",
+      "PROPTECH": "PropTech / Immobilien",
+      "OTHER": "Other"
+    },
+    "stages": {
+      "pre-seed": "Pre-Seed (< €500k)",
+      "seed": "Seed (€500k – €2M)",
+      "series-a": "Series A (€2M – €5M)",
+      "series-b": "Series B (€5M – €15M)",
+      "series-c-plus": "Series C+ (> €15M)"
+    },
+    "regions": {
+      "DACH": "DACH (DE, AT, CH)",
+      "DE_ONLY": "Germany only",
+      "EU_WIDE": "European Union",
+      "GLOBAL": "Global / Remote"
+    },
+    "businessModels": {
+      "SUBSCRIPTION": "Subscription / SaaS",
+      "TRANSACTIONAL": "Transaction-based / Marketplace",
+      "USAGE_BASED": "Usage-based (API / Usage)",
+      "HARDWARE": "Hardware / License",
+      "HYBRID": "Hybrid / Other"
+    }
+  },
+  "investor": {
+    "selectAll": "Select all",
+    "clear": "Reset",
+    "title": "Welcome",
+    "text": "Your investor account is ready. Mandate settings and weekly teasers are available.",
+    "goToFeed": "Go to Digest",
+    "cabinetTitle": "Investor Cabinet",
+    "cabinetSubtitle": "Weekly selections of 3–5 blind teasers according to your mandate.",
+    "mandateHistoryBtn": "Mandate History [B]",
+    "editMandateBtn": "Edit Mandate",
+    "tabDigest": "Current Digest (3–5 Teasers)",
+    "emptyFeedAlert": "There are no new teasers this week, or you have already reviewed all profiles. The next digest will be generated on Monday at 08:00 (provided there are 3–5 matching startups).",
+    "status": {
+      "title": "Investor Status Confirmation",
+      "intro": "Before continuing, please confirm that you are acting as a professional investor.",
+      "translationNote": "",
+      "translation": "",
+      "continue": "Continue to Mandate"
+    },
+    "mandate": {
+      "historyModalTitle": "Investment Mandate History",
+      "historyModalDesc": "Each change to the criteria creates a new version. Matches are permanently linked to the version valid at the time of the digest.",
+      "noHistory": "No version history available yet.",
+      "versionLabel": "Version {{version}}",
+      "currentVersionBadge": "Active Version",
+      "ticketLabel": "Ticket",
+      "title": "Investment Mandate",
+      "intro": "Define your criteria. You will receive only blind teasers that match your mandate.",
+      "hard": "Exclusion Criteria (Hard Filters)",
+      "soft": "Preferences (Soft Filters)",
+      "sectors": "Industries & Sectors",
+      "stages": "Funding Stages",
+      "regions": "Target Regions",
+      "countries": "Countries",
+      "ticket": "Ticket Size",
+      "ticketMin": "Min. Ticket",
+      "ticketMax": "Max. Ticket",
+      "ticketHint": "Amounts in EUR. Offers outside this range are filtered out.",
+      "businessModels": "Preferred Business Models",
+      "businessModelsHint": "Used to prioritize matching deals in the weekly digest.",
+      "save": "Save Mandate",
+      "saved": "Saved",
+      "lastSaved": "Last saved: {{date}}"
+    }
+  },
+  "matching": {
+    "tags": {
+      "sector": "Industry",
+      "stage": "Funding Stage",
+      "region": "Target Region",
+      "ticket": "Ticket Size",
+      "businessModel": "Preferred Business Model"
+    },
+    "reasons": {
+      "sector": "Industry does not match",
+      "stage": "Wrong Stage",
+      "region": "Region does not match",
+      "ticket": "Ticket size does not match",
+      "team": "Insufficient team experience",
+      "metrics": "Insufficient metrics / traction",
+      "other": "Other"
+    },
+    "interestedModalTitle": "Express Interest in Startup",
+    "interestedModalHint": "The startup will receive a request with your fund's name. You can add a short personal message (optional):",
+    "messagePlaceholder": "E.g.: Interesting case, we would like to discuss the business model...",
+    "sendInterestBtn": "Send Intro Request",
+    "declineTitle": "Why doesn't this startup fit?",
+    "declineHint": "Your feedback helps optimize future weekly digests.",
+    "reasonLabel": "Reason",
+    "declineBtn": "Decline Profile"
+  },
+  "dsa": {
+    "reportTooltip": "Report Content (Art. 16 DSA)",
+    "modalTitle": "Report Content (Art. 16 DSA)",
+    "modalIntro": "Under Art. 16 of the Digital Services Act (DSA), you can report suspected unlawful or misleading content in this profile.",
+    "reasonLabel": "Report Category *",
+    "explanationLabel": "Reason for Report *",
+    "explanationPlaceholder": "Please describe exactly why this content is unlawful or misleading...",
+    "nameLabel": "Your Name",
+    "emailLabel": "Contact Email *",
+    "emailHint": "For the legally required confirmation of receipt (Art. 16(5) DSA)",
+    "goodFaithDeclaration": "I confirm, to the best of my knowledge and belief, that the information provided is correct and complete (Art. 16(2)(d) DSA).",
+    "submitBtn": "Submit Report",
+    "requiredFields": "Please complete all required fields and confirm the statement.",
+    "successMessage": "Thank you! Your report has been received. A confirmation has been sent to your email address.",
+    "reasons": {
+      "fraud_scam": "Fraud / False Information",
+      "misleading_metrics": "Misleading Metrics / Traction",
+      "ip_infringe": "Copyright Infringement / Plagiarism",
+      "illegal_content": "Unlawful Content",
+      "other": "Other"
+    }
+  },
+  "staff": {
+    "dashboard": {
+      "title": "Platform Administration",
+      "subtitle": "DSA compliance management, user moderation, and audit logging according to German standards.",
+      "tabs": {
+        "moderation": "DSA Reports (Art. 16)",
+        "users": "Users & Investors",
+        "consents": "Consent Records (GDPR)",
+        "events": "Event Log (Audit Log)"
+      },
+      "table": {
+        "role": "Role",
+        "orgMandate": "Organization / Mandate",
+        "status": "Status",
+        "action": "Action"
+      },
+      "status": {
+        "active": "Active",
+        "blocked": "Blocked"
+      },
+      "actions": {
+        "block": "Block",
+        "unblock": "Unblock"
+      },
+      "consents": {
+        "user": "User",
+        "document": "Document",
+        "version": "Version",
+        "context": "Context",
+        "acceptedAt": "Consent Timestamp"
+      },
+      "events": {
+        "time": "Time",
+        "event": "Event",
+        "role": "Role",
+        "userId": "User ID",
+        "properties": "Parameters (JSON)"
+      }
+    },
+    "moderation": {
+      "title": "DSA Moderation Area (Art. 16/17)",
+      "subtitle": "Handling complaints about startups, blocking misleading information, and removing content from publication.",
+      "empty": "No complaints in this category. All reviews are complete!",
+      "tab": {
+        "open": "🔥 New Complaints (OPEN)",
+        "resolved": "✅ Resolved",
+        "all": "All Complaints"
+      },
+      "reportBadge": "Complaint #{{id}}",
+      "hiddenBadge": "Hidden from search",
+      "startupId": "Startup ID: {{id}} ({{sector}} / {{stage}})",
+      "reporter": "Complainant: {{email}}",
+      "decisionLabel": "Decision",
+      "action": {
+        "noAction": "Reject Complaint (No Action)",
+        "hide": "Hide from Matching",
+        "remove": "Permanently Block (REMOVED)"
+      },
+      "dialog": {
+        "title": "Confirm Moderation Decision",
+        "intro": "You selected the action “{{decision}}” for complaint #{{id}}.",
+        "noteLabel": "Moderation Note (Reasoning under Art. 17 DSA)",
+        "confirm": "Confirm Decision"
+      }
+    }
+  },
+  "freigabeRequests": {
+    "emptyTitle": "No requests yet",
+    "emptyText": "When an investor expresses interest in your profile, the request will appear here. Your contact details will only be shared after your approval.",
+    "sectionTitle": "Incoming Intro Requests (Approval)",
+    "expiresIn": "Valid until",
+    "investorMessageLabel": "Investor's message:",
+    "textD": "is interested in your profile. Your contact details will only be shared after your approval.",
+    "freigabeBtn": "✓ Approve (Share Contacts)",
+    "declineBtn": "Decline",
+    "freigabeSuccessToast": "Contacts successfully shared! Both parties have received an email with the contact details and legal notice (Text E).",
+    "declineSuccessToast": "The investor's request was declined."
+  },
+  "privacy": {
+    "zoneTitle": "Data & Privacy (GDPR)",
+    "zoneDesc": "Manage your personal data in accordance with European standards (Art. 17 and Art. 20 GDPR).",
+    "exportTitle": "Data export",
+    "exportHint": "Art. 20 GDPR",
+    "exportText": "Download a copy of all your data in JSON format.",
+    "exportBtn": "Export my data (JSON)",
+    "pauseTitle": "Just want to hide your profile?",
+    "pauseText": "Pause your profile: investors won't see it, but all your data is kept. You can resume visibility at any time.",
+    "pauseBtn": "Go to profile status",
+    "deleteTitle": "Delete account",
+    "deleteHint": "Art. 17 GDPR · cannot be undone",
+    "deleteText": "Your personal data will be permanently anonymised, access will be blocked, and your profile and teaser will no longer be shown to investors. Account recovery is not possible.",
+    "deleteAccountBtn": "Delete account permanently",
+    "deleteConfirmTitle": "Permanent account deletion",
+    "deleteDialog": {
+      "title": "Permanently delete account?",
+      "text": "Your account and all associated personal data will be irretrievably deleted (Art. 17 GDPR). This action cannot be undone.",
+      "confirm": "Delete account",
+      "cancel": "Cancel"
+    }
+  }
+}
