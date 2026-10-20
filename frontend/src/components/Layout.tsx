@@ -12,9 +12,10 @@ import { FOOTER_HEIGHT } from "./footerConfig";
 export default function Layout() {
   const { t } = useTranslation();
   const { user, loading, logout } = useAuth();
-  const signedOut = !loading && !user;
   const { pathname } = useLocation();
-  const wide = pathname.startsWith("/profile") || pathname.startsWith("/investor");
+  const signedOut = !loading && !user;
+  const wide = pathname.startsWith("/profile") || pathname.startsWith("/investor") || pathname.startsWith("/staff");
+  const maxWidth = pathname.startsWith("/staff") ? "xl" : wide ? "lg" : "md";
   const navigate = useNavigate();
 
   return (
@@ -102,7 +103,7 @@ export default function Layout() {
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth={wide ? "lg" : "md"} sx={{ py: { xs: 3, md: 5 }, position: "relative", zIndex: 1, flexGrow: 1 }}>
+      <Container maxWidth={maxWidth} sx={{ py: { xs: 3, md: 5 }, position: "relative", zIndex: 1, flexGrow: 1 }}>
         <Outlet />
       </Container>
 

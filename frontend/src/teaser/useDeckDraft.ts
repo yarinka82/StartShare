@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { teaserApi } from "./api";
 import type { DeckDraftResponse } from "./types";

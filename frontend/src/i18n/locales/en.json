@@ -419,8 +419,13 @@
     }
   },
   "staff": {
+    "protectedUser": "Protected (Staff)",
+    "loadError": "Could not load data.",
     "dashboard": {
       "title": "Platform Administration",
+      "searchConsents": "Search by email or document",
+      "searchEvents": "Search by event, role, ID or parameters",
+      "searchUsers": "Search by email or organization",
       "subtitle": "DSA compliance management, user moderation, and audit logging according to German standards.",
       "tabs": {
         "moderation": "DSA Reports (Art. 16)",
@@ -442,6 +447,11 @@
         "block": "Block",
         "unblock": "Unblock"
       },
+      "filter": {
+        "all": "All",
+        "active": "Active",
+        "blocked": "Blocked"
+    },
       "consents": {
         "user": "User",
         "document": "Document",
@@ -466,6 +476,13 @@
         "resolved": "✅ Resolved",
         "all": "All Complaints"
       },
+      "type": {
+      "fraud_scam": "Fraud / False statements",
+      "misleading_metrics": "Misleading metrics",
+      "ip_infringe": "Copyright infringement",
+      "illegal_content": "Illegal content",
+      "other": "Other"
+      },
       "reportBadge": "Complaint #{{id}}",
       "hiddenBadge": "Hidden from search",
       "startupId": "Startup ID: {{id}} ({{sector}} / {{stage}})",
@@ -477,7 +494,9 @@
         "remove": "Permanently Block (REMOVED)"
       },
       "dialog": {
+        "removeWarning": "The profile will be permanently removed from the platform. This action cannot be undone.",
         "title": "Confirm Moderation Decision",
+        "noteRequired": "Please provide a reason for the decision.",
         "intro": "You selected the action “{{decision}}” for complaint #{{id}}.",
         "noteLabel": "Moderation Note (Reasoning under Art. 17 DSA)",
         "confirm": "Confirm Decision"

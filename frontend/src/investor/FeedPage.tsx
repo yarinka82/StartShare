@@ -147,7 +147,7 @@ export default function FeedPage() {
         ) : loadError ? (
           <Alert
             severity="error"
-            action={<Button color="inherit" size="small" onClick={() => void loadFeed()}>{t("common.retry", "Повторити")}</Button>}
+            action={<Button color="inherit" size="small" onClick={() => void loadFeed()}>{t("common.tryAgain", "Повторити")}</Button>}
           >
             {t("investor.feedLoadError", "Не вдалося завантажити дайджест.")}
           </Alert>
@@ -183,18 +183,6 @@ export default function FeedPage() {
           </Stack>
         )}
 
-        {/*/!* АКУРАТНЕ РОЗМІЩЕННЯ ПІД СТРІЧКОЮ НАД ФУТЕРОМ / БІЛЯ DATENSCHUTZ *!/*/}
-        {/*<Box sx={{ display: "flex", justifyContent: "center", pt: 3 }}>*/}
-        {/*  <Button*/}
-        {/*    variant="text"*/}
-        {/*    size="small"*/}
-        {/*    startIcon={<HistoryIcon />}*/}
-        {/*    onClick={() => setHistoryOpen(true)}*/}
-        {/*    sx={{ color: "text.secondary", textTransform: "none", fontSize: "0.82rem", "&:hover": { color: "#17407a" } }}*/}
-        {/*  >*/}
-        {/*    {t("investor.mandateHistoryBtn", "Історія версій мандату")}*/}
-        {/*  </Button>*/}
-        {/*</Box>*/}
       </Box>
 
       {/* Діалог «Цікаво» */}

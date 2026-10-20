@@ -8,7 +8,11 @@ import LegalPage from "./pages/LegalPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-import StaffDashboardPage from "./pages/StaffDashboardPage";
+import StaffLayout from "./staff/StaffLayout";
+import StaffUsersPage from "./staff/UsersPage";
+import StaffConsentsPage from "./staff/ConsentsPage";
+import StaffEventsPage from "./staff/EventsPage";
+import StaffModerationPage from "./staff/ModerationPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import CompanyPage from "./profile/CompanyPage";
 import ProfileLayout from "./profile/ProfileLayout";
@@ -39,14 +43,12 @@ export default function App() {
     {/* Юридичні сторінки (AGB, Datenschutz, Impressum, Kriterien / Текст F) */}
     <Route path="/legal/:doc" element={<LegalPage />} />
 
-        <Route
-          path="/staff/dashboard"
-          element={
-            <RequireRole role="staff">
-              <StaffDashboardPage />
-            </RequireRole>
-          }
-        />
+    <Route path="/staff/dashboard" element={<RequireRole role="staff"><StaffLayout /></RequireRole>}>
+      <Route index element={<StaffModerationPage />} />
+      <Route path="users" element={<StaffUsersPage />} />
+      <Route path="consents" element={<StaffConsentsPage />} />
+      <Route path="events" element={<StaffEventsPage />} />
+    </Route>
 
         {/* 1. ПОТІК СТАРТАПУ: Анкета + Завантаження деку + Редактор тизера ШІ (все в ProfilePage) */}
         <Route path="/profile" element={<RequireRole role="startup"><ProfileLayout /></RequireRole>}>

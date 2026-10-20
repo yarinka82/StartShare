@@ -16,7 +16,7 @@ export default function IntrosPage() {
   if (error) {
     return (
       <Alert severity="error" action={<Button color="inherit" size="small" onClick={() => void reload()}>
-        {t("common.retry", "Повторити")}
+        {t("common.tryAgain", "Повторити")}
       </Button>}>
         {t("freigabeRequests.loadError", "Не вдалося завантажити запити.")}
       </Alert>

@@ -419,7 +419,12 @@
     }
   },
   "staff": {
+    "protectedUser": "Geschützt (Staff)",
     "dashboard": {
+      "loadError": "Daten konnten nicht geladen werden.",
+      "searchConsents": "Suche nach E-Mail oder Dokument",
+      "searchEvents": "Suche nach Ereignis, Rolle, ID oder Parametern",
+      "searchUsers": "Suche nach E-Mail oder Organisation",
       "title": "Plattform-Administration",
       "subtitle": "DSA-Compliance-Management, Nutzermoderation und Prüfprotokoll nach deutschen Standards.",
       "tabs": {
@@ -434,6 +439,11 @@
         "status": "Status",
         "action": "Aktion"
       },
+      "filter": {
+        "all": "Alle",
+        "active": "Aktiv",
+        "blocked": "Gesperrt"
+    },
       "status": {
         "active": "Aktiv",
         "blocked": "Gesperrt"
@@ -466,6 +476,13 @@
         "resolved": "✅ Bearbeitet",
         "all": "Alle Beschwerden"
       },
+      "type": {
+      "fraud_scam": "Betrug / Falsche Angaben",
+      "misleading_metrics": "Irreführende Kennzahlen",
+      "ip_infringe": "Urheberrechtsverletzung",
+      "illegal_content": "Rechtswidrige Inhalte",
+      "other": "Sonstiges"
+      },
       "reportBadge": "Beschwerde #{{id}}",
       "hiddenBadge": "Aus der Suche ausgeblendet",
       "startupId": "Startup-ID: {{id}} ({{sector}} / {{stage}})",
@@ -477,7 +494,9 @@
         "remove": "Dauerhaft sperren (REMOVED)"
       },
       "dialog": {
+        "removeWarning": "Das Profil wird dauerhaft von der Plattform entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
         "title": "Bestätigung der Moderationsentscheidung",
+        "noteRequired": "Bitte geben Sie eine Begründung für die Entscheidung an.",
         "intro": "Sie haben die Maßnahme „{{decision}}“ für Beschwerde #{{id}} gewählt.",
         "noteLabel": "Moderationshinweis (Begründung nach Art. 17 DSA)",
         "confirm": "Entscheidung bestätigen"

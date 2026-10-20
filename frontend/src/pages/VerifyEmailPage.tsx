@@ -47,7 +47,7 @@ export default function VerifyEmailPage() {
             </Typography>
             {token && (
               <Button variant="outlined" onClick={() => setAttempt((a) => a + 1)}>
-                {t("common.retry", "Повторити")}
+                {t("common.tryAgain", "Повторити")}
               </Button>
             )}
           </>

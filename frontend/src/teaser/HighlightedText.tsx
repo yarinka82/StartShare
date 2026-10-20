@@ -1,4 +1,3 @@
-
 import { splitByPhrases } from "./highlight";
 import { categoryLabel } from "./labels";
 import { isBlocking, type RiskPhrase } from "./types";

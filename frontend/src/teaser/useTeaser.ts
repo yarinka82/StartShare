@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useState } from "react";
 import { teaserApi, type TeaserApi } from "./api";
 import type { FieldName, TeaserContent } from "./types";
