@@ -1,9 +1,10 @@
-"""Тонкий интерфейс к провайдеру ШІ. Провайдера выбираем позже: меняется одна настройка."""
-from dataclasses import dataclass
+
 """Тонкий интерфейс к провайдеру ШІ. Провайдера выбираем позже: меняется одна настройка."""
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Protocol
+
+
 
 
 class LLMError(Exception):
@@ -62,20 +63,56 @@ class FakeLLMClient:
         )
 
 
-def get_client() -> LLMClient:
-    """Выбор клиента по settings.TEASER_LLM_PROVIDER ('fake' по умолчанию).
-
-    Удалённые провайдеры добавлять сюда и вызывать ensure_remote_allowed() перед созданием.
-    """
+def _resolve_config() -> dict:
+    """PlatformConfig (админка) в приоритете, settings.TEASER_LLM_PROVIDER как запасной вариант."""
     from django.conf import settings
+    
+    cfg = {
+        "provider": getattr(settings, "TEASER_LLM_PROVIDER", "gemini"),
+        "model": None,
+        "temperature": None,
+    }
+    try:
+        from apps.accounts.models import PlatformConfig
+        
+        pc = PlatformConfig.get_solo()
+        cfg["provider"] = pc.ai_provider or cfg["provider"]
+        cfg["model"] = pc.ai_model or None
+        cfg["temperature"] = pc.ai_temperature
+    except Exception:
+        pass  # до миграций и в тестах работаем от settings
+    return cfg
 
-    provider = getattr(settings, "TEASER_LLM_PROVIDER", "fake")
+
+
+def get_client() -> LLMClient:
+    from django.conf import settings
+    
+    cfg = _resolve_config()
+    provider = cfg["provider"]
+    extra = {k: cfg[k] for k in ("model", "temperature") if cfg[k] is not None}
+    
     if provider == "fake":
+        if not settings.DEBUG:
+            raise LLMError("Provider 'fake' is only allowed with DEBUG=True.")
         return FakeLLMClient()
-    if provider in ("gemini_free", "gemini"):
+    
+    if provider in ("gemini", "gemini_free"):
+        # AVV и DEBUG для free-tier проверяются внутри GeminiClient.from_settings
         from .gemini import GeminiClient
-        return GeminiClient.from_settings(settings, free_tier=(provider == "gemini_free"))
-    raise LLMError(f"Unknown TEASER_LLM_PROVIDER: {provider!r}")
+        return GeminiClient.from_settings(settings, free_tier=(provider == "gemini_free"), **extra)
+    
+    if provider == "openai":
+        ensure_remote_allowed()
+        from .openai_client import OpenAIClient  # TODO
+        return OpenAIClient.from_settings(settings, **extra)
+    
+    if provider == "azure_openai":
+        ensure_remote_allowed()
+        from .azure_openai import AzureOpenAIClient  # TODO; модель = AZURE_OPENAI_DEPLOYMENT
+        return AzureOpenAIClient.from_settings(settings, temperature=cfg["temperature"])
+    
+    raise LLMError(f"Unknown LLM provider: {provider!r}")
 
 
 def ensure_remote_allowed() -> None:

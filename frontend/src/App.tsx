@@ -23,6 +23,7 @@ import TeaserSectionPage from "./profile/TeaserSectionPage";
 import InvestorLayout from "./investor/InvestorLayout";
 import MandatePage from "./investor/MandatePage";
 import PrivacyPage from "./components/PrivacyPage";
+import StaffConfigPage from "./staff/StaffConfigPage";
 
 export default function App() {
   return (
@@ -48,6 +49,7 @@ export default function App() {
       <Route path="users" element={<StaffUsersPage />} />
       <Route path="consents" element={<StaffConsentsPage />} />
       <Route path="events" element={<StaffEventsPage />} />
+      <Route path="config" element={<StaffConfigPage />} />
     </Route>
 
         {/* 1. ПОТІК СТАРТАПУ: Анкета + Завантаження деку + Редактор тизера ШІ (все в ProfilePage) */}

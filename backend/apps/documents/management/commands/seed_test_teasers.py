@@ -1,4 +1,3 @@
-
 from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -27,8 +26,8 @@ STARTUPS_DATA = [
     {
         "email": "startup_pflege@test.de",
         "company_name": "PflegeFlow Technologies",
-        "sector_code": "b2b-saas",
-        "sector_name": "B2B SaaS / Enterprise",
+        "sector_code": "healthtech-medtech",
+        "sector_name": "HealthTech & MedTech",
         "stage_code": "seed",
         "stage_name": "Seed",
         "country_code": "de",
@@ -51,7 +50,7 @@ STARTUPS_DATA = [
         "email": "startup_logi@test.de",
         "company_name": "LogiChain Intelligence",
         "sector_code": "ai-data",
-        "sector_name": "AI & Data Infrastructure",
+        "sector_name": "AI & Data",
         "stage_code": "seed",
         "stage_name": "Seed",
         "country_code": "de",
@@ -74,7 +73,7 @@ STARTUPS_DATA = [
         "email": "startup_tax@test.de",
         "company_name": "TaxPayroll DACH",
         "sector_code": "fintech",
-        "sector_name": "FinTech / InsurTech",
+        "sector_name": "FinTech",
         "stage_code": "pre-seed",
         "stage_name": "Pre-Seed",
         "country_code": "at",
@@ -96,8 +95,8 @@ STARTUPS_DATA = [
     {
         "email": "startup_solar@test.de",
         "company_name": "CleanGrid Systems",
-        "sector_code": "climatetech",
-        "sector_name": "ClimateTech / CleanTech",
+        "sector_code": "climatetech-energy",
+        "sector_name": "ClimateTech & Energy",
         "stage_code": "seed",
         "stage_name": "Seed",
         "country_code": "ch",
@@ -186,10 +185,8 @@ class Command(BaseCommand):
                 defaults={"is_other": False} if hasattr(BusinessModel, "is_other") else {},
             )
 
-            # У моделі Country поле name є:
             country, _ = Country.objects.get_or_create(
                 code=data["country_code"],
-                defaults={"name": data["country_name"]},
             )
 
             # 2. Користувач

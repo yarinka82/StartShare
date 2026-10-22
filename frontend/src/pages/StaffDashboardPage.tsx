@@ -24,9 +24,10 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import StaffModerationPage from "../components/StaffModerationPage";
+
 import {useAuth} from "../auth/AuthContext";
 import {api} from "../api/client";
+import StaffModerationPage from "../staff/ModerationPage";
 
 export default function StaffDashboardPage() {
   const { t, i18n } = useTranslation();

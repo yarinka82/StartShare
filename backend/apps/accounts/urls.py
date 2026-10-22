@@ -2,7 +2,8 @@ from django.urls import path
 
 from . import views
 from .staff_views import (StaffReportsListView, StaffReportDecisionView, StaffUsersListView,
-                          StaffToggleUserActiveView, StaffConsentsListView, StaffEventsListView)
+                          StaffToggleUserActiveView, StaffConsentsListView, StaffEventsListView,
+                          StaffPlatformConfigView, StaffPublishLegalDocView)
     
 
 urlpatterns = [
@@ -25,4 +26,7 @@ urlpatterns = [
          name="staff-toggle-user"),
     path("staff/consents/", StaffConsentsListView.as_view(), name="staff-consents"),
     path("staff/events/", StaffEventsListView.as_view(), name="staff-events"),
+    path("staff/config/", StaffPlatformConfigView.as_view(), name="staff-config"),
+    path("staff/legal-documents/publish/", StaffPublishLegalDocView.as_view(),
+         name="staff-publish-legal-doc"),
 ]

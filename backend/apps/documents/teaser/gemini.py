@@ -22,9 +22,9 @@ _FENCE = re.compile(r"^\s*```(?:json)?\s*|\s*```\s*$", re.I)
 
 
 class GeminiClient:
-    def __init__(self, api_key: str, model: str = DEFAULT_MODEL, *, free_tier: bool, client=None,
-                 sleep=time.sleep, max_attempts: int = 4,
-                 price_in_eur_per_m: "Decimal | None" = None, price_out_eur_per_m: "Decimal | None" = None):
+    def __init__(self, api_key, model=DEFAULT_MODEL, *, free_tier, client=None,
+                sleep=time.sleep, max_attempts=4, temperature: float = 0.2,
+                price_in_eur_per_m=None, price_out_eur_per_m=None):
         if client is None:
             from google import genai  # импорт здесь: проект работает и без установленного SDK
             client = genai.Client(api_key=api_key)
@@ -32,12 +32,13 @@ class GeminiClient:
         self.model = model
         self.free_tier = free_tier
         self._sleep = sleep
+        self.temperature = temperature
         self._max_attempts = max_attempts
         self._price_in = price_in_eur_per_m
         self._price_out = price_out_eur_per_m
  
     @classmethod
-    def from_settings(cls, settings, *, free_tier: bool) -> "GeminiClient":
+    def from_settings(cls, settings, *, free_tier: bool, model=None, temperature=None):
         if free_tier:
             if not getattr(settings, "DEBUG", False):
                 raise RemoteProviderNotAllowed(
@@ -48,8 +49,11 @@ class GeminiClient:
         key = getattr(settings, "TEASER_GEMINI_API_KEY", "")
         if not key:
             raise LLMError("TEASER_GEMINI_API_KEY is not set.")
+            
         return cls(
-            key, getattr(settings, "TEASER_GEMINI_MODEL", DEFAULT_MODEL), free_tier=free_tier,
+            key, model or getattr(settings, "TEASER_GEMINI_MODEL", DEFAULT_MODEL),
+            free_tier=free_tier,
+            temperature=0.2 if temperature is None else float(temperature),
             price_in_eur_per_m=getattr(settings, "TEASER_GEMINI_PRICE_IN_EUR_PER_M", None),
             price_out_eur_per_m=getattr(settings, "TEASER_GEMINI_PRICE_OUT_EUR_PER_M", None),
         )
@@ -61,7 +65,7 @@ class GeminiClient:
             system_instruction=system,
             response_mime_type="application/json",
             response_json_schema=schema,
-            temperature=0.2,
+            temperature=self.temperature,
             max_output_tokens=8192,  # запас: токены «размышлений» входят в лимит вывода
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),  # инструментов нет
         )

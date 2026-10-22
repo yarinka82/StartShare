@@ -419,6 +419,32 @@
     }
   },
   "staff": {
+      "config": {
+        "aiSection": "KI-Parameter (AI Generator & Model)",
+        "aiProvider": "KI-Anbieter",
+        "aiModel": "KI-Modell",
+        "azureDeployment": "Wird durch das Azure-Deployment festgelegt",
+        "azureHelper": "Umgebungsvariable AZURE_OPENAI_DEPLOYMENT auf dem Server",
+        "temperature": "Temperatur (0.0 — strenge Fakten, 1.0 — kreativ)",
+        "title": "Systemkonstanten der Plattform",
+        "subtitle": "Verwaltung von KI-Modellen, Dateilimits und wöchentlichen Matching-Regeln.",
+        "lastUpdated": "Zuletzt aktualisiert:",
+        "filesSection": "Dateien & Aufbewahrungsrichtlinien (DSGVO / TTL)",
+        "maxDeckSize": "Max. Deck-Größe (MB)",
+        "retentionHours": "Auto-Löschung Deck (Stunden)",
+        "retentionHelper": "Gemäß Pflichtenheft: 24 Stunden",
+        "draftExpiryDays": "Timeout für Entwürfe (Tage)",
+        "draftHelper": "Gemäß Pflichtenheft: 30 Tage",
+        "matchingSection": "Regeln für wöchentlichen Digest & Intros",
+        "minDigestCards": "Min. Teaser für Versand",
+        "minDigestHelper": "Gemäß Pflichtenheft: 3 Teaser",
+        "maxDigestCards": "Max. Teaser im Digest",
+        "maxDigestHelper": "Gemäß Pflichtenheft: 5 Teaser",
+        "introExpiryDays": "Intro-Timeout für Startups (Tage)",
+        "introExpiryHelper": "Gemäß Pflichtenheft: 7 Tage",
+        "saveBtn": "Einstellungen speichern",
+        "savedSuccess": "Plattformeinstellungen erfolgreich aktualisiert!"
+      },
     "protectedUser": "Geschützt (Staff)",
     "dashboard": {
       "loadError": "Daten konnten nicht geladen werden.",
@@ -431,7 +457,8 @@
         "moderation": "DSA-Meldungen (Art. 16)",
         "users": "Nutzer & Investoren",
         "consents": "Einwilligungsnachweis (DSGVO)",
-        "events": "Ereignisprotokoll (Audit Log)"
+        "events": "Ereignisprotokoll (Audit Log)",
+        "config": "Plattformeinstellungen"
       },
       "table": {
         "role": "Rolle",

@@ -1,4 +1,3 @@
-
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
@@ -132,6 +131,7 @@ class UserConsentContext(models.TextChoices):
     INVESTOR_STATUS = "investor_status", "Investor status (C)"
 
 
+
 class UserConsent(models.Model):
     Context = UserConsentContext
 
@@ -164,3 +164,42 @@ class UserConsent(models.Model):
 
     def __str__(self):
         return f"{self.user_id}:{self.document_type}@{self.document_version}"
+    
+    
+
+class PlatformConfig(models.Model):
+    """Глобальні системні налаштування платформи (Singleton: завжди ID=1)."""
+
+    # 1. ШІ та LLM
+    ai_provider = models.CharField(max_length=32, default="gemini")
+    ai_model = models.CharField(max_length=64, default="gemini-2.0-flash")
+    ai_temperature = models.FloatField(default=0.2)
+
+    # 2. Ліміти файлів та TTL
+    max_deck_size_mb = models.PositiveIntegerField(default=20)
+    deck_retention_hours = models.PositiveIntegerField(default=24)
+    draft_expiry_days = models.PositiveIntegerField(default=30)
+
+    # 3. Бізнес-правила матчингу та дайджесту
+    min_digest_cards = models.PositiveSmallIntegerField(default=3)
+    max_digest_cards = models.PositiveSmallIntegerField(default=5)
+    intro_request_expiry_days = models.PositiveSmallIntegerField(default=7)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "platform_config"
+        verbose_name = "Platform Configuration"
+
+    def save(self, *args, **kwargs):
+        # Гарантуємо, що запис завжди лише один (ID=1)
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return f"Config (Model: {self.ai_model}, Deck: {self.max_deck_size_mb}MB)"

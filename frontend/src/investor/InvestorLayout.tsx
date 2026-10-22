@@ -5,10 +5,11 @@ import VerifiedUserOutlinedIcon from "@mui/icons-material/VerifiedUserOutlined";
 import { Badge } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router-dom";
-import SidebarLayout, { type SidebarItem } from "../components/SidebarLayout";
+
 import { InvestorProvider, useInvestor } from "./InvestorProvider";
 import StatusConfirm from "./StatusConfirm";
 import {FeedProvider, useFeed} from "./FeedContext";
+import SidebarLayout, {SidebarItem} from "../components/SidebarLayout";
 
 /** Navigation of a confirmed investor; the feed icon shows how many teasers wait for an answer. */
 function ConfirmedShell() {

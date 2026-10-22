@@ -2,6 +2,7 @@ import { Box, Link, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import { FOOTER_HEIGHT } from "./footerConfig";
+import { useGuardedLink } from "./UnsavedGuard";
 
 const DOCS = ["agb", "datenschutz", "impressum", "kriterien"] as const;
 
@@ -13,6 +14,7 @@ const DOCS = ["agb", "datenschutz", "impressum", "kriterien"] as const;
 export default function AppFooter({ variant = "app" }: { variant?: "app" | "auth" }) {
   const { t } = useTranslation();
   const auth = variant === "auth";
+  const guardLink = useGuardedLink();
 
   return (
     <Box
@@ -29,7 +31,7 @@ export default function AppFooter({ variant = "app" }: { variant?: "app" | "auth
       }}
     >
       {DOCS.map((doc) => (
-        <Link key={doc} component={RouterLink} to={`/legal/${doc}`} variant="caption" underline="hover" sx={{ color: "text.secondary" }}>
+        <Link key={doc} component={RouterLink} to={`/legal/${doc}`} onClick={guardLink(`/legal/${doc}`)} variant="caption" underline="hover" sx={{ color: "text.secondary" }}>
           {t(`footer.${doc}`)}
         </Link>
       ))}

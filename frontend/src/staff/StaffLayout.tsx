@@ -2,6 +2,7 @@ import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import GavelIcon from "@mui/icons-material/Gavel";
 import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutlined";
+import SettingsSuggestOutlinedIcon from "@mui/icons-material/SettingsSuggestOutlined";
 import ShieldIcon from "@mui/icons-material/Shield";
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -20,6 +21,8 @@ export default function StaffLayout() {
       label: t("staff.dashboard.tabs.consents", "Аудит згод (DSGVO)") },
     { key: "events", to: "/staff/dashboard/events", icon: <HistoryOutlinedIcon />,
       label: t("staff.dashboard.tabs.events", "Журнал подій (Audit Log)") },
+    { key: "config", to: "/staff/dashboard/config", icon: <SettingsSuggestOutlinedIcon />,
+      label: t("staff.dashboard.tabs.config", "Налаштування платформи") },
   ];
 
   return (

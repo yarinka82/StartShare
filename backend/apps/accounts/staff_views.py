@@ -3,8 +3,9 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.accounts.models import User, UserConsent, UserRole
+from apps.accounts.models import User, UserConsent, UserRole, LegalDocument, PlatformConfig
 from apps.analytics.models import Event
+from apps.documents.serializers import PlatformConfigSerializer
 from apps.investors.models import Mandate
 from apps.startups.models import Report, ReportDecision, ReportStatus
 
@@ -212,3 +213,72 @@ class StaffEventsListView(APIView):
             for e in events
         ]
         return Response(data)
+
+
+
+class StaffPlatformConfigView(APIView):
+    """
+    GET   /api/auth/staff/config/ — поточні налаштування + каталог провайдерів.
+    PATCH /api/auth/staff/config/ — часткове оновлення з валідацією.
+    """
+    permission_classes = []  # [IsStaff]
+    
+    def get(self, request):
+        cfg = PlatformConfig.get_solo()  # noqa: F821
+        return Response(PlatformConfigSerializer(cfg).data)
+    
+    def patch(self, request):
+        cfg = PlatformConfig.get_solo()  # noqa: F821
+        serializer = PlatformConfigSerializer(cfg, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+
+class StaffPublishLegalDocView(APIView):
+    """
+    POST /api/staff/legal-documents/publish/
+    Публікація нової версії тексту (A-G, AGB, DSE) без перезапуску сайту.
+    """
+    permission_classes = [IsStaff]
+
+    def post(self, request):
+        code = request.data.get("code")
+        language = request.data.get("language", "de")
+        title = request.data.get("title", "")
+        body = request.data.get("body", "").strip()
+
+        if not code or not body:
+            return Response({"detail": "Код документа та текст є обов'язковими."}, status=status.HTTP_400_BAD_REQUEST)
+
+        now = timezone.now()
+
+        # 1. Знаходимо останню версію і архівуємо її
+        current = LegalDocument.objects.filter(code=code, language=language, valid_to__isnull=True).order_by("-version").first()
+        new_version = 1
+        if current:
+            current.valid_to = now
+            current.save(update_fields=["valid_to"])
+            new_version = current.version + 1
+
+        # 2. Створюємо нову чинну версію (v+1)
+        new_doc = LegalDocument.objects.create(
+            code=code,
+            language=language,
+            version=new_version,
+            title=title or current.title if current else f"Doc {code}",
+            body=body,
+            legal_approved_at=now,
+            valid_from=now,
+        )
+
+        return Response({
+            "status": "published",
+            "code": new_doc.code,
+            "version": new_doc.version,
+            "valid_from": new_doc.valid_from.isoformat()
+        }, status=status.HTTP_201_CREATED)
+    
+    
+    

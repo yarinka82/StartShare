@@ -419,6 +419,32 @@
     }
   },
   "staff": {
+    "config": {
+        "aiSection": "Параметри ШІ (AI Generator & Model)",
+        "aiProvider": "Провайдер ШІ",
+        "aiModel": "Модель ШІ",
+        "azureDeployment": "Визначається деплоєм Azure",
+        "azureHelper": "Змінна AZURE_OPENAI_DEPLOYMENT на сервері",
+        "temperature": "Температура (0.0 — суворі факти, 1.0 — креатив)",
+        "title": "Системні константи платформи",
+        "subtitle": "Керування параметрами ШІ, лімітами файлів та правилами щотижневого матчингу.",
+        "lastUpdated": "Останнє оновлення:",
+        "filesSection": "Файли та політика зберігання (GDPR / TTL)",
+        "maxDeckSize": "Макс. розмір деку (МБ)",
+        "retentionHours": "Автовидалення деку (години)",
+        "retentionHelper": "За ТЗ: 24 години",
+        "draftExpiryDays": "Таймаут чернетки (дні)",
+        "draftHelper": "За ТЗ: 30 днів",
+        "matchingSection": "Правила тижневого дайджесту та знайомств",
+        "minDigestCards": "Мін. карток для відправки",
+        "minDigestHelper": "За ТЗ: 3 тизери",
+        "maxDigestCards": "Макс. карток у дайджесті",
+        "maxDigestHelper": "За ТЗ: 5 тизерів",
+        "introExpiryDays": "Таймаут інтро для стартапу (дні)",
+        "introExpiryHelper": "За ТЗ: 7 днів",
+        "saveBtn": "Зберегти налаштування",
+        "savedSuccess": "Налаштування платформи успішно оновлено!"
+      },
     "protectedUser": "Захищено (Staff)",
     "loadError": "Не вдалося завантажити дані.",
     "dashboard": {
@@ -428,10 +454,11 @@
       "searchUsers": "Пошук за email або організацією",
       "subtitle": "Управління відповідністю DSA, модерація користувачів і журнал перевірок відповідно до німецьких стандартів.",
       "tabs": {
-        "moderation": "Скарги DSA (ст. 16)",
-        "users": "Користувачі та інвестори",
-        "consents": "Підтвердження згоди (GDPR)",
-        "events": "Журнал подій (Audit Log)"
+        "moderation": "Модерація DSA (ст. 16)",
+        "users": "Користувачі та Інвестори",
+        "consents": "Аудит згод (DSGVO)",
+        "events": "Журнал подій (Audit Log)",
+        "config": "Налаштування платформи"
       },
       "table": {
         "role": "Роль",
@@ -452,8 +479,7 @@
         "active": "Активні",
         "blocked": "Заблоковані"
     },
-
-      "consents": {
+     "consents": {
         "user": "Користувач",
         "document": "Документ",
         "version": "Версія",
@@ -540,8 +566,7 @@
       "cancel": "Скасувати"
     }
   }
-
-  }
+}
 
 
 

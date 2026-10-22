@@ -50,7 +50,6 @@ class PitchDeck(models.Model):
     # Файл в приватном хранилище
     file = models.FileField(
         upload_to=deck_upload_path,
-        storage=get_private_storage,
         max_length=500,
         null=True,
         blank=True,

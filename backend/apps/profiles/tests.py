@@ -1,5 +1,6 @@
 import io
 import os
+from unittest.mock import patch
 
 from django.core.cache import cache
 from django.core.management import call_command
@@ -213,8 +214,8 @@ class DeckTests(APITestCase):
                 self.assertIn(code, str(r.data), (code, kw))
         self.assertEqual(PitchDeck.objects.count(), 0)
     
-    @override_settings(DECK_MAX_BYTES=1000)
-    def test_too_large(self):
+    @patch("apps.documents.serializers.get_max_deck_size_bytes", return_value=1000)
+    def test_too_large(self, _mock):
         r = self.upload(data=make_pdf(pages=30))
         self.assertEqual(r.status_code, 400)
         self.assertIn("deck_too_large", str(r.data))

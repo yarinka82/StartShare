@@ -1,4 +1,3 @@
-
 """Контракт ответа ШІ (BA-AI-01 §4, черновик) и проверка risk_phrases."""
 from typing import Literal
 
@@ -21,6 +20,7 @@ class TeaserFields(BaseModel):
     team: str = Field(default="", max_length=800)
 
 
+
 class RiskPhrase(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -28,6 +28,7 @@ class RiskPhrase(BaseModel):
     field: str
     quote: str = Field(min_length=1, max_length=300)
     reason: str = Field(default="", max_length=300)
+
 
 
 class DraftResponse(BaseModel):

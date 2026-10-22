@@ -419,6 +419,32 @@
     }
   },
   "staff": {
+      "config": {
+        "aiSection": "AI parameters (AI Generator & Model)",
+        "aiProvider": "AI provider",
+        "aiModel": "AI model",
+        "azureDeployment": "Determined by Azure deployment",
+        "azureHelper": "AZURE_OPENAI_DEPLOYMENT environment variable on the server",
+        "temperature": "Temperature (0.0 — strict facts, 1.0 — creative)",
+        "title": "Platform System Constants",
+        "subtitle": "Manage AI models, file thresholds, and weekly matching parameters.",
+        "lastUpdated": "Last updated:",
+        "filesSection": "Files & Retention Policy (GDPR / TTL)",
+        "maxDeckSize": "Max Pitch Deck Size (MB)",
+        "retentionHours": "Auto-purge Deck (hours)",
+        "retentionHelper": "Per specification: 24 hours",
+        "draftExpiryDays": "Draft Timeout (days)",
+        "draftHelper": "Per specification: 30 days",
+        "matchingSection": "Weekly Digest & Intro Rules",
+        "minDigestCards": "Min Teasers to Dispatch",
+        "minDigestHelper": "Per specification: 3 teasers",
+        "maxDigestCards": "Max Teasers in Digest",
+        "maxDigestHelper": "Per specification: 5 teasers",
+        "introExpiryDays": "Intro Timeout for Startups (days)",
+        "introExpiryHelper": "Per specification: 7 days",
+        "saveBtn": "Save Settings",
+        "savedSuccess": "Platform settings updated successfully!"
+      },
     "protectedUser": "Protected (Staff)",
     "loadError": "Could not load data.",
     "dashboard": {
@@ -428,10 +454,11 @@
       "searchUsers": "Search by email or organization",
       "subtitle": "DSA compliance management, user moderation, and audit logging according to German standards.",
       "tabs": {
-        "moderation": "DSA Reports (Art. 16)",
+        "moderation": "DSA Notices (Art. 16)",
         "users": "Users & Investors",
         "consents": "Consent Records (GDPR)",
-        "events": "Event Log (Audit Log)"
+        "events": "Event Log (Audit Log)",
+        "config": "Platform Settings"
       },
       "table": {
         "role": "Role",

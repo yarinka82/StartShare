@@ -1,8 +1,58 @@
-from rest_framework import serializers, settings
+from rest_framework import serializers
 from django.conf import settings
-
+from typing import TypedDict
+from apps.accounts.models import PlatformConfig
 from apps.analytics.services import processing_status
 from apps.documents.models import PitchDeck
+from common.validators import get_max_deck_size_bytes
+
+
+class AIModel(TypedDict):
+    id: str
+    label: str
+
+
+class AIProvider(TypedDict):
+    id: str
+    label: str
+    models: list[AIModel]
+
+
+AI_PROVIDER_CATALOG: list[AIProvider] = [
+    {
+        "id": "gemini",
+        "label": "Google Gemini",
+        "models": [
+            {"id": "gemini-3.8-flash", "label": "Gemini 3.8 Flash (Fast / Recommended)"},
+            {"id": "gemini-3.7-flash", "label": "Gemini 3.7 Flash"},
+        ],
+    },
+    {
+        "id": "openai",
+        "label": "OpenAI",
+        "models": [{"id": "gpt-4o-mini", "label": "GPT-4o-mini"}],
+    },
+    {
+        "id": "azure_openai",
+        "label": "Azure OpenAI",
+        "models": [],  # модель = AZURE_OPENAI_DEPLOYMENT
+    },
+]
+
+_CATALOG_BY_ID: dict[str, AIProvider] = {p["id"]: p for p in AI_PROVIDER_CATALOG}
+
+
+def _provider_configured(provider_id: str) -> bool:
+    if provider_id == "gemini":
+        return bool(getattr(settings, "TEASER_GEMINI_API_KEY", ""))
+    if provider_id == "openai":
+        return bool(getattr(settings, "OPENAI_API_KEY", ""))
+    if provider_id == "azure_openai":
+        return all(
+            getattr(settings, name, "")
+            for name in ("AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_DEPLOYMENT")
+        )
+    return False
 
 
 
@@ -39,22 +89,10 @@ class DeckUploadSerializer(serializers.Serializer):
             "required": "deck_empty",
         },
     )
-
+    
     def validate_file(self, value):
-        # 1. ПРОВЕРКА РАЗМЕРА (Dynamic max_bytes для @override_settings)
-        max_bytes = getattr(settings, "DECK_MAX_BYTES", None)
-        max_mb = getattr(settings, "DECK_MAX_MB", None)
-
-        if max_bytes is not None and max_mb is not None:
-            max_limit = min(int(max_bytes), int(max_mb) * 1024 * 1024)
-        elif max_bytes is not None:
-            max_limit = int(max_bytes)
-        elif max_mb is not None:
-            max_limit = int(max_mb) * 1024 * 1024
-        else:
-            max_limit = 20 * 1024 * 1024
-
-        if getattr(value, "size", 0) > max_limit:
+        # 1. Размер: единый источник истины (PlatformConfig -> дефолт из settings)
+        if value.size > get_max_deck_size_bytes():
             raise serializers.ValidationError("deck_too_large")
 
         # 2. ПРОВЕРКА НА ПУСТОЙ ФАЙЛ
@@ -112,3 +150,75 @@ class DeckUploadSerializer(serializers.Serializer):
             value.seek(0)  # Всегда возвращаем указатель в начало!
 
         return value
+
+
+
+class PlatformConfigSerializer(serializers.ModelSerializer):
+    ai_providers = serializers.SerializerMethodField()
+    # Для azure_openai модель пустая: если у модельного поля нет blank=True, добавьте его.
+    ai_model = serializers.CharField(allow_blank=True, required=False)
+    
+    class Meta:
+        model = PlatformConfig
+        fields = [
+            "ai_provider", "ai_model", "ai_temperature",
+            "max_deck_size_mb", "deck_retention_hours", "draft_expiry_days",
+            "min_digest_cards", "max_digest_cards", "intro_request_expiry_days",
+            "updated_at", "ai_providers",
+        ]
+        read_only_fields = ["updated_at"]
+        extra_kwargs = {
+            "ai_temperature": {"min_value": 0, "max_value": 1},
+            "max_deck_size_mb": {"min_value": 1, "max_value": 200},
+            "deck_retention_hours": {"min_value": 1},
+            "draft_expiry_days": {"min_value": 1},
+            "min_digest_cards": {"min_value": 1},
+            "max_digest_cards": {"min_value": 1},
+            "intro_request_expiry_days": {"min_value": 1},
+        }
+    
+    def get_ai_providers(self, obj):
+        return AI_PROVIDER_CATALOG
+    
+    def validate(self, attrs):
+        inst = self.instance
+        
+        if "ai_provider" in attrs or "ai_model" in attrs:
+            provider_id = attrs.get("ai_provider", inst.ai_provider)
+            if isinstance(provider_id, list):
+                provider_id = provider_id[0] if provider_id else None
+            
+            provider = _CATALOG_BY_ID.get(provider_id)
+            if provider is None:
+                raise serializers.ValidationError(
+                    {"ai_provider": f"Невідомий провайдер: {provider_id!r}."}
+                )
+            if not getattr(settings, "TEASER_AVV_SIGNED", False):
+                raise serializers.ValidationError(
+                    {"ai_provider": "Віддалений провайдер потребує підписаного AVV (REQ-39)."}
+                )
+            if not _provider_configured(provider_id):
+                raise serializers.ValidationError(
+                    {"ai_provider": "Для цього провайдера не задано ключі/налаштування на сервері."}
+                )
+            
+            if provider["models"]:
+                model = attrs.get("ai_model", inst.ai_model)
+                if isinstance(model, list):
+                    model = model[0] if model else None
+                if model not in {m["id"] for m in provider["models"]}:
+                    raise serializers.ValidationError(
+                        {"ai_model": "Ця модель недоступна для обраного провайдера."}
+                    )
+            else:
+                attrs["ai_model"] = ""
+        
+        lo = attrs.get("min_digest_cards", inst.min_digest_cards)
+        hi = attrs.get("max_digest_cards", inst.max_digest_cards)
+        if lo > hi:
+            raise serializers.ValidationError(
+                {"min_digest_cards": "Мінімум не може бути більшим за максимум."}
+            )
+        return attrs
+    
+    

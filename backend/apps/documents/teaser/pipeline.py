@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from decimal import Decimal
 
+from django.conf import settings
 from pydantic import ValidationError
 
 from anonymizer import detect
+from .gemini import GeminiClient
 
 from ..pdf_extract import DeckContent, DeckExtractionError, extract_deck
 from .contract import DraftResponse, check_response, response_schema, unsupported_fields, valid_phrases
@@ -105,6 +107,7 @@ def run_pipeline(
     return PipelineResult(draft, unique, total_cost, attempts)
 
 
+
 def build_draft(pitch_deck):
     """
     Обёртка для tasks.process_deck: возвращает (draft, risk_phrases, cost_eur).
@@ -125,20 +128,67 @@ def build_draft(pitch_deck):
     except DeckExtractionError as exc:
         raise PipelineError(exc.code) from exc
 
+    # Безпечні помічники для отримання назви довідника
+    def get_ref_name(obj, fallback_attr=""):
+        if not obj:
+            return getattr(profile, fallback_attr, "") or ""
+        return getattr(obj, "name_de", getattr(obj, "name", getattr(obj, "code", "")))
+
     # 3. Формируем контекст формы стартапа из связанных довідників
     form = {
-        "sector": profile.sector.name_de if profile and profile.sector else (getattr(profile, "sector_other_text", "") or ""),
-        "stage": profile.stage.name_de if profile and profile.stage else "",
-        "business_model": profile.business_model.name_de if profile and profile.business_model else (getattr(profile, "business_model_other_text", "") or ""),
-        "country": profile.country.name_de if profile and profile.country else "",
+        "sector": get_ref_name(getattr(profile, "sector", None), "sector_other_text"),
+        "stage": get_ref_name(getattr(profile, "stage", None)),
+        "business_model": get_ref_name(getattr(profile, "business_model", None), "business_model_other_text"),
+        "country": get_ref_name(getattr(profile, "country", None)),
     }
 
-    # 4. Запускаем LLM пайплайн генерации
+    # 4. Запускаем LLM пайплайн генерации через ДИНАМІЧНИЙ клієнт
     result = run_pipeline(
         content,
         form,
         terms_from_profile(profile) if profile else [],
-        get_client(),
+        get_active_llm_client(),  # 🚀 ВИПРАВЛЕНО: викликаємо динамічний клієнт із налаштувань адмінки!
         max_retries=getattr(settings, "TEASER_LLM_MAX_RETRIES", 2),
     )
     return result.draft, result.risk_phrases, result.cost_eur
+
+
+
+def get_active_llm_client():
+    """
+    Визначає активного провайдера та модель:
+    спочатку дивиться у динамічний PlatformConfig, якщо немає — бере з settings.
+    """
+    provider = "gemini"
+    model = None
+    temperature = 0.2
+
+    try:
+        from apps.accounts.models import PlatformConfig
+        cfg = PlatformConfig.get_solo()
+        provider = cfg.ai_provider or "gemini"
+        model = cfg.ai_model
+        temperature = cfg.ai_temperature
+    except Exception:
+        provider = getattr(settings, "TEASER_LLM_PROVIDER", "gemini_free")
+        model = getattr(settings, "TEASER_GEMINI_MODEL", "gemini-2.0-flash")
+
+    # Якщо обрано Gemini (Free або з підписаним AVV)
+    if provider in ("gemini", "gemini_free"):
+        free_tier = (provider == "gemini_free" or getattr(settings, "TEASER_LLM_PROVIDER", "") == "gemini_free")
+        return GeminiClient(
+            api_key=settings.TEASER_GEMINI_API_KEY,
+            model=model or "gemini-2.0-flash",
+            free_tier=free_tier,
+        )
+
+    # Якщо для продакшну обрано OpenAI
+    if provider == "openai":
+        from .openai_client import OpenAIClient
+        return OpenAIClient(
+            api_key=getattr(settings, "OPENAI_API_KEY", ""),
+            model=model or "gpt-4o-mini",
+            temperature=temperature,
+        )
+
+    raise ValueError(f"Невідомий або ненадійний AI провайдер: {provider}")

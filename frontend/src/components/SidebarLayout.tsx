@@ -1,11 +1,9 @@
 import {
-  Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItemButton,
-  ListItemIcon, ListItemText, Paper, Tab, Tabs, Typography,
+  Box, List, ListItemButton, ListItemIcon, ListItemText, Paper, Tab, Tabs,
 } from "@mui/material";
-import { useState, type MouseEvent, type ReactElement, type ReactNode } from "react";
-import { useTranslation } from "react-i18next";
-import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
-import { UnsavedGuardProvider, useUnsavedGuardState } from "./UnsavedGuard";
+import type { ReactElement, ReactNode } from "react";
+import { Link as RouterLink, useLocation } from "react-router-dom";
+import { useGuardedLink } from "./UnsavedGuard";
 
 export type SidebarItem = {
   key: string;
@@ -17,32 +15,15 @@ export type SidebarItem = {
   trailing?: ReactNode;
 };
 
-function Inner({ items, ariaLabel, children }: {
+/** Sticky sidebar on desktop, scrollable tabs on mobile, content on the right. */
+export default function SidebarLayout({ items, ariaLabel, children }: {
   items: SidebarItem[]; ariaLabel: string; children: ReactNode;
 }) {
-  const { t } = useTranslation();
   const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const guard = useUnsavedGuardState();
-  const [pending, setPending] = useState<string | null>(null);
+  const guardLink = useGuardedLink(); // asks before leaving a page with unsaved edits
 
   const isActive = (i: SidebarItem) => (i.end ? pathname === i.to : pathname.startsWith(i.to));
   const active = items.find(isActive)?.to ?? false;
-
-  // ask before leaving a page with unsaved edits
-  const onNav = (to: string) => (e: MouseEvent) => {
-    if (!guard?.dirty || to === pathname) return;
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return; // open in new tab etc.
-    e.preventDefault();
-    setPending(to);
-  };
-
-  const leave = () => {
-    const to = pending;
-    setPending(null);
-    guard?.setDirty(false);
-    if (to) navigate(to);
-  };
 
   return (
     <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: { xs: "1fr", md: "240px minmax(0, 1fr)" }, alignItems: "start" }}>
@@ -54,17 +35,17 @@ function Inner({ items, ariaLabel, children }: {
           {items.map((i) => (
             <ListItemButton
               key={i.key} component={RouterLink} to={i.to} selected={isActive(i)}
-              onClick={onNav(i.to)} sx={{ borderRadius: 2, mb: 0.25 }}
+              onClick={guardLink(i.to)} sx={{ borderRadius: 2, mb: 0.25 }}
             >
               <ListItemIcon sx={{ minWidth: 36 }}>{i.icon}</ListItemIcon>
               <ListItemText
-                  primary={i.label}
-                  slotProps={{
-                    primary: {
-                      sx: { fontWeight: isActive(i) ? 700 : 500 }
-                    }
-                  }}
-                />
+                primary={i.label}
+                slotProps={{
+                  primary: {
+                    sx: { fontWeight: isActive(i) ? 700 : 500 },
+                  },
+                }}
+              />
               {i.trailing}
             </ListItemButton>
           ))}
@@ -75,7 +56,7 @@ function Inner({ items, ariaLabel, children }: {
         <Tabs value={active} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile>
           {items.map((i) => (
             <Tab
-              key={i.key} value={i.to} component={RouterLink} to={i.to} onClick={onNav(i.to)}
+              key={i.key} value={i.to} component={RouterLink} to={i.to} onClick={guardLink(i.to)}
               icon={i.icon} iconPosition="start" label={i.label}
               sx={{ minHeight: 48, textTransform: "none" }}
             />
@@ -84,36 +65,6 @@ function Inner({ items, ariaLabel, children }: {
       </Paper>
 
       <Box sx={{ minWidth: 0 }}>{children}</Box>
-
-      <Dialog open={pending !== null} onClose={() => setPending(null)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>
-          {t("common.unsavedTitle", "Є незбережені зміни")}
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary">
-            {t("common.unsavedText", "Якщо піти зараз, внесені зміни буде втрачено.")}
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setPending(null)} autoFocus>
-            {t("common.stay", "Залишитись")}
-          </Button>
-          <Button onClick={leave} color="error">
-            {t("common.leaveWithoutSaving", "Піти без збереження")}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
-  );
-}
-
-/** Sticky sidebar on desktop, scrollable tabs on mobile, content on the right. */
-export default function SidebarLayout(props: {
-  items: SidebarItem[]; ariaLabel: string; children: ReactNode;
-}) {
-  return (
-    <UnsavedGuardProvider>
-      <Inner {...props} />
-    </UnsavedGuardProvider>
   );
 }

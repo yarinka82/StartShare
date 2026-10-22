@@ -5,6 +5,8 @@ from pypdf import PdfReader
 
 from rest_framework import serializers
 
+from common.validators import get_max_deck_size_bytes
+
 # Messages are stable error codes; the frontend translates them.
 ALLOWED_CONTENT_TYPES = {"application/pdf", "application/x-pdf", "application/octet-stream"}
 
@@ -12,7 +14,7 @@ ALLOWED_CONTENT_TYPES = {"application/pdf", "application/x-pdf", "application/oc
 def validate_deck_file(f):
     if f.size == 0:
         raise serializers.ValidationError("deck_empty")
-    if f.size > settings.DECK_MAX_BYTES:
+    if f.size > get_max_deck_size_bytes():
         raise serializers.ValidationError("deck_too_large")
 
     ext = os.path.splitext(f.name or "")[1].lower()

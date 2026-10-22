@@ -25,7 +25,7 @@ class Country(ReferenceModel):
         db_table = "countries"
         constraints = [
             models.CheckConstraint(
-                condition=Q(code__regex=r"^[a-z]{2,10}$"),  # <--- виправлено
+                condition=Q(code__regex=r"^[a-z]{2,10}$"),
                 name="chk_countries_code",
             )
         ]

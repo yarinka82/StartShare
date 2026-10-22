@@ -12,11 +12,12 @@ import { Alert, Badge, Chip, CircularProgress, Stack, Typography } from "@mui/ma
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
-import SidebarLayout, { type SidebarItem } from "../components/SidebarLayout";
+
 
 import {missingCompany} from "../components/Sections";
 import {Meta, ProfileProvider, useProfile} from "../profile/ProfileProvider";
 import {IntrosProvider, useIntros} from "../profile/IntrosContext";
+import SidebarLayout, {SidebarItem} from "../components/SidebarLayout";
 
 type NavStatus = "done" | "todo" | "locked" | null;
 type NavDef = { key: string; to: string; end?: boolean; icon: ReactElement; status: (m: Meta) => NavStatus };
