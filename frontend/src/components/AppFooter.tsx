@@ -5,7 +5,7 @@ import { FOOTER_HEIGHT } from "./footerConfig";
 import { useGuardedLink } from "./UnsavedGuard";
 
 const DOCS = ["agb", "datenschutz", "impressum", "kriterien"] as const;
-
+const APP_VERSION = "v2-24.10.2026-dev";
 /**
  * Slim legal bar pinned to the bottom of the viewport.
  * variant="app"  – light blue bar for signed-in screens
@@ -36,7 +36,7 @@ export default function AppFooter({ variant = "app" }: { variant?: "app" | "auth
         </Link>
       ))}
       <Typography variant="caption" sx={{ color: "text.secondary", opacity: 0.8, display: { xs: "none", sm: "inline" } }}>
-        © {new Date().getFullYear()} {t("app.name")}
+        © {new Date().getFullYear()} {t("app.name")}· {APP_VERSION}
       </Typography>
     </Box>
   );

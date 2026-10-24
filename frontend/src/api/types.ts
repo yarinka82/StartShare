@@ -20,6 +20,7 @@ export interface Dictionaries {
   business_models: Option[];
   countries: Option[];
   regions: Option[];
+  investor_types: Option[];
   growth_periods: Option[];
 }
 
@@ -48,6 +49,15 @@ export interface Profile {
   is_complete: boolean;
   missing_fields: string[];
 }
+
+export interface InvestorProfile {
+  organization_name: string;
+  investor_type: string;   // code
+  country: string;         // code
+  contact_person_name: string;
+  contact_email: string;
+}
+export type InvestorProfileInput = InvestorProfile;
 
 export interface Mandate {
   version: number;
@@ -78,6 +88,7 @@ export interface InvestorState {
   status_confirmed: boolean;
   status_confirmed_at: string | null;
   mandate: Mandate | null;
+  profile: InvestorProfile | null;
 }
 
 export interface LegalDocItem {

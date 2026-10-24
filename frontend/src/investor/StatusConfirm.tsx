@@ -22,7 +22,8 @@ export default function StatusConfirm() {
     setBusy(true);
     setErr(null);
     try {
-      setState(await api.confirmInvestorStatus());
+      const s = await api.confirmInvestorStatus();
+      setState({ ...s, profile: null });
     } catch (ex) {
       setErr(parseError(ex));
     } finally {

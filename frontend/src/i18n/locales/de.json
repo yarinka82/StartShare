@@ -280,6 +280,15 @@
     "copyright": "Start Share Plattform. Alle Rechte vorbehalten."
   },
   "dict": {
+    "investorTypes": {
+      "business-angel": "Business Angel",
+      "vc": "Venture Capital Fonds",
+      "family-office": "Family Office",
+      "corporate-vc": "Corporate VC (CVC)",
+      "accelerator-incubator": "Accelerator / Inkubator",
+      "private-equity": "Private Equity",
+      "other": "Sonstiges"
+    },
     "sectors": {
       "B2B_SAAS": "B2B SaaS / Enterprise",
       "FINTECH": "FinTech / InsurTech",
@@ -334,6 +343,17 @@
       "translationNote": "",
       "translation": "",
       "continue": "Weiter zum Mandat"
+    },
+    "profile": {
+      "title": "Investorenprofil",
+      "intro": "Diese Angaben sehen Startups, an die Sie eine Intro-Anfrage senden",
+      "organization": "Organisation",
+      "type": "Investorentyp",
+      "country": "Land",
+      "contactPerson": "Ansprechpartner",
+      "contactEmail": "Kontakt-E-Mail",
+      "saveAndContinue": "Speichern und fortfahren",
+      "saved": "Profil gespeichert"
     },
     "mandate": {
       "historyModalTitle": "Historie des Investitionsmandats",

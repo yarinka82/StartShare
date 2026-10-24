@@ -13,7 +13,7 @@ from apps.analytics.models import EventName, Event
 from common.models import InvestorType, Country, DeclineReason
 from .models import InvestorProfile, Mandate, MandateSource, Digest, DigestCard, Introduction
 from .permissions import IsConfirmedInvestor, IsVerifiedInvestor, is_status_confirmed
-from .serializers import ConfirmStatusSerializer, MandateOutSerializer, MandateSerializer
+from .serializers import ConfirmStatusSerializer, MandateOutSerializer, MandateSerializer, InvestorProfileSerializer
 
 # Актуальный список полей новой модели
 MANDATE_FIELDS = (
@@ -127,7 +127,7 @@ class MandateView(APIView):
     def get(self, request):
         profile = getattr(request.user, "investor_profile", None)
         if not profile:
-            return Response(None)
+            return Response({"detail": "profile_required"}, status=status.HTTP_409_CONFLICT)
         current = Mandate.objects.filter(investor_profile=profile, is_current=True).first()
         if not current:
             return Response(None)
@@ -350,3 +350,20 @@ class CardActionView(APIView):
                     pass
 
         return Response({"status": "ok", "action": action}, status=status.HTTP_200_OK)
+    
+
+    
+class InvestorProfileView(APIView):
+    permission_classes = [IsConfirmedInvestor]
+
+    def get(self, request):
+        profile = getattr(request.user, "investor_profile", None)
+        return Response(InvestorProfileSerializer(profile).data if profile else None)
+
+    def put(self, request):
+        profile = getattr(request.user, "investor_profile", None)
+        ser = InvestorProfileSerializer(profile, data=request.data, partial=profile is not None)
+        ser.is_valid(raise_exception=True)
+        ser.save(user=request.user)
+        return Response(ser.data)
+    

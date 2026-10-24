@@ -5,7 +5,7 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from common.models import ReportType, Sector, Stage, BusinessModel, Region, Country
+from common.models import ReportType, Sector, Stage, BusinessModel, Region, Country, InvestorType
 from .models import StartupProfile, Report, ReportStatus
 from .permissions import IsVerifiedStartup
 from .serializers import StartupProfileSerializer
@@ -66,6 +66,10 @@ class DictionariesView(APIView):
                 for c in Country.objects.filter(is_active=True)
             ],
             "growth_periods": GROWTH_PERIODS,
+            "investor_types": [
+                {"code": t.code, "name": t.name_de}
+                for t in InvestorType.objects.filter(is_active=True)
+            ],
         })
 
 
