@@ -1,0 +1,98 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - startshare_redis_data:/data
+    networks:
+      - startshare
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        format: raw
+    environment:
+      DJANGO_DEBUG: "0"
+      DJANGO_ALLOWED_HOSTS: "crm.moomdoom.com,localhost,127.0.0.1"
+      APP_ENV: "production"
+      REDIS_URL: "redis://redis:6379/0"
+      TEASER_AVV_SIGNED: "false"
+      FRONTEND_URL: "https://crm.moomdoom.com"
+      CSRF_TRUSTED_ORIGINS: "https://crm.moomdoom.com"
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      - redis
+    command: >
+      sh -c "python manage.py migrate &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+    networks:
+      - startshare
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        format: raw
+    environment:
+      DJANGO_DEBUG: "0"
+      DJANGO_ALLOWED_HOSTS: "crm.moomdoom.com,localhost,127.0.0.1"
+      APP_ENV: "production"
+      REDIS_URL: "redis://redis:6379/0"
+      TEASER_AVV_SIGNED: "false"
+      FRONTEND_URL: "https://crm.moomdoom.com"
+      CSRF_TRUSTED_ORIGINS: "https://crm.moomdoom.com"
+    depends_on:
+      - redis
+    command: celery -A config worker --loglevel=info
+    networks:
+      - startshare
+
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        format: raw
+    environment:
+      DJANGO_DEBUG: "0"
+      DJANGO_ALLOWED_HOSTS: "crm.moomdoom.com,localhost,127.0.0.1"
+      APP_ENV: "production"
+      REDIS_URL: "redis://redis:6379/0"
+      TEASER_AVV_SIGNED: "false"
+      FRONTEND_URL: "https://crm.moomdoom.com"
+      CSRF_TRUSTED_ORIGINS: "https://crm.moomdoom.com"
+    depends_on:
+      - redis
+    command: celery -A config beat --loglevel=info
+    networks:
+      - startshare
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5173:80"
+    depends_on:
+      - backend
+    networks:
+      - startshare
+
+networks:
+  startshare:
+
+volumes:
+  startshare_redis_data:
+
