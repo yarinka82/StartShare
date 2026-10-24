@@ -14,24 +14,6 @@ def is_status_confirmed(user) -> bool:
     ).exists()
 
 
-def build_state(user) -> dict:
-    consent = (
-        UserConsent.objects.filter(
-            user=user,
-            context=UserConsent.Context.INVESTOR_STATUS
-        )
-        .order_by("-accepted_at")
-        .first()
-    )
-    
-    from .serializers import MandateOutSerializer
-    from apps.investors.models import Mandate
-    mandate = Mandate.objects.filter(user=user).first()
-    return {
-        "status_confirmed": consent is not None,
-        "status_confirmed_at": consent.accepted_at if consent else None,
-        "mandate": MandateOutSerializer(mandate).data if mandate else None,
-    }
 
 
 class IsVerifiedInvestor(BasePermission):

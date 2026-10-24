@@ -9,6 +9,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import SectionCard from "./SectionCard";
+import { api } from "../api/client";
+import { errorText, parseError } from "../api/errors";
 
 type PrivacyPageProps = {
   audience: "investor" | "startup";
@@ -38,19 +40,16 @@ export default function PrivacyPage({ audience }: PrivacyPageProps)  {
     setError(null);
     setBusy(true);
     try {
-      const res = await fetch("/api/auth/delete-account/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        const raw = body.password ?? body.detail;
-        throw new Error((Array.isArray(raw) ? raw.join(" ") : raw) || t("privacy.deleteError", "Помилка при видаленні акаунта."));
-      }
-      window.location.href = "/login";
+      await api.deleteAccount(password);
+      window.location.href = "/login"; // full reload also drops all in-memory state
     } catch (e) {
-      setError((e as Error).message);
+      const parsed = parseError(e);
+      const codes = parsed.fields.password ?? (parsed.detail ? [parsed.detail] : []);
+      setError(
+        codes.length
+          ? codes.map((c) => errorText(t, c)).join(" ")
+          : t("privacy.deleteError", "Помилка при видаленні акаунта."),
+      );
     } finally {
       setBusy(false);
     }

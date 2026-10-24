@@ -118,7 +118,8 @@ export const api = {
       "POST"
     ),
 
-
+  deleteAccount: (password: string) =>
+    request<{ detail: string }>("/api/auth/delete-account/", "POST", { password }),
   // profile
   dictionaries: () => request<Dictionaries>("/api/dictionaries/"),
   getProfile: () => request<Profile>("/api/profile/"),
@@ -130,7 +131,7 @@ export const api = {
   investorState: () => request<InvestorState>("/api/investor/"),
   confirmInvestorStatus: () => request<InvestorState>("/api/investor/confirm-status/", "POST", { accept: true }),
   saveMandate: (data: MandateInput) => request<Mandate>("/api/investor/mandate/", "PUT", data),
-  investorProfile: () => request<InvestorProfile | null>("/api/investor/profile/"),
+  // investorProfile: () => request<InvestorProfile | null>("/api/investor/profile/"),
   saveInvestorProfile: (body: InvestorProfileInput) =>
     request<InvestorProfile>("/api/investor/profile/", "PUT", body),
   getInvestorFeed: () => request<DigestCardDto[]>("/api/investor/feed/"),

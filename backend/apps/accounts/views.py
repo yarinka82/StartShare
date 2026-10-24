@@ -54,6 +54,40 @@ class CsrfView(APIView):
 
 
 
+class LoginView(PublicPostView):
+    throttle_scope = "login"
+
+    def post(self, request):
+        s = LoginSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        user = authenticate(
+            request, username=s.validated_data["email"], password=s.validated_data["password"]
+        )
+        if user is None:
+            return Response({"detail": "invalid_credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.is_email_verified:
+            return Response({"detail": "email_not_verified"}, status=status.HTTP_403_FORBIDDEN)
+        login(request, user)
+        return Response(MeSerializer(user).data)
+
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        logout(request)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(MeSerializer(request.user).data)
+
+
 class RegisterView(PublicPostView):
     throttle_scope = "register"
 
@@ -115,13 +149,18 @@ class VerifyEmailView(PublicPostView):
     def post(self, request):
         s = VerifyEmailSerializer(data=request.data)
         s.is_valid(raise_exception=True)
-        try:
-            uid = read_verify_token(s.validated_data["token"])
-        except signing.BadSignature:  # includes SignatureExpired
+
+        payload = read_verify_token(s.validated_data["token"])
+        if payload is None:
             return Response({"detail": "invalid_or_expired_token"}, status=status.HTTP_400_BAD_REQUEST)
-        user = User.objects.filter(pk=uid).first()
+
+        # the e-mail is part of the token: a link issued for an old address no longer works
+        user = User.objects.filter(
+            pk=payload["uid"], email__iexact=payload["email"], is_active=True
+        ).first()
         if user is None:
             return Response({"detail": "invalid_or_expired_token"}, status=status.HTTP_400_BAD_REQUEST)
+
         if user.email_verified_at is None:
             user.email_verified_at = timezone.now()
             user.save(update_fields=["email_verified_at"])
@@ -141,41 +180,6 @@ class ResendVerificationView(PublicPostView):
         if user:
             send_verification_email(user)
         return Response({"detail": "check_email"})  # same answer in every case
-
-
-
-class LoginView(PublicPostView):
-    throttle_scope = "login"
-
-    def post(self, request):
-        s = LoginSerializer(data=request.data)
-        s.is_valid(raise_exception=True)
-        user = authenticate(
-            request, username=s.validated_data["email"], password=s.validated_data["password"]
-        )
-        if user is None:
-            return Response({"detail": "invalid_credentials"}, status=status.HTTP_400_BAD_REQUEST)
-        if not user.is_email_verified:
-            return Response({"detail": "email_not_verified"}, status=status.HTTP_403_FORBIDDEN)
-        login(request, user)
-        return Response(MeSerializer(user).data)
-
-
-
-class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        logout(request)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-
-class MeView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        return Response(MeSerializer(request.user).data)
 
 
 
@@ -210,7 +214,11 @@ class PasswordResetConfirmView(PublicPostView):
         except DjangoValidationError as e:
             return Response({"new_password": list(e.messages)}, status=status.HTTP_400_BAD_REQUEST)
         user.set_password(d["new_password"])
-        user.save(update_fields=["password"])
+        fields = ["password"]
+        if user.email_verified_at is None:
+            user.email_verified_at = timezone.now()
+            fields.append("email_verified_at")
+        user.save(update_fields=fields)
         return Response({"detail": "password_changed"})
     
     

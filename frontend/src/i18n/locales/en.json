@@ -348,6 +348,14 @@
       "saveAndContinue": "Save and continue",
       "saved": "Profile saved"
     },
+    "nav": {
+      "status": "Status confirmation",
+      "mandate": "Investment mandate",
+      "digest": "Digest",
+      "profile": "Investor profile",
+      "privacy": "Data & Privacy"
+    },
+
     "status": {
       "title": "Investor Status Confirmation",
       "intro": "Before continuing, please confirm that you are acting as a professional investor.",
@@ -356,6 +364,8 @@
       "continue": "Continue to Mandate"
     },
     "mandate": {
+      "unsaved": "There are unsaved changes",
+      "notSavedYet": "Mandate not saved yet",
       "historyModalTitle": "Investment Mandate History",
       "historyModalDesc": "Each change to the criteria creates a new version. Matches are permanently linked to the version valid at the time of the digest.",
       "noHistory": "No version history available yet.",
@@ -567,6 +577,7 @@
     "declineSuccessToast": "The investor's request was declined."
   },
   "privacy": {
+    "confirmDeleteBtn": "Delete permanently",
     "zoneTitle": "Data & Privacy (GDPR)",
     "zoneDesc": "Manage your personal data in accordance with European standards (Art. 17 and Art. 20 GDPR).",
     "exportTitle": "Data export",

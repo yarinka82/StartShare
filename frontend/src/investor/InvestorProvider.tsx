@@ -31,10 +31,10 @@ export function InvestorProvider({ children }: { children: ReactNode }) {
   const [dicts, setDicts] = useState<Dictionaries | null>(null);
   const [loadError, setLoadError] = useState("");
 
-  useEffect(() => {
-    Promise.all([api.investorState(), api.dictionaries(), api.investorProfile()])
-      .then(([s, d, p]) => {
-        setState({ ...s, profile: p });
+useEffect(() => {
+    Promise.all([api.investorState(), api.dictionaries()])
+      .then(([s, d]) => {
+        setState(s); // s.profile comes with the state
         setDicts(d);
       })
       .catch((ex) => setLoadError(errorText(t, parseError(ex).detail)));

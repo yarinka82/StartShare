@@ -168,12 +168,25 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 # --- E-mail ------------------------------------------------------------------
-EMAIL_BACKEND = os.environ.get(
-    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
-)
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@example.com")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+
+if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+else:
+    # no credentials (tests, a fresh clone): the letter is printed to the console
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_TIMEOUT = 10  # otherwise a hanging SMTP blocks the request indefinitely
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
-EMAIL_VERIFY_MAX_AGE = 48 * 60 * 60  # seconds
+
+EMAIL_VERIFY_MAX_AGE = 60 * 60 * 48          # 48 h
+PASSWORD_RESET_TIMEOUT = 60 * 60             # 1 h, used by default_token_generator
+
 
 # --- Legal documents: bump a version to require re-acceptance ---------------
 LEGAL_DOCUMENT_VERSIONS = {
