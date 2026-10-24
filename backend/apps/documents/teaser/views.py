@@ -1,4 +1,3 @@
-
 """Редактирование и утверждение тизера. Отдельные APIView, как отдельные эндпоинты поверх profiles.Deck."""
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -17,6 +16,7 @@ from .serializers import TeaserDraftSerializer, TeaserSerializer
 from ...accounts.models import Language, UserConsent, LegalDocument
 
 VALID_TEASER_FIELDS = set(TeaserFieldFieldName.values)
+
 
 class Conflict(APIException):
     status_code = 409
@@ -209,6 +209,7 @@ class TeaserReviewView(APIView):
             teaser.save(update_fields=["updated_at"])
         
         return _respond(teaser)
+
 
 
 class TeaserApproveView(APIView):

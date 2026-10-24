@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     "apps.investors",
     "apps.matching",
     "apps.notifications",
-    "apps.profiles",
     "apps.startups",
 ]
 
@@ -185,6 +184,8 @@ LEGAL_DOCUMENT_VERSIONS = {
 
 # --- Pitch deck uploads ------------------------------------------------------
 DECK_MAX_MB_DEFAULT = int(os.environ.get("DECK_MAX_MB", "20"))
+DECK_MAX_BYTES = DECK_MAX_MB_DEFAULT * 1024 * 1024
+
 # nginx client_max_body_size must be slightly above DECK_MAX_MB.
 
 # --- Storage: Cloudflare R2 (production) or local FS (dev/tests) ------------

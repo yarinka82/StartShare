@@ -44,6 +44,7 @@ export interface Profile {
   team_size: number | null;
   status: "DRAFT" | "LIVE" | "PAUSED" | "REMOVED";
   deck: Deck | null;
+  deck_max_mb: number;
   is_complete: boolean;
   missing_fields: string[];
 }

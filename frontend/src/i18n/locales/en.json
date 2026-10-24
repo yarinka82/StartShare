@@ -107,6 +107,7 @@
     "title": "Log in",
     "submit": "Log in",
     "forgot": "Forgot password?",
+    "subtitle": "Sign in to your account",
     "noAccount": "No account yet? Register",
     "notVerified": "Please confirm your email address first. You will find the link in your inbox.",
     "resend": "Resend link",
@@ -118,6 +119,9 @@
     "failed": "This link is invalid or has expired. Log in to request a new one."
   },
   "forgot": {
+    "doneHint": "Address: {{email}}. Delivery may take a few minutes – please also check your spam folder.",
+    "resend": "Send again",
+    "changeEmail": "Change email",
     "title": "Reset password",
     "text": "Enter your email address and we will send you a link.",
     "submit": "Send link",

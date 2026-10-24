@@ -106,6 +106,7 @@
   "login": {
     "title": "Anmelden",
     "submit": "Anmelden",
+    "subtitle": "Melden Sie sich in Ihrem Konto an",
     "forgot": "Passwort vergessen?",
     "noAccount": "Noch kein Konto? Registrieren",
     "notVerified": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Den Link finden Sie in Ihrem Postfach.",
@@ -118,6 +119,9 @@
     "failed": "Dieser Link ist ungültig oder abgelaufen. Melden Sie sich an, um einen neuen anzufordern."
   },
   "forgot": {
+    "doneHint": "Adresse: {{email}}. Der Versand kann einige Minuten dauern – prüfen Sie auch den Spam-Ordner.",
+    "resend": "Erneut senden",
+    "changeEmail": "E-Mail ändern",
     "title": "Passwort zurücksetzen",
     "text": "Geben Sie Ihre E-Mail-Adresse ein, wir senden Ihnen einen Link.",
     "submit": "Link senden",
@@ -211,7 +215,7 @@
       "stage": "Phase",
       "country": "Land",
       "amount_sought": "Gesuchte Summe",
-      "mrr": "MRR (monatlich wiederkehrender Umsatz)",
+      "mrr": "MRR (monatl. wiederkehrend)",
       "growth_percent": "Wachstum",
       "growth_period": "Wachstumszeitraum",
       "team_size": "Teamgröße",
