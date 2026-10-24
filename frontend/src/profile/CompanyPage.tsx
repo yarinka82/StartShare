@@ -52,7 +52,7 @@ export default function CompanyPage() {
 
       <SectionCard
         title={t("profile.sections.metrics")}
-        hint={t("profile.hints.metrics", "Необов’язкові показники: MRR та зростання")}
+        hint={t("profile.hints.metrics", )}
         icon={<InsightsOutlinedIcon fontSize="small" />}
       >
         <Box sx={grid}>

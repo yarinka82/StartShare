@@ -24,6 +24,7 @@ import InvestorLayout from "./investor/InvestorLayout";
 import MandatePage from "./investor/MandatePage";
 import PrivacyPage from "./components/PrivacyPage";
 import StaffConfigPage from "./staff/StaffConfigPage";
+import InvestorProfilePage from "./investor/InvestorProfilePage";
 
 export default function App() {
   return (
@@ -66,6 +67,7 @@ export default function App() {
         <Route path="/investor" element={<RequireRole role="investor"><InvestorLayout /></RequireRole>}>
           <Route index element={<MandatePage />} />
           <Route path="feed" element={<FeedPage />} />
+          <Route path="profile" element={<InvestorProfilePage />} />
           <Route path="privacy" element={<PrivacyPage audience="investor" />} />
         </Route>
 

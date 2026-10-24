@@ -13,7 +13,7 @@ export type Values = {
   amount_sought: string; mrr: string; growth_percent: string; growth_period: string; team_size: string;
 };
 export type Name = keyof Values;
-export type Meta = Pick<Profile, "status" | "is_complete" | "missing_fields" | "deck">;
+export type Meta = Pick<Profile, "status" | "is_complete" | "missing_fields" | "deck" | "deck_max_mb">;
 export type SaveState = "idle" | "saving" | "saved" | "error";
 
 const DECIMALS: Name[] = ["amount_sought", "mrr", "growth_percent"];
@@ -39,6 +39,7 @@ const toMeta = (p: Profile): Meta => ({
   is_complete: p.is_complete,
   missing_fields: p.missing_fields,
   deck: p.deck,
+  deck_max_mb: p.deck_max_mb,   
 });
 
 /** undefined = value is still being typed (e.g. "-"), do not send yet */

@@ -107,6 +107,7 @@
     "title": "Log in",
     "submit": "Log in",
     "forgot": "Forgot password?",
+    "subtitle": "Sign in to your account",
     "noAccount": "No account yet? Register",
     "notVerified": "Please confirm your email address first. You will find the link in your inbox.",
     "resend": "Resend link",
@@ -118,6 +119,9 @@
     "failed": "This link is invalid or has expired. Log in to request a new one."
   },
   "forgot": {
+    "doneHint": "Address: {{email}}. Delivery may take a few minutes – please also check your spam folder.",
+    "resend": "Send again",
+    "changeEmail": "Change email",
     "title": "Reset password",
     "text": "Enter your email address and we will send you a link.",
     "submit": "Send link",
@@ -276,6 +280,15 @@
     "copyright": "Start Share Platform. All rights reserved."
   },
   "dict": {
+    "investorTypes": {
+      "business-angel": "Business Angel",
+      "vc": "Venture Capital",
+      "family-office": "Family Office",
+      "corporate-vc": "Corporate VC (CVC)",
+      "accelerator-incubator": "Accelerator / Incubator",
+      "private-equity": "Private Equity",
+      "other": "Other"
+    },
     "sectors": {
       "B2B_SAAS": "B2B SaaS / Enterprise",
       "FINTECH": "FinTech / InsurTech",
@@ -324,6 +337,17 @@
     "editMandateBtn": "Edit Mandate",
     "tabDigest": "Current Digest (3–5 Teasers)",
     "emptyFeedAlert": "There are no new teasers this week, or you have already reviewed all profiles. The next digest will be generated on Monday at 08:00 (provided there are 3–5 matching startups).",
+    "profile": {
+      "title": "Investor profile",
+      "intro": "Startups you send an intro request to will see this information",
+      "organization": "Organization",
+      "type": "Investor type",
+      "country": "Country",
+      "contactPerson": "Contact person",
+      "contactEmail": "Contact email",
+      "saveAndContinue": "Save and continue",
+      "saved": "Profile saved"
+    },
     "status": {
       "title": "Investor Status Confirmation",
       "intro": "Before continuing, please confirm that you are acting as a professional investor.",

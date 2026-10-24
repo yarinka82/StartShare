@@ -5,7 +5,7 @@ from django.test import SimpleTestCase, override_settings
 from apps.documents.teaser import factory
 from apps.documents.teaser.factory import get_client, LLMNotConfigured
 from apps.documents.teaser.gemini import GeminiClient
-from apps.documents.teaser.openai_client import OpenAIClient, _strictify
+from apps.documents.teaser.openai_client import OpenAIClient
 
 BASE = dict(
     TEASER_LLM_PROVIDER="gemini",

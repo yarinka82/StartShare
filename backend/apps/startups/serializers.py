@@ -6,6 +6,7 @@ from rest_framework import serializers
 from apps.documents.serializers import DeckSerializer
 from common.models import Sector, Stage, BusinessModel, Country
 from apps.startups.models import StartupProfile, StartupPrivateDetails, StartupProfileRemovedBy, Report
+from common.validators import get_max_deck_size_mb
 
 REQUIRED_FOR_COMPLETE = ("sector", "stage", "country", "amount_sought", "team_size")
 
@@ -52,7 +53,7 @@ class StartupProfileSerializer(serializers.ModelSerializer):
     )
     amount_sought = serializers.DecimalField(
         source="round_amount_eur", max_digits=14, decimal_places=2, min_value=Decimal("1"),
-        required=False, allow_null=True, write_only=True
+        required=False, allow_null=True,
     )
 
     mrr_eur = serializers.DecimalField(
@@ -60,12 +61,12 @@ class StartupProfileSerializer(serializers.ModelSerializer):
     )
     mrr = serializers.DecimalField(
         source="mrr_eur", max_digits=14, decimal_places=2, min_value=Decimal("0"),
-        required=False, allow_null=True, write_only=True
+        required=False, allow_null=True,
     )
 
     growth_pct = serializers.DecimalField(max_digits=7, decimal_places=2, required=False, allow_null=True)
     growth_percent = serializers.DecimalField(
-        source="growth_pct", max_digits=7, decimal_places=2, required=False, allow_null=True, write_only=True
+        source="growth_pct", max_digits=7, decimal_places=2, required=False, allow_null=True,
     )
     growth_period = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
@@ -73,7 +74,8 @@ class StartupProfileSerializer(serializers.ModelSerializer):
 
     missing_fields = serializers.SerializerMethodField()
     is_complete = serializers.SerializerMethodField()
-
+    deck_max_mb = serializers.SerializerMethodField()
+    
     class Meta:
         model = StartupProfile
         fields = [
@@ -81,6 +83,7 @@ class StartupProfileSerializer(serializers.ModelSerializer):
             "status",
             "company_name",
             "deck",
+            "deck_max_mb",
             "sector",
             "sector_other_text",
             "stage",
@@ -123,7 +126,10 @@ class StartupProfileSerializer(serializers.ModelSerializer):
         if active_deck and active_deck.file:
             return DeckSerializer(active_deck).data
         return None
-
+    
+    def get_deck_max_mb(self, obj) -> int:
+        return get_max_deck_size_mb()
+    
     def to_internal_value(self, data):
         # Дозволяємо очищати поля передачею порожнього рядка: {"sector": ""} -> None
         data = data.copy()
@@ -168,12 +174,10 @@ class StartupProfileSerializer(serializers.ModelSerializer):
         return value
     
     def validate(self, attrs):
-        growth = attrs.get("growth_pct")
-        period = attrs.get("growth_period")
-        if growth is not None and not period:
-            raise serializers.ValidationError(
-                {"growth_period": "growth_period is required when growth_percent is provided."}
-            )
+        growth = attrs.get("growth_pct", getattr(self.instance, "growth_pct", None))
+        period = attrs.get("growth_period", getattr(self.instance, "growth_period", ""))
+        if "growth_pct" in attrs and growth is not None and not period:
+            raise serializers.ValidationError({"growth_period": "required_with_growth"})
         
         if self.instance and self.instance.status in ("LIVE", "PAUSED"):
             required = ["sector", "stage", "business_model", "country", "round_amount_eur", "team_size"]
@@ -247,7 +251,6 @@ class StartupProfileSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         company_name = validated_data.pop("company_name", None)
-        validated_data.pop("growth_period", None)
         
         new_status = validated_data.get("status")
         if new_status and new_status != instance.status:

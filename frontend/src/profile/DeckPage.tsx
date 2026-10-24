@@ -6,6 +6,7 @@ import DeckUpload from "../components/DeckUpload";
 import { useProfile } from "./ProfileProvider";
 import SectionCard from "../components/SectionCard";
 
+
 export default function DeckPage() {
   const { t } = useTranslation();
   const { meta, readOnly, refreshMeta } = useProfile();
@@ -20,10 +21,10 @@ export default function DeckPage() {
       )}
       <SectionCard
         title={t("profile.sections.deck")}
-        hint={t("profile.hints.deck", "Презентація, на основі якої ШІ готує тизер")}
+        hint={t("profile.hints.deck", { max: meta.deck_max_mb, defaultValue: "Презентація, на основі якої ШІ готує тизер" })}
         icon={<DescriptionOutlinedIcon fontSize="small" />}
       >
-        <DeckUpload deck={meta.deck as Deck | null} onChanged={refreshMeta} locked={locked || readOnly} />
+        <DeckUpload deck={meta.deck as Deck | null} onChanged={refreshMeta} locked={locked || readOnly} maxMb={meta.deck_max_mb} />
       </SectionCard>
     </Stack>
   );
