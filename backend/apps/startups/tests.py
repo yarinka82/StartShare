@@ -16,6 +16,7 @@ from apps.startups.models import StartupProfile
 from common.models import Sector, Stage, BusinessModel, Country, Region
 
 
+
 def make_pdf(password=None, pages=1):
     w = PdfWriter()
     for _ in range(pages):

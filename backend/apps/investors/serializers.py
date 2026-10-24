@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from common.models import BusinessModel, Country, Region, Sector, Stage
-from .models import Mandate
+from common.models import BusinessModel, Country, Region, Sector, Stage, InvestorType
+from .models import Mandate, InvestorProfile
 
 
 def _validate_and_canonicalize(model_cls, values: list[str], required: bool = True) -> list[str]:
@@ -124,3 +124,16 @@ class ConfirmStatusSerializer(serializers.Serializer):
         if value is not True:
             raise serializers.ValidationError("status_confirmation_required")
         return value
+    
+    
+
+class InvestorProfileSerializer(serializers.ModelSerializer):
+    investor_type = serializers.SlugRelatedField(
+        slug_field="code", queryset=InvestorType.objects.filter(is_active=True))
+    country = serializers.SlugRelatedField(
+        slug_field="code", queryset=Country.objects.filter(is_active=True))
+
+    class Meta:
+        model = InvestorProfile
+        fields = ["organization_name", "investor_type", "country",
+                  "contact_person_name", "contact_email"]

@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, Navigate } from "react-router-dom";
 import { api } from "../api/client";
 import { errorText, parseError, type ParsedError } from "../api/errors";
 import type { Mandate, MandateInput, Option } from "../api/types";
@@ -43,7 +43,7 @@ const toForm = (m: Mandate | null): MandateInput =>
 
 export default function MandatePage() {
   const { t, i18n } = useTranslation();
-  const { state, dicts, setMandate } = useInvestor();
+  const { state, dicts, profile, setMandate } = useInvestor();
   const initial = state.mandate;
 
   const [form, setForm] = useState<MandateInput>(toForm(initial));
@@ -94,6 +94,9 @@ export default function MandatePage() {
   // first visit: an untouched empty form is not "unsaved work"
   const hasEdits = baseline === null ? JSON.stringify(form) !== JSON.stringify(emptyForm()) : dirty;
   useUnsavedGuard(hasEdits);
+
+    // the mandate needs an investor profile (type, country, organization); fill it in first
+    if (!profile) return <Navigate to="/investor/profile" replace />;
 
   const reset = () => {
     if (!baseline) return;

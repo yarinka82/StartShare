@@ -1,7 +1,7 @@
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import { Button } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import type { Deck } from "../api/types";
 import EmptyState from "../components/EmptyState";
 import { TeaserPage } from "../teaser";
@@ -13,18 +13,14 @@ import SectionCard from "../components/SectionCard";
 export default function TeaserSectionPage() {
   const { t } = useTranslation();
   const { meta, readOnly, refreshMeta } = useProfile();
+  const navigate = useNavigate();
 
   if (readOnly) {
     return (
       <EmptyState
         icon={<AutoAwesomeOutlinedIcon />}
         title={t("profile.teaserRemoved.title", "Профіль видалено")}
-        text={t("profile.teaserRemoved.text", "Відновіть профіль на сторінці «Огляд», щоб знову редагувати тизер.")}
-        action={
-          <Button variant="contained" component={RouterLink} to="/profile">
-            {t("profile.teaserRemoved.action", "До огляду")}
-          </Button>
-        }
+        text={t("profile.teaserRemoved.text", "Редагування тизера для видаленого профілю недоступне.")}
       />
     );
   }
@@ -50,7 +46,11 @@ export default function TeaserSectionPage() {
       hint={t("profile.hints.teaser", "Чернетка від ШІ: перевірте та затвердіть перед публікацією")}
       icon={<AutoAwesomeOutlinedIcon fontSize="small" />}
     >
-      <TeaserPage deckId={Number((meta.deck as Deck).id)} onApproved={refreshMeta} />
+      <TeaserPage
+        deckId={Number((meta.deck as Deck).id)}
+        onApproved={refreshMeta}
+        onReupload={() => navigate("/profile/deck")}
+      />
     </SectionCard>
   );
 }

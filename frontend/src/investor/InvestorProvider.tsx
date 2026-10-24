@@ -3,14 +3,18 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import { errorText, parseError } from "../api/errors";
-import type { Dictionaries, InvestorState, Mandate } from "../api/types";
+import type { Dictionaries, InvestorProfile, InvestorState, Mandate } from "../api/types";
 
 type InvestorContextValue = {
   state: InvestorState;
   dicts: Dictionaries;
+  /** null until the investor has filled in the profile; MandatePage redirects to the profile form */
+  profile: InvestorProfile | null;
   setState: (s: InvestorState) => void;
   /** keeps the mandate in sync after saving, so the form does not show stale data when you come back to it */
   setMandate: (m: Mandate) => void;
+  /** same for the profile */
+  setProfile: (p: InvestorProfile) => void;
 };
 
 const InvestorContext = createContext<InvestorContextValue | null>(null);
@@ -28,9 +32,9 @@ export function InvestorProvider({ children }: { children: ReactNode }) {
   const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
-    Promise.all([api.investorState(), api.dictionaries()])
-      .then(([s, d]) => {
-        setState(s);
+    Promise.all([api.investorState(), api.dictionaries(), api.investorProfile()])
+      .then(([s, d, p]) => {
+        setState({ ...s, profile: p });
         setDicts(d);
       })
       .catch((ex) => setLoadError(errorText(t, parseError(ex).detail)));
@@ -41,9 +45,16 @@ export function InvestorProvider({ children }: { children: ReactNode }) {
     setState((s) => (s ? { ...s, mandate: m } : s));
   }, []);
 
+  const setProfile = useCallback((p: InvestorProfile) => {
+    setState((s) => (s ? { ...s, profile: p } : s));
+  }, []);
+
   const value = useMemo(
-    () => (state && dicts ? { state, dicts, setState, setMandate } : null),
-    [state, dicts, setMandate],
+    () =>
+      state && dicts
+        ? { state, dicts, profile: state.profile, setState, setMandate, setProfile }
+        : null,
+    [state, dicts, setMandate, setProfile],
   );
 
   if (loadError) return <Alert severity="error">{loadError}</Alert>;

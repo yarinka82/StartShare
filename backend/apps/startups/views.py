@@ -1,29 +1,92 @@
 from django.conf import settings
 from django.core.mail import send_mail
-from rest_framework import viewsets, permissions, status
+from rest_framework import permissions, status
+from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from common.models import ReportType
+from common.models import ReportType, Sector, Stage, BusinessModel, Region, Country, InvestorType
 from .models import StartupProfile, Report, ReportStatus
-from ..profiles.serializers import ProfileSerializer
+from .permissions import IsVerifiedStartup
+from .serializers import StartupProfileSerializer
+
+
+GROWTH_PERIODS = [
+    {"code": "mom", "name": "MoM (Month over month)"},
+    {"code": "qoq", "name": "QoQ (Quarter over quarter)"},
+    {"code": "yoy", "name": "YoY (Year over year)"},
+]
+
+def get_profile(user):
+    return StartupProfile.objects.get_or_create(user=user)[0]
+
+
+def serialize_reference(queryset, lang: str = "de"):
+    """Допоміжна функція: перетворює QuerySet ReferenceModel у список {code, name, is_other}."""
+    name_field = "name_en" if lang.startswith("en") else "name_de"
+    result = []
+    for item in queryset:
+        data = {
+            "code": item.code,
+            "name": getattr(item, name_field, item.name_de),
+        }
+        # Якщо в моделі є поле is_other (для Sector та BusinessModel)
+        if hasattr(item, "is_other"):
+            data["is_other"] = item.is_other
+        result.append(data)
+    return result
 
 
 
-class StartupProfileViewSet(viewsets.ModelViewSet):
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    http_method_names = ["get", "post", "patch"]  # без delete — по ТЗ профиль паузится/removed, а не удаляется физически
+class DictionariesView(APIView):
+    """Повертає всі довідники для стартапів та інвесторів в одному запиті."""
 
-    def get_queryset(self):
-        return StartupProfile.objects.filter(user=self.request.user)
+    permission_classes = [permissions.AllowAny]
 
-    def perform_create(self, serializer):
-        if self.request.user.role != "startup":
-            raise permissions.PermissionDenied("Только пользователь с ролью startup может создать профиль.")
-        serializer.save(user=self.request.user)
+    def get(self, request):
+        return Response({
+            "sectors": [
+                {"code": s.code, "name": s.name_de}
+                for s in Sector.objects.filter(is_active=True)
+            ],
+            "stages": [
+                {"code": s.code, "name": s.name_de}
+                for s in Stage.objects.filter(is_active=True)
+            ],
+            "business_models": [
+                {"code": b.code, "name": b.name_de}
+                for b in BusinessModel.objects.filter(is_active=True)
+            ],
+            "regions": [
+                {"code": r.code, "name": r.name_de}
+                for r in Region.objects.filter(is_active=True)
+            ],
+            "countries": [
+                {"code": c.code, "name": c.name_de}
+                for c in Country.objects.filter(is_active=True)
+            ],
+            "growth_periods": GROWTH_PERIODS,
+            "investor_types": [
+                {"code": t.code, "name": t.name_de}
+                for t in InvestorType.objects.filter(is_active=True)
+            ],
+        })
 
 
+
+class ProfileView(RetrieveUpdateAPIView):
+    """GET / PUT / PATCH: PUT is also partial, so the form can autosave a draft."""
+
+    permission_classes = [IsVerifiedStartup]
+    serializer_class = StartupProfileSerializer
+
+    def get_object(self):
+        return get_profile(self.request.user)
+
+    def put(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+    
+    
 
 class SubmitReportView(APIView):
     """

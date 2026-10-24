@@ -8,9 +8,14 @@ interface Props {
   deckId: number | null;
   api?: TeaserApi;
   onApproved?: () => void;
+  /** FAILED state: lets the parent offer "upload another deck" (e.g. navigate to the deck page) */
+  onReupload?: () => void;
 }
 
-export function TeaserPage({ deckId, api, onApproved }: Props) {
+// errors that are not the user's fault: another upload would not help, "try again later" does
+const TECHNICAL_ERRORS = new Set(["llm_error", "llm_not_configured", "unexpected"]);
+
+export function TeaserPage({ deckId, api, onApproved, onReupload }: Props) {
   const { t } = useTranslation();
   const { data, error, timedOut, refetch, isPolling } = useDeckDraft(deckId, {
     fetchDraft: api ? api.getDraft : teaserApi.getDraft,
@@ -48,25 +53,40 @@ export function TeaserPage({ deckId, api, onApproved }: Props) {
   }
 
   if (data?.state === "FAILED") {
+    const code = data.error_code ?? "unexpected";
+    // ERROR_MESSAGES is a Proxy over i18n ("errors.<code>"), it translates and falls back by itself
+    const message = ERROR_MESSAGES[code];
+    const technical = TECHNICAL_ERRORS.has(code);
+
     return (
-      <p role="alert" className="tz-error">
-        {ERROR_MESSAGES[data.error_code ?? "unexpected"]}
-      </p>
+      <div role="alert" className="tz-banner tz-banner--error" style={{ marginBottom: 16 }}>
+        <p style={{ margin: "0 0 8px 0" }}>{message}</p>
+        {technical && (
+          <p style={{ margin: "0 0 8px 0" }}>
+            {t("teaser.errors.tryLater", "Це технічна проблема на нашому боці. Спробуйте пізніше.")}
+          </p>
+        )}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {technical && (
+            <button type="button" onClick={refetch}>
+              {t("common.checkAgain", "Перевірити знову")}
+            </button>
+          )}
+          {!technical && onReupload && (
+            <button type="button" onClick={onReupload}>
+              {t("teaser.uploadAnother", "Завантажити інший дек")}
+            </button>
+          )}
+        </div>
+      </div>
     );
   }
 
   if (data?.state === "DRAFT_READY") {
-    return (
-      <TeaserEditor
-        deckId={deckId}
-        draft={data}
-        api={api}
-        onApproved={onApproved}
-      />
-    );
+    return <TeaserEditor deckId={deckId} draft={data} api={api} onApproved={onApproved} />;
   }
 
-  // Стан черги та обробки ШІ (QUEUED / PROCESSING)
+  // Queued / processing by the AI (QUEUED / PROCESSING)
   return (
     <p role="status" aria-busy={isPolling} className="tz-banner" style={{ margin: 0 }}>
       {data?.state === "PROCESSING"

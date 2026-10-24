@@ -2,7 +2,7 @@ import i18n from "../i18n";
 import type {
   Deck,
   Dictionaries,
-  DigestCardDto,
+  DigestCardDto, InvestorProfile, InvestorProfileInput,
   InvestorState,
   LegalDocItem,
   Mandate, MandateHistoryDto,
@@ -130,7 +130,9 @@ export const api = {
   investorState: () => request<InvestorState>("/api/investor/"),
   confirmInvestorStatus: () => request<InvestorState>("/api/investor/confirm-status/", "POST", { accept: true }),
   saveMandate: (data: MandateInput) => request<Mandate>("/api/investor/mandate/", "PUT", data),
-
+  investorProfile: () => request<InvestorProfile | null>("/api/investor/profile/"),
+  saveInvestorProfile: (body: InvestorProfileInput) =>
+    request<InvestorProfile>("/api/investor/profile/", "PUT", body),
   getInvestorFeed: () => request<DigestCardDto[]>("/api/investor/feed/"),
 
   submitReport: (startupPublicId: string, data: ReportPayload) =>
@@ -149,7 +151,7 @@ export const api = {
 
   getMandateHistory: () => request<MandateHistoryDto[]>("/api/investor/mandate/history/"),
 
-   getStartupIntros: () => request<StartupIntroDto[]>("/api/startups/intros/"),
+  getStartupIntros: () => request<StartupIntroDto[]>("/api/startups/intros/"),
 
   respondToStartupIntro: (id: string, action: "freigabe" | "nein") =>
     request<{ status: string; decision: string }>(

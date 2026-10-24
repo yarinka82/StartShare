@@ -87,6 +87,7 @@ class StartupProfile(models.Model):
     round_amount_eur = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
     mrr_eur = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
     growth_pct = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
+    growth_period = models.CharField(max_length=16, blank=True, default="")
     team_size = models.SmallIntegerField(null=True, blank=True)
 
     # ЖИТТЄВИЙ ЦИКЛ ТА ТАЙМСТЕЙМПИ

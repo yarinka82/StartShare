@@ -1,4 +1,5 @@
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import DynamicFeedOutlinedIcon from "@mui/icons-material/DynamicFeedOutlined";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import VerifiedUserOutlinedIcon from "@mui/icons-material/VerifiedUserOutlined";
@@ -8,21 +9,33 @@ import { Outlet, useLocation } from "react-router-dom";
 
 import { InvestorProvider, useInvestor } from "./InvestorProvider";
 import StatusConfirm from "./StatusConfirm";
-import {FeedProvider, useFeed} from "./FeedContext";
-import SidebarLayout, {SidebarItem} from "../components/SidebarLayout";
+import { FeedProvider, useFeed } from "./FeedContext";
+import SidebarLayout, { SidebarItem } from "../components/SidebarLayout";
 
 /** Navigation of a confirmed investor; the feed icon shows how many teasers wait for an answer. */
 function ConfirmedShell() {
   const { t } = useTranslation();
+  const { profile } = useInvestor();
   const { cards } = useFeed();
 
   const items: SidebarItem[] = [
-    { key: "mandate", to: "/investor", end: true, icon: <AssignmentOutlinedIcon />, label: t("nav.mandate", "Мандат") },
+    {
+      key: "profile", to: "/investor/profile",
+      icon: <Badge color="warning" variant="dot" invisible={!!profile}><BadgeOutlinedIcon /></Badge>,
+      label: t("investor.profile.title", "Профіль інвестора"),
+    },
+    {
+      key: "mandate", to: "/investor", end: true,
+      icon: <AssignmentOutlinedIcon />, label: t("nav.mandate", "Мандат"),
+    },
     {
       key: "feed", to: "/investor/feed", label: t("nav.digest", "Дайджест"),
       icon: <Badge badgeContent={cards.length} color="success"><DynamicFeedOutlinedIcon /></Badge>,
     },
-    { key: "privacy", to: "/investor/privacy", icon: <ShieldOutlinedIcon />, label: t("profile.nav.privacy", "Конфіденційність") },
+    {
+      key: "privacy", to: "/investor/privacy",
+      icon: <ShieldOutlinedIcon />, label: t("profile.nav.privacy", "Конфіденційність"),
+    },
   ];
 
   return (

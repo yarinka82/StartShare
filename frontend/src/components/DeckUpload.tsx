@@ -1,4 +1,3 @@
-
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -6,29 +5,14 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import {
-  Alert,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  LinearProgress,
-  Link,
-  Paper,
-  Stack,
-  Tooltip,
-  Typography,
+  Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
+  LinearProgress, Link, Paper, Stack, Tooltip, Typography,
 } from "@mui/material";
 import { useRef, useState, type DragEvent } from "react";
 import { useTranslation } from "react-i18next";
-
-import { api } from "../api/client";
+import { ApiError, api } from "../api/client";
 import { errorText, parseError } from "../api/errors";
 import type { Deck } from "../api/types";
-
-const MAX_MB = Number(import.meta.env.VITE_DECK_MAX_MB ?? 20);
 
 const formatSize = (bytes: number) =>
   bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
@@ -37,35 +21,46 @@ interface Props {
   deck: Deck | null;
   /** called after upload / removal so the parent can refresh the completeness checklist */
   onChanged: () => void;
-  /** Чи заблоковано заміну/видалення через затверджений тизер (статус LIVE / APPROVED) */
+  /** replacing / deleting is blocked while the teaser is approved (status LIVE) */
   locked?: boolean;
+  /** upload limit in MB, from the server (PlatformConfig); the same value the server enforces */
+  maxMb: number;
 }
 
-export default function DeckUpload({ deck, onChanged, locked = false }: Props) {
+export default function DeckUpload({ deck, onChanged, locked = false, maxMb }: Props) {
   const { t, i18n } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string>("");
   const [dragOver, setDragOver] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const params = { max: MAX_MB };
+
+  const max = maxMb;
+  const params = { max }; // fills {{max}} in deck.hint and in the size error
+  const uploading = progress !== null;
 
   async function handleFile(file: File) {
-    if (locked) return;
+    if (locked || uploading) return;
     setError("");
 
     if (!file.name.toLowerCase().endsWith(".pdf")) return setError(errorText(t, "deck_not_pdf", params));
     if (file.size === 0) return setError(errorText(t, "deck_empty", params));
-    if (file.size > MAX_MB * 1024 * 1024) return setError(errorText(t, "deck_too_large", params));
+    if (file.size > max * 1024 * 1024) return setError(errorText(t, "deck_too_large", params));
+    // a renamed file is not a PDF: "%PDF-" must appear in the first 1024 bytes (the server checks again)
+    if (!(await file.slice(0, 1024).text()).includes("%PDF-")) return setError(errorText(t, "deck_not_pdf", params));
 
     setProgress(0);
     try {
       await api.uploadDeck(file, setProgress);
       onChanged();
     } catch (ex) {
-      const p = parseError(ex);
-      const code = p.fields.file?.[0] ?? p.detail;
-      setError(errorText(t, code, params));
+      if (ex instanceof ApiError && ex.status === 413) {
+        // the web server (nginx) rejected it before Django: its limit is lower than the one in the admin
+        setError(errorText(t, "deck_too_large", params));
+      } else {
+        const p = parseError(ex);
+        setError(errorText(t, p.fields.file?.[0] ?? p.detail, params));
+      }
     } finally {
       setProgress(null);
       if (inputRef.current) inputRef.current.value = "";
@@ -74,8 +69,8 @@ export default function DeckUpload({ deck, onChanged, locked = false }: Props) {
 
   function onDrop(e: DragEvent) {
     e.preventDefault();
-    if (locked) return;
     setDragOver(false);
+    if (locked) return;
     const file = e.dataTransfer.files?.[0];
     if (file) void handleFile(file);
   }
@@ -90,13 +85,10 @@ export default function DeckUpload({ deck, onChanged, locked = false }: Props) {
     }
   }
 
-  const uploading = progress !== null;
-
   return (
     <Stack spacing={2}>
       {error && <Alert severity="error" onClose={() => setError("")}>{error}</Alert>}
 
-      {/* Якщо тизер опубліковано і файл заблоковано від видалення */}
       {locked && (
         <Alert severity="info" icon={<LockOutlinedIcon fontSize="inherit" />}>
           {t("deck.lockedHint", "Тизер опубліковано (LIVE). Для заміни або видалення презентації спочатку переведіть профіль у режим паузи.")}
@@ -115,7 +107,7 @@ export default function DeckUpload({ deck, onChanged, locked = false }: Props) {
               </Typography>
             </Box>
             <CheckCircleOutlineIcon color="success" />
-            
+
             <Button component={Link} href={api.deckDownloadUrl} startIcon={<DownloadIcon />} size="small">
               {t("deck.download")}
             </Button>
@@ -123,11 +115,8 @@ export default function DeckUpload({ deck, onChanged, locked = false }: Props) {
             <Tooltip title={locked ? t("deck.lockedDeleteTooltip", "Неможливо видалити під час статусу LIVE") : ""}>
               <span>
                 <Button
-                  color="error"
-                  startIcon={<DeleteOutlineIcon />}
-                  size="small"
-                  onClick={() => setConfirmOpen(true)}
-                  disabled={uploading || locked} // Блокуємо видалення
+                  color="error" startIcon={<DeleteOutlineIcon />} size="small"
+                  onClick={() => setConfirmOpen(true)} disabled={uploading || locked}
                 >
                   {t("deck.remove")}
                 </Button>
@@ -137,19 +126,14 @@ export default function DeckUpload({ deck, onChanged, locked = false }: Props) {
         </Paper>
       )}
 
-      {/* Зона завантаження (приховується або вимикається, якщо файл уже заблоковано) */}
       {!locked && (
         <Box
-          onDragOver={(e) => { e.preventDefault(); if (!locked) setDragOver(true); }}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
           onDrop={onDrop}
           sx={{
-            border: "2px dashed",
-            borderColor: dragOver ? "primary.main" : "divider",
-            borderRadius: 2,
-            bgcolor: dragOver ? "action.hover" : "transparent",
-            p: 3,
-            textAlign: "center",
+            border: "2px dashed", borderColor: dragOver ? "primary.main" : "divider", borderRadius: 2,
+            bgcolor: dragOver ? "action.hover" : "transparent", p: 3, textAlign: "center",
           }}
         >
           <UploadFileIcon color="action" fontSize="large" />
@@ -162,10 +146,7 @@ export default function DeckUpload({ deck, onChanged, locked = false }: Props) {
           </Typography>
           <Typography variant="body2" color="text.secondary">{t("deck.hint", params)}</Typography>
           <input
-            ref={inputRef}
-            type="file"
-            accept="application/pdf,.pdf"
-            hidden
+            ref={inputRef} type="file" accept="application/pdf,.pdf" hidden
             onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); }}
           />
           {uploading && (

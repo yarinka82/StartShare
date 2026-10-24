@@ -4,6 +4,8 @@ import {
   Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, FormControl,
   InputLabel, MenuItem, Select, Skeleton, Snackbar, Stack, TextField, Typography,
 } from "@mui/material";
+import { Navigate } from "react-router-dom";
+import { useInvestor } from "./InvestorProvider";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
@@ -27,11 +29,12 @@ type Toast = { severity: "success" | "error"; message: string } | null;
 
 export default function FeedPage() {
   const { t } = useTranslation();
+  const { profile } = useInvestor();
   const { cards, loading, loadError, reload: loadFeed, removeCard } = useFeed();
   const [historyOpen, setHistoryOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
-
+  
   const [interestedModalOpen, setInterestedModalOpen] = useState(false);
   const [activeCardId, setActiveCardId] = useState<number | null>(null);
   const [investorMessage, setInvestorMessage] = useState("");
@@ -96,6 +99,7 @@ export default function FeedPage() {
       setBusy(false);
     }
   };
+    if (!profile) return <Navigate to="/investor/profile" replace />;
 
   return (
 <Stack spacing={3}>

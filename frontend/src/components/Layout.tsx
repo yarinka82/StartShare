@@ -46,11 +46,14 @@ function LayoutShell() {
           <Box sx={{ flexGrow: 1, display: "flex", gap: 1, ml: 2 }}>
             {user?.role === "investor" && (
               <>
-                <Button component={RouterLink} to="/investor/feed" onClick={guardLink("/investor/feed")} color="inherit">
-                  {t("nav.digest", "Дайджест")}
+                <Button component={RouterLink} to="/investor/profile" onClick={guardLink("/investor/profile")} color="inherit">
+                  {t("investor.profile.title", "Профіль інвестора")}
                 </Button>
                 <Button component={RouterLink} to="/investor" onClick={guardLink("/investor")} color="inherit">
                   {t("nav.mandate", "Мандат")}
+                </Button>
+                <Button component={RouterLink} to="/investor/feed" onClick={guardLink("/investor/feed")} color="inherit">
+                  {t("nav.digest", "Дайджест")}
                 </Button>
               </>
             )}
