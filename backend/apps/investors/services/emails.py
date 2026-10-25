@@ -1,10 +1,11 @@
 import logging
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives, send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 logger = logging.getLogger(__name__)
+
 
 
 def send_digest_email(user, digest):
@@ -71,68 +72,3 @@ def send_digest_email(user, digest):
         
         
         
-TEXT_E = (
-    "Start Share vermittelt nur den Kontakt und ist nicht Partei von Gesprächen oder Verträgen. "
-    "Bitte behandeln Sie ausgetauschte Informationen vertraulich."
-)
-
-
-def send_intro_completed_emails(intro):
-    """
-    Надсилає обом сторонам контакти одна одної та Текст E (Art. E).
-    Викликається тільки після того, як стартап натиснув 'Freigabe'.
-    """
-    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "Start Share <noreply@startshare.de>")
-
-    inv_profile = intro.investor_profile
-    investor_user = inv_profile.user
-    sp_profile = intro.startup_profile
-    startup_user = sp_profile.user
-
-    # Отримуємо назву компанії стартапу (з моделі або приватних деталей)
-    company_name = getattr(sp_profile, "company_name", "")
-    if hasattr(sp_profile, "private_details") and sp_profile.private_details:
-        company_name = sp_profile.private_details.company_name or company_name
-    if not company_name:
-        company_name = f"Startup #{sp_profile.id}"
-
-    # Контакти інвестора
-    inv_org = inv_profile.organization_name
-    inv_contact = inv_profile.contact_person_name or "Investment Team"
-    inv_email = inv_profile.contact_email or investor_user.email
-
-    # 1. Лист інвестору з контактами стартапу
-    send_mail(
-        subject=f"Start Share: Kontaktfreigabe erteilt für {company_name}",
-        message=(
-            f"Guten Tag {inv_contact},\n\n"
-            f"das Startup '{company_name}' (Profil #{sp_profile.id}) hat Ihre Kontaktanfrage angenommen!\n\n"
-            f"Kontaktdaten des Gründers:\n"
-            f"E-Mail: {startup_user.email}\n\n"
-            f"Sie können nun direkt per E-Mail in Kontakt treten.\n\n"
-            f"---\n"
-            f"Rechtlicher Hinweis:\n{TEXT_E}"
-        ),
-        from_email=from_email,
-        recipient_list=[investor_user.email],
-        fail_silently=True,
-    )
-
-    # 2. Лист стартапу з контактами інвестора
-    send_mail(
-        subject=f"Start Share: Kontaktdaten von {inv_org}",
-        message=(
-            f"Guten Tag,\n\n"
-            f"Sie haben die Kontaktdaten für {inv_org} freigegeben.\n\n"
-            f"Kontaktdaten des Investors:\n"
-            f"Organisation: {inv_org}\n"
-            f"Ansprechpartner: {inv_contact}\n"
-            f"E-Mail: {inv_email}\n\n"
-            f"Der Investor hat ebenfalls Ihre E-Mail-Adresse erhalten.\n\n"
-            f"---\n"
-            f"Rechtlicher Hinweis:\n{TEXT_E}"
-        ),
-        from_email=from_email,
-        recipient_list=[startup_user.email],
-        fail_silently=True,
-    )

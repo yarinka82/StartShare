@@ -1,5 +1,3 @@
-
-from datetime import timedelta
 from django.utils import timezone
 from apps.startups.models import StartupProfile
 from apps.documents.models import Teaser  # або apps.documents.teaser.models

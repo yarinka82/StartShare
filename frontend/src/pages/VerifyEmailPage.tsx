@@ -4,10 +4,12 @@ import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
 
 import { api } from "../api/client";
+import { useAuth } from "../auth/AuthContext";
 import FormCard from "../components/FormCard";
 
 export default function VerifyEmailPage() {
   const { t } = useTranslation();
+  const { user, refresh } = useAuth();
   const [params] = useSearchParams();
   const token = params.get("token");
   const [state, setState] = useState<"loading" | "ok" | "failed">("loading");
@@ -22,8 +24,19 @@ export default function VerifyEmailPage() {
       return;
     }
     setState("loading");
-    api.verifyEmail(token).then(() => setState("ok")).catch(() => setState("failed"));
-  }, [token, attempt]);
+    api
+      .verifyEmail(token)
+      .then(() => {
+        // tell the other tab (the one with "check your e-mail"), then close the channel
+        const ch = new BroadcastChannel("auth");
+        ch.postMessage("email_verified");
+        ch.close();
+        // this tab shares the session cookie, so a logged-in user gets the fresh state too
+        void refresh();
+        setState("ok");
+      })
+      .catch(() => setState("failed"));
+  }, [token, attempt, refresh]);
 
   return (
     <FormCard title={t("verify.title", "Підтвердження e-mail")}>
@@ -54,8 +67,8 @@ export default function VerifyEmailPage() {
         )}
 
         {state !== "loading" && (
-          <Button component={RouterLink} to="/login" variant="contained" size="large">
-            {t("common.backToLogin")}
+          <Button component={RouterLink} to={user ? "/" : "/login"} variant="contained" size="large">
+            {user ? t("verify.continue", "Продовжити") : t("common.backToLogin")}
           </Button>
         )}
       </Stack>

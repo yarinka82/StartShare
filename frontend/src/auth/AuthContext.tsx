@@ -8,6 +8,8 @@ interface AuthState {
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
+  /** re-reads the current user, e.g. after the e-mail was verified in another tab */
+  refresh: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -38,7 +40,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const value = useMemo(() => ({ user, loading, login, logout }), [user, loading, login, logout]);
+  const refresh = useCallback(async () => {
+    try {
+      setUser(await api.me());
+    } catch {
+      // keep the current state: a network hiccup must not look like a logout
+    }
+  }, []);
+
+  // the verification link opens in a new tab; that tab tells this one
+  useEffect(() => {
+    const ch = new BroadcastChannel("auth");
+    ch.onmessage = (e) => {
+      if (e.data === "email_verified") void refresh();
+    };
+    return () => ch.close();
+  }, [refresh]);
+
+  const value = useMemo(
+    () => ({ user, loading, login, logout, refresh }),
+    [user, loading, login, logout, refresh],
+  );
+
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

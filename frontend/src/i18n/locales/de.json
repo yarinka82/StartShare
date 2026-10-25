@@ -91,6 +91,7 @@
     "investor": "Investor"
   },
   "register": {
+    "doneEmail": "Die E-Mail wurde an {{email}} gesendet. Bitte prüfen Sie auch den Spam-Ordner.",
     "title": "Konto erstellen",
     "iAm": "Ich registriere mich als",
     "passwordHelper": "Mindestens 8 Zeichen.",
@@ -344,6 +345,13 @@
       "translation": "",
       "continue": "Weiter zum Mandat"
     },
+    "nav": {
+      "status": "Statusbestätigung",
+      "mandate": "Investitionsmandat",
+      "digest": "Digest",
+      "profile": "Investorenprofil",
+      "privacy": "Daten & Datenschutz"
+    },
     "profile": {
       "title": "Investorenprofil",
       "intro": "Diese Angaben sehen Startups, an die Sie eine Intro-Anfrage senden",
@@ -356,6 +364,8 @@
       "saved": "Profil gespeichert"
     },
     "mandate": {
+      "unsaved": "Es gibt ungespeicherte Änderungen",
+      "notSavedYet": "Mandat noch nicht gespeichert",
       "historyModalTitle": "Historie des Investitionsmandats",
       "historyModalDesc": "Jede Änderung der Kriterien erstellt eine neue Version. Matchings werden fest mit der zum Zeitpunkt des Digests gültigen Version verknüpft.",
       "noHistory": "Noch keine Versionshistorie vorhanden.",
@@ -567,6 +577,7 @@
     "declineSuccessToast": "Anfrage des Investors wurde abgelehnt."
   },
   "privacy": {
+    "confirmDeleteBtn": "Endgültig löschen",
     "zoneTitle": "Daten & Datenschutz (DSGVO)",
     "zoneDesc": "Verwalten Sie Ihre personenbezogenen Daten gemäß den europäischen Standards (gemäß Art. 17 und Art. 20 DSGVO).",
     "exportTitle": "Datenexport",
