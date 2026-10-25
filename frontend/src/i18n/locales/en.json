@@ -92,6 +92,7 @@
   },
   "register": {
     "title": "Konto erstellen",
+    "doneEmail": "The email was sent to {{email}}. Please also check your spam folder.",
     "iAm": "I am registering as",
     "passwordHelper": "At least 8 characters.",
     "agb": "I accept the <link>General Terms and Conditions (GTC)</link>.",

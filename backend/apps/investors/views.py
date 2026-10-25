@@ -1,19 +1,22 @@
-from datetime import timedelta
-
 from django.utils import timezone
 from django.db import transaction
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.views import APIView
 from decimal import Decimal
 
 from apps.accounts.models import LegalDocument, LegalDocumentCode, UserConsent
 from apps.analytics.events import track
 from apps.analytics.models import EventName, Event
+from apps.investors.services.intro_emails import send_intro_request_to_startup
 from common.models import InvestorType, Country, DeclineReason
 from .models import InvestorProfile, Mandate, MandateSource, Digest, DigestCard, Introduction
 from .permissions import IsConfirmedInvestor, IsVerifiedInvestor, is_status_confirmed
 from .serializers import ConfirmStatusSerializer, MandateOutSerializer, MandateSerializer, InvestorProfileSerializer
+from .services.intro_state_machine import transition_introduction
+from  apps.investors.tasks import build_first_digest
+from .validators import validate_investor_message
 
 # Актуальный список полей новой модели
 MANDATE_FIELDS = (
@@ -163,7 +166,7 @@ class MandateView(APIView):
             )
 
             after = snapshot(data)
-
+            
             # 1. ПЕРВОЕ СОЗДАНИЕ (версия 1)
             if current_mandate is None:
                 mandate = Mandate.objects.create(
@@ -174,6 +177,8 @@ class MandateView(APIView):
                     **data,
                 )
                 track(EventName.MANDATE_SAVED, request.user, **after)
+                # the first digest does not wait for Monday; a broker failure is logged, not a 500
+                transaction.on_commit(lambda: build_first_digest.delay(profile.pk), robust=True)
                 return Response(MandateOutSerializer(mandate).data, status=status.HTTP_201_CREATED)
 
             # 2. ПРОВЕРКА ИЗМЕНЕНИЙ
@@ -247,11 +252,13 @@ class InvestorFeedView(APIView):
             digest.first_opened_at = timezone.now()
             digest.first_open_channel = Digest.Channel.CABINET
             digest.save(update_fields=["first_opened_at", "first_open_channel"])
-
-        cards = digest.cards.select_related(
-            "introduction__startup_profile",
-            "introduction__teaser"
-        ).order_by("position")
+        
+        cards = (
+            digest.cards.filter(introduction__status=Introduction.Status.SUGGESTED)
+            .select_related("introduction__startup_profile", "introduction__teaser")
+            .prefetch_related("introduction__teaser__fields")
+            .order_by("position")
+        )
 
         data = []
         for c in cards:
@@ -282,79 +289,85 @@ class InvestorFeedView(APIView):
             })
         
         return Response(data)
-    
-    
-    
+
+
+
 class CardActionView(APIView):
     """
     POST /api/investor/cards/action/
-    Фіксує рішення інвестора у моделі Introduction (INTERESTED або DECLINED).
+    Фіксує рішення інвестора: INTERESTED або DECLINED.
     """
     permission_classes = [IsConfirmedInvestor]
-
+    
     def post(self, request):
         card_id = request.data.get("card_id")
-        action = request.data.get("action")  # "interested" або "declined"
-        message = (request.data.get("investor_message") or "").strip()[:500]
-        reason = (request.data.get("decline_reason") or "").strip()
-
-        if not card_id or action not in ("interested", "declined"):
-            return Response({"detail": "Invalid card_id or action."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Знаходимо картку дайджесту поточного інвестора разом із сутністю Introduction
+        action = request.data.get("action")
+        confirm_notice = request.data.get("confirm_notice", True)
+        
+        if not confirm_notice and action == "interested":
+            return Response(
+                {"confirm_notice": "Необхідно підтвердити згоду на передачу даних стартапу."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        # Знаходимо картку (використовуємо .filter().first() для безпеки)
         card = DigestCard.objects.select_related("introduction", "digest").filter(
             id=card_id,
-            digest__investor_profile__user=request.user
+            digest__investor_profile__user=request.user,
         ).first()
-
+        
         if not card:
             return Response({"detail": "Card not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        now = timezone.now()
+        
         intro = card.introduction
-
-        with transaction.atomic():
+        
+        try:
             if action == "interested":
-                # 1. Фіксуємо статус «Цікаво» у моделі Introduction
-                intro.status = Introduction.Status.INTERESTED
-                intro.interested_at = now
-                intro.investor_message = message
-                # Встановлюємо 7 днів таймауту для відповіді стартапу
-                intro.request_expires_at = now + timedelta(days=7)
-                intro.save(update_fields=["status", "interested_at", "investor_message", "request_expires_at"])
-
-                # Логуємо аналітику
+                # 1. Валідація повідомлення
+                raw_message = request.data.get("investor_message", "")
+                # Перехоплюємо можливу ValidationError, щоб не було 500
                 try:
-                    Event.objects.create(name=EventName.INTERESTED, user=request.user)
-                except Exception:
-                    pass
-
+                    message = validate_investor_message(raw_message)
+                except Exception as e:
+                    raise DRFValidationError({"investor_message": str(e)})
+                
+                # 2. Зміна статусу через State Machine
+                transition_introduction(
+                    intro.id,
+                    Introduction.Status.INTERESTED,
+                    user=request.user,
+                    message=message
+                )
+                
+                # 3. Надсилання Тексту D (після успішного коміту в БД)
+                transaction.on_commit(lambda: send_intro_request_to_startup(intro))
+            
             elif action == "declined":
-                # 2. Фіксуємо відхилення у моделі Introduction
-                intro.status = Introduction.Status.DECLINED
-                intro.declined_at = now
-                intro.declined_by = getattr(Introduction.DeclinedBy, "INVESTOR", "investor")
-
-                # Знаходимо або створюємо причину DeclineReason
-                if reason:
-                    try:
-                        dr, _ = DeclineReason.objects.get_or_create(
-                            code=reason,
-                            defaults={"name": reason.capitalize()}
-                        )
-                        intro.decline_reason = dr
-                    except Exception:
-                        pass
-
-                intro.save(update_fields=["status", "declined_at", "declined_by", "decline_reason"])
-
-                # Логуємо відмову з причиною
-                try:
-                    Event.objects.create(name=EventName.DECLINED, user=request.user)
-                except Exception:
-                    pass
-
-        return Response({"status": "ok", "action": action}, status=status.HTTP_200_OK)
+                reason_code = request.data.get("decline_reason", "other")
+                
+                # Знаходимо причину відмови
+                decline_obj = None
+                if reason_code:
+                    decline_obj, _ = DeclineReason.objects.get_or_create(
+                        code=reason_code,
+                        defaults={"name": reason_code.capitalize()}
+                    )
+                
+                transition_introduction(
+                    intro.id,
+                    Introduction.Status.DECLINED,
+                    user=request.user,
+                    declined_by=Introduction.DeclinedBy.INVESTOR,
+                    decline_reason=decline_obj,
+                )
+            
+            return Response({"status": "ok", "action": action}, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            # Якщо виникла непередбачена помилка, Django виведе її в консоль
+            import logging
+            logging.getLogger(__name__).error(f"Error in CardActionView: {e}", exc_info=True)
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
     

@@ -1,7 +1,8 @@
 from django.urls import path
 
+from .intro_views import StartupIntrosListView, StartupIntroRespondView
 from .views import SubmitReportView
-from ..matching.intro_views import StartupIntrosListView, StartupIntroRespondView
+
 
 urlpatterns = [
     path("intros/", StartupIntrosListView.as_view(), name="startup-intros-list"),

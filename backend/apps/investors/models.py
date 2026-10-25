@@ -219,6 +219,9 @@ class Introduction(models.Model):
     )
     
     # Таймлайны воронки
+    reminder_sent_at = models.DateTimeField(null=True, blank=True, help_text="Дата отправки напоминания стартапу (I6)")
+    intro_email_sent_to_startup = models.BooleanField(default=False)
+    intro_email_sent_to_investor = models.BooleanField(default=False)
     suggested_at = models.DateTimeField(default=timezone.now)
     interested_at = models.DateTimeField(null=True, blank=True)
     investor_message = models.CharField(max_length=500, null=True, blank=True)
@@ -265,7 +268,17 @@ class Introduction(models.Model):
     
     def __str__(self):
         return f"Intro: {self.investor_profile} x {self.startup_profile} [{self.status}]"
-
+    
+    # ЗАХИСТ ВІД ПРЯМОГО ПРИСВОЄННЯ СТАТУСУ В ОБХІД СЕРВІСІВ (I1)
+    def save(self, *args, **kwargs):
+        if self.pk:
+            # Отримуємо поточний статус із бази
+            orig_status = Introduction.objects.filter(pk=self.pk).values_list("status", flat=True).first()
+            if orig_status and orig_status != self.status:
+                from .services.intro_state_machine import can_transition, InvalidTransition
+                if not can_transition(orig_status, self.status):
+                    raise InvalidTransition(f"Заборонений перехід статусу: з '{orig_status}' у '{self.status}'.")
+        super().save(*args, **kwargs)
 
 # =====================================================================
 #  ДАЙДЖЕСТ (WEEKLY DIGEST)
@@ -323,6 +336,7 @@ class Digest(models.Model):
     
     def __str__(self):
         return f"Digest {self.investor_profile.organization_name} ({self.period_start})"
+
 
 
 class DigestCard(models.Model):

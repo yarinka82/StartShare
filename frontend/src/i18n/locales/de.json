@@ -91,6 +91,7 @@
     "investor": "Investor"
   },
   "register": {
+    "doneEmail": "Die E-Mail wurde an {{email}} gesendet. Bitte prüfen Sie auch den Spam-Ordner.",
     "title": "Konto erstellen",
     "iAm": "Ich registriere mich als",
     "passwordHelper": "Mindestens 8 Zeichen.",

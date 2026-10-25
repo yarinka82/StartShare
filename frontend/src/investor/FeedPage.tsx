@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import { Navigate } from "react-router-dom";
 import { useInvestor } from "./InvestorProvider";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import BlindTeaserCard from "../components/BlindTeaserCard";
@@ -31,6 +31,13 @@ export default function FeedPage() {
   const { t } = useTranslation();
   const { profile } = useInvestor();
   const { cards, loading, loadError, reload: loadFeed, removeCard } = useFeed();
+
+  useEffect(() => {
+    void loadFeed();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
   const [historyOpen, setHistoryOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<Toast>(null);

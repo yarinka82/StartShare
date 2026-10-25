@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     "apps.analytics",
     "apps.documents",
     "apps.investors",
-    "apps.matching",
     "apps.notifications",
     "apps.startups",
 ]
@@ -147,6 +146,7 @@ CELERY_TASK_ACKS_LATE = True            # don't lose tasks when a worker dies mi
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1   # long AI calls: don't prefetch
 CELERY_TASK_TIME_LIMIT = 600            # hard limit
 CELERY_TASK_SOFT_TIME_LIMIT = 570       # soft limit, 30s before hard
+CELERY_TASK_ALWAYS_EAGER = True
 
 CELERY_BEAT_SCHEDULE = {
     "purge-expired-decks": {
@@ -299,7 +299,21 @@ TEASER_AVV_SIGNED = os.environ.get("TEASER_AVV_SIGNED", "false").lower() in (
 if APP_ENV == "production" and TEASER_AVV_SIGNED and not os.environ.get("AVV_CONFIRMED_BY_LEGAL"):
     raise ImproperlyConfigured(
         "TEASER_AVV_SIGNED нельзя включать в production без подтверждения AVV."
+        
     )
 
+# --- Intro Workflow Parameters (ТЗ від 16.10.2026) ---
+INTRO_EXPIRE_DAYS = 7        # Q-01: термін на відповідь стартапу (Freigabe/Nein)
+INTRO_REMINDER_DAYS = 4      # Q-32: нагадування стартапу перед закінченням
+CARD_ACTIVE_DAYS = 4         # Q-27: картка без реакції зникає з активного списку
+SURVEY_DAYS = (14, 30)       # дні опитування
+SURVEYS_ENABLED = False      # прапорець опитувань
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "loggers": {"django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False}},
+}
 
 
