@@ -309,11 +309,6 @@ CARD_ACTIVE_DAYS = 4         # Q-27: картка без реакції зник
 SURVEY_DAYS = (14, 30)       # дні опитування
 SURVEYS_ENABLED = False      # прапорець опитувань
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
-    "loggers": {"django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False}},
-}
+
 
 

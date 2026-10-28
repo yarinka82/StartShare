@@ -3,7 +3,7 @@ from django.urls import path
 from . import views
 from .staff_views import (StaffReportsListView, StaffReportDecisionView, StaffUsersListView,
                           StaffToggleUserActiveView, StaffConsentsListView, StaffEventsListView,
-                          StaffPlatformConfigView, StaffPublishLegalDocView)
+                          StaffPlatformConfigView, StaffPublishLegalDocView, StaffLegalDocumentsListView)
     
 
 urlpatterns = [
@@ -29,4 +29,6 @@ urlpatterns = [
     path("staff/config/", StaffPlatformConfigView.as_view(), name="staff-config"),
     path("staff/legal-documents/publish/", StaffPublishLegalDocView.as_view(),
          name="staff-publish-legal-doc"),
+    path("staff/legal-documents/", StaffLegalDocumentsListView.as_view(),
+         name="staff-legal-docs-manage"),
 ]

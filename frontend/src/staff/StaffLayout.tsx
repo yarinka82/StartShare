@@ -4,6 +4,7 @@ import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutlined";
 import SettingsSuggestOutlinedIcon from "@mui/icons-material/SettingsSuggestOutlined";
 import ShieldIcon from "@mui/icons-material/Shield";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
@@ -23,6 +24,8 @@ export default function StaffLayout() {
       label: t("staff.dashboard.tabs.events", "Журнал подій (Audit Log)") },
     { key: "config", to: "/staff/dashboard/config", icon: <SettingsSuggestOutlinedIcon />,
       label: t("staff.dashboard.tabs.config", "Налаштування платформи") },
+    { key: "legal", to: "/staff/dashboard/legal", icon: <MenuBookOutlinedIcon />,
+      label: t("staff.dashboard.tabs.legal", "Юридичні тексти (A–G, AGB)") },
   ];
 
   return (

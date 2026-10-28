@@ -17,9 +17,11 @@ export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: unknown } | null)?.from;
+  const state = location.state as { from?: unknown; verified?: boolean; email?: string } | null;
+  const from = state?.from;
+  const justVerified = !!state?.verified;
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(state?.email ?? "");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<ParsedError | null>(null);
@@ -33,6 +35,11 @@ export default function LoginPage() {
     const id = window.setTimeout(() => setCooldown((c) => c - 1), 1000);
     return () => window.clearTimeout(id);
   }, [cooldown]);
+
+  useEffect(() => {
+    if (state?.email) passwordRef.current?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -81,6 +88,12 @@ export default function LoginPage() {
     <FormCard title={t("login.title")} subtitle={t("login.subtitle", "Увійдіть до свого кабінету")}>
       <form onSubmit={submit} noValidate>
         <Stack spacing={2}>
+          {justVerified && !err && (
+            <Alert severity="success">
+              {t("login.emailVerified", "E-mail підтверджено. Тепер можна увійти.")}
+            </Alert>
+          )}
+
           {notVerified ? (
             <Alert
               severity={resent ? "success" : "warning"}
@@ -102,7 +115,7 @@ export default function LoginPage() {
             type="email"
             // "username" is what password managers look for on a login form
             autoComplete="username"
-            autoFocus
+            autoFocus={!state?.email}
             required
             fullWidth
             value={email}

@@ -86,9 +86,7 @@ INVESTOR_TYPES_INITIAL = [
     ("business-angel", "Business Angel", "Business Angel", 1),
     ("vc", "Venture Capital Fonds", "Venture Capital", 2),
     ("family-office", "Family Office", "Family Office", 3),
-    ("corporate-vc", "Corporate VC (CVC)", "Corporate VC (CVC)", 4),
-    ("accelerator-incubator", "Accelerator / Inkubator", "Accelerator / Incubator", 5),
-    ("private-equity", "Private Equity", "Private Equity", 6),
+    ("accelerator-incubator", "Accelerator", "Accelerator", 4),
     ("other", "Sonstiges", "Other", 99),
 ]
 

@@ -212,7 +212,7 @@
     "saved": "Saved",
     "saveError": "Speichern nicht möglich",
     "fields": {
-      "company_name": "Company Name",
+      "company_name": "Startup Name",
       "sector": "Industry",
       "stage": "Stage",
       "country": "Country",
@@ -333,11 +333,11 @@
     "text": "Your investor account is ready. Mandate settings and weekly teasers are available.",
     "goToFeed": "Go to Digest",
     "cabinetTitle": "Investor Cabinet",
-    "cabinetSubtitle": "Weekly selections of 3–5 blind teasers according to your mandate.",
+    "cabinetSubtitle": "Curated weekly selections of blind teasers tailored to your mandate.",
     "mandateHistoryBtn": "Mandate History [B]",
     "editMandateBtn": "Edit Mandate",
     "tabDigest": "Current Digest (3–5 Teasers)",
-    "emptyFeedAlert": "There are no new teasers this week, or you have already reviewed all profiles. The next digest will be generated on Monday at 08:00 (provided there are 3–5 matching startups).",
+    "emptyFeedAlert": "There are no new teasers for this week, or you have already reviewed all cards. The next digest will be generated on Monday at 08:00 once matching startups are available.",
     "profile": {
       "title": "Investor profile",
       "intro": "Startups you send an intro request to will see this information",
@@ -454,7 +454,35 @@
     }
   },
   "staff": {
+      "legal": {
+        "title": "Legal Texts & Versioning (A–G, AGB, DSE)",
+        "subtitle": "Platform legal text management. Every update creates a v+1 revision preserving audit trails.",
+        "newVersionBtn": "Publish New Revision",
+        "code": "Code",
+        "docTitle": "Document Title",
+        "lang": "Language",
+        "version": "Version",
+        "status": "Status",
+        "validFrom": "Valid From",
+        "active": "Active",
+        "archived": "Archived",
+        "createNextVersion": "New Revision",
+        "modalTitle": "Publish New Legal Text Revision",
+        "modalNotice": "Saving creates the next version (v+1) and marks the previous one as superseded. Past user consents remain tied to their respective historical versions under Art. 7 GDPR.",
+        "bodyLabel": "Legal Text Body (Markdown / Plain Text):",
+        "publishAction": "Publish Revision",
+        "publishedToast": "New legal document revision published successfully!"
+      },
       "config": {
+        "introSection": "Intro Workflow & Survey Parameters (Specification)",
+        "introExpiryDays": "Freigabe Response Deadline (days)",
+        "q01Helper": "Q-01: Default 7 days",
+        "introReminderDays": "Startup Reminder (days)",
+        "q32Helper": "Q-32: Default 4 days",
+        "cardActiveDays": "Card Active in Feed (days)",
+        "q27Helper": "Q-27: Hide if no reaction",
+        "surveysToggle": "Enable automated feedback surveys after 14 and 30 days",
+        "surveysHint": "Collects anonymous product value ratings after successful introductions.",
         "aiSection": "AI parameters (AI Generator & Model)",
         "aiProvider": "AI provider",
         "aiModel": "AI model",
@@ -475,7 +503,6 @@
         "minDigestHelper": "Per specification: 3 teasers",
         "maxDigestCards": "Max Teasers in Digest",
         "maxDigestHelper": "Per specification: 5 teasers",
-        "introExpiryDays": "Intro Timeout for Startups (days)",
         "introExpiryHelper": "Per specification: 7 days",
         "saveBtn": "Save Settings",
         "savedSuccess": "Platform settings updated successfully!"
@@ -493,6 +520,7 @@
         "users": "Users & Investors",
         "consents": "Consent Records (GDPR)",
         "events": "Event Log (Audit Log)",
+        "legal": "Legal texts (A–G, AGB)",
         "config": "Platform Settings"
       },
       "table": {

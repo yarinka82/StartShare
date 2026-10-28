@@ -5,7 +5,7 @@ import { FOOTER_HEIGHT } from "./footerConfig";
 import { useGuardedLink } from "./UnsavedGuard";
 
 const DOCS = ["agb", "datenschutz", "impressum", "kriterien"] as const;
-const APP_VERSION = "v3-25.10.2026-dev";
+const APP_VERSION = "v4-28.10.2026-dev";
 /**
  * Slim legal bar pinned to the bottom of the viewport.
  * variant="app"  – light blue bar for signed-in screens

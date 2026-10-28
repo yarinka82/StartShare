@@ -4,6 +4,8 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import HistoryIcon from "@mui/icons-material/History";
+import MandateHistoryModal from "../components/MandateHistoryModal";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import {
   Alert, Box, Button, CircularProgress, InputAdornment, Paper, Snackbar, Stack, TextField, Typography,
@@ -45,7 +47,7 @@ export default function MandatePage() {
   const { t, i18n } = useTranslation();
   const { state, dicts, profile, setMandate } = useInvestor();
   const initial = state.mandate;
-
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [form, setForm] = useState<MandateInput>(toForm(initial));
   const [baseline, setBaseline] = useState<MandateInput | null>(initial ? toForm(initial) : null);
   const [createdAt, setCreatedAt] = useState<string | null>(initial?.created_at ?? null);
@@ -108,11 +110,31 @@ export default function MandatePage() {
 
   return (
     <Stack spacing={3}>
-      <Box>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 800, color: "#0b2142" }}>
-          {t("investor.mandate.title")}
-        </Typography>
-        <Typography color="text.secondary">{t("investor.mandate.intro")}</Typography>
+    {/* ШАПКА З КНОПКОЮ ІСТОРІЇ ВЕРСІЙ МАНДАТУ */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 2 }}>
+        <Box>
+          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 800, color: "#0b2142" }}>
+            {t("investor.mandate.title")}
+          </Typography>
+          <Typography color="text.secondary">{t("investor.mandate.intro")}</Typography>
+        </Box>
+
+        {/* КНОПКА ВІДКРИТТЯ ІСТОРІЇ МАНДАТУ */}
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<HistoryIcon />}
+          onClick={() => setHistoryOpen(true)}
+          sx={{
+            textTransform: "none",
+            fontWeight: 600,
+            color: "text.secondary",
+            borderColor: "divider",
+            "&:hover": { borderColor: "#17407a", color: "#17407a" },
+          }}
+        >
+          {t("investor.mandateHistoryBtn", "Історія версій мандату")}
+        </Button>
       </Box>
 
       {err?.detail && <Alert severity="error">{errorText(t, err.detail)}</Alert>}
@@ -244,8 +266,11 @@ export default function MandatePage() {
           )}
         </Stack>
       </Paper>
+        
+      {/* Модальне вікно історії версій */}
+      <MandateHistoryModal open={historyOpen} onClose={() => setHistoryOpen(false)} />
 
-      <Snackbar
+        <Snackbar
         open={savedMsg}
         autoHideDuration={3500}
         onClose={() => setSavedMsg(false)}

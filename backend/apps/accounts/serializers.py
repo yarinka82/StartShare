@@ -1,10 +1,13 @@
+from typing import TypedDict
+
+from django.conf import settings
 from django.contrib.auth.password_validation import validate_password as run_password_validators
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils import translation
 from django.utils.translation import ngettext
 from rest_framework import serializers
 
-from apps.accounts.models import UserRole
+from apps.accounts.models import UserRole, PlatformConfig
 
 
 # NOTE: custom validation messages are stable error codes (e.g. "accept_agb_required").
@@ -117,3 +120,155 @@ class MeSerializer(serializers.Serializer):
     email = serializers.EmailField()
     role = serializers.CharField()
     email_verified = serializers.BooleanField(source="is_email_verified")
+
+
+class AIModel(TypedDict):
+    id: str
+    label: str
+
+
+class AIProvider(TypedDict):
+    id: str
+    label: str
+    models: list[AIModel]
+
+
+AI_PROVIDER_CATALOG: list[AIProvider] = [
+    {
+        "id": "gemini",
+        "label": "Google Gemini",
+        "models": [
+            {"id": "gemini-3.8-flash", "label": "Gemini 3.8 Flash (Fast / Recommended)"},
+            {"id": "gemini-3.7-flash", "label": "Gemini 3.7 Flash"},
+        ],
+    },
+    {
+        "id": "openai",
+        "label": "OpenAI",
+        "models": [{"id": "gpt-4o-mini", "label": "GPT-4o-mini"}],
+    },
+    {
+        "id": "azure_openai",
+        "label": "Azure OpenAI",
+        "models": [],  # модель = AZURE_OPENAI_DEPLOYMENT
+    },
+]
+
+_CATALOG_BY_ID: dict[str, AIProvider] = {p["id"]: p for p in AI_PROVIDER_CATALOG}
+
+
+def _provider_configured(provider_id: str) -> bool:
+    if provider_id == "gemini":
+        return bool(getattr(settings, "TEASER_GEMINI_API_KEY", ""))
+    if provider_id == "openai":
+        return bool(getattr(settings, "OPENAI_API_KEY", ""))
+    if provider_id == "azure_openai":
+        return all(
+            getattr(settings, name, "")
+            for name in ("AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_DEPLOYMENT")
+        )
+    return False
+
+
+
+class PlatformConfigSerializer(serializers.ModelSerializer):
+    ai_providers = serializers.SerializerMethodField()
+    ai_model = serializers.CharField(allow_blank=True, required=False)
+
+    class Meta:
+        model = PlatformConfig
+        fields = [
+            "ai_provider",
+            "ai_model",
+            "ai_temperature",
+            "max_deck_size_mb",
+            "deck_retention_hours",
+            "draft_expiry_days",
+            "min_digest_cards",
+            "max_digest_cards",
+            "intro_request_expiry_days",
+            "intro_reminder_days",
+            "card_active_days",
+            "surveys_enabled",
+            "survey_day_first",
+            "survey_day_second",
+            "updated_at",
+            "ai_providers",
+        ]
+        read_only_fields = ["updated_at"]
+        extra_kwargs = {
+            "ai_temperature": {"min_value": 0, "max_value": 1},
+            "max_deck_size_mb": {"min_value": 1, "max_value": 200},
+            "deck_retention_hours": {"min_value": 1},
+            "draft_expiry_days": {"min_value": 1},
+            "min_digest_cards": {"min_value": 1},
+            "max_digest_cards": {"min_value": 1},
+            "intro_request_expiry_days": {"min_value": 1, "max_value": 60},
+            "intro_reminder_days": {"min_value": 1, "max_value": 30},
+            "card_active_days": {"min_value": 1, "max_value": 30},
+            "survey_day_first": {"min_value": 1},
+            "survey_day_second": {"min_value": 1},
+        }
+
+    def get_ai_providers(self, obj):
+        return AI_PROVIDER_CATALOG
+
+    def validate(self, attrs):
+        inst = self.instance
+
+        # 1. Ваша існуюча перевірка AI провайдерів та AVV (REQ-39)
+        if "ai_provider" in attrs or "ai_model" in attrs:
+            provider_id = attrs.get("ai_provider", getattr(inst, "ai_provider", None))
+            if isinstance(provider_id, list):
+                provider_id = provider_id[0] if provider_id else None
+
+            provider = _CATALOG_BY_ID.get(provider_id)
+            if provider is None:
+                raise serializers.ValidationError(
+                    {"ai_provider": f"Невідомий провайдер: {provider_id!r}."}
+                )
+            if not getattr(settings, "TEASER_AVV_SIGNED", False):
+                raise serializers.ValidationError(
+                    {"ai_provider": "Віддалений провайдер потребує підписаного AVV (REQ-39)."}
+                )
+            if not _provider_configured(provider_id):
+                raise serializers.ValidationError(
+                    {"ai_provider": "Для цього провайдера не задано ключі/налаштування на сервері."}
+                )
+
+            if provider.get("models"):
+                model = attrs.get("ai_model", getattr(inst, "ai_model", ""))
+                if isinstance(model, list):
+                    model = model[0] if model else None
+                if model not in {m["id"] for m in provider["models"]}:
+                    raise serializers.ValidationError(
+                        {"ai_model": "Ця модель недоступна для обраного провайдера."}
+                    )
+            else:
+                attrs["ai_model"] = ""
+
+        # 2. Ваша перевірка лімітів дайджесту
+        lo = attrs.get("min_digest_cards", getattr(inst, "min_digest_cards", 3))
+        hi = attrs.get("max_digest_cards", getattr(inst, "max_digest_cards", 5))
+        if lo > hi:
+            raise serializers.ValidationError(
+                {"min_digest_cards": "Мінімум карток не може бути більшим за максимум."}
+            )
+
+        # 3. Логічна перевірка: нагадування стартапу має бути раніше за таймаут закриття запиту
+        reminder = attrs.get("intro_reminder_days", getattr(inst, "intro_reminder_days", 4))
+        expiry = attrs.get("intro_request_expiry_days", getattr(inst, "intro_request_expiry_days", 7))
+        if reminder >= expiry:
+            raise serializers.ValidationError(
+                {"intro_reminder_days": f"Дні нагадування ({reminder}) повинні бути меншими за термін закриття запиту ({expiry})."}
+            )
+
+        # 4. Перевірка порядку опитувань
+        s1 = attrs.get("survey_day_first", getattr(inst, "survey_day_first", 14))
+        s2 = attrs.get("survey_day_second", getattr(inst, "survey_day_second", 30))
+        if s1 >= s2:
+            raise serializers.ValidationError(
+                {"survey_day_first": "Перше опитування має відбутися раніше за друге."}
+            )
+
+        return attrs

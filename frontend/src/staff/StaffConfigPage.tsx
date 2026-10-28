@@ -1,4 +1,6 @@
 import SaveIcon from "@mui/icons-material/Save";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import SettingsSuggestOutlinedIcon from "@mui/icons-material/SettingsSuggestOutlined";
 import {
   Alert,
@@ -40,8 +42,13 @@ interface ConfigDto {
   min_digest_cards: NumField;
   max_digest_cards: NumField;
   intro_request_expiry_days: NumField;
+  intro_reminder_days: number;
+  card_active_days: number;
+  surveys_enabled: boolean;
+  survey_day_first: number;
+  survey_day_second: number;
   updated_at?: string;
-  ai_providers?: ProviderOption[]; // read-only, може приходити з бекенду
+  ai_providers?: ProviderOption[];
 }
 
 type NumKey =
@@ -346,6 +353,70 @@ export default function StaffConfigPage() {
             />
           </Box>
         </Box>
+
+                <Divider />
+
+        {/* 4. СЕКЦІЯ ТАЙМАУТІВ ЗНАЙОМСТВА ТА ОПИТУВАНЬ */}
+        <Box>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#17407a", mb: 2 }}>
+            🤝 {t("staff.config.introSection", "Параметри воронки знайомства та опитувань (ТЗ)")}
+          </Typography>
+
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" }, gap: 2.5, mb: 3 }}>
+            <TextField
+              label={t("staff.config.introExpiryDays", "Термін на відповідь Freigabe (дні)")}
+              size="small"
+              type="number"
+              slotProps={{ htmlInput: { min: 1, max: 30 } }}
+              value={config.intro_request_expiry_days}
+              onChange={(e) => setConfig({ ...config, intro_request_expiry_days: parseInt(e.target.value) || 7 })}
+              helperText={t("staff.config.q01Helper", "Q-01: за замовчуванням 7 днів")}
+            />
+
+            <TextField
+              label={t("staff.config.introReminderDays", "Нагадування стартапу (дні)")}
+              size="small"
+              type="number"
+              slotProps={{ htmlInput: { min: 1, max: 20 } }}
+              value={config.intro_reminder_days}
+              onChange={(e) => setConfig({ ...config, intro_reminder_days: parseInt(e.target.value) || 4 })}
+              helperText={t("staff.config.q32Helper", "Q-32: за замовчуванням 4 дні")}
+            />
+
+            <TextField
+              label={t("staff.config.cardActiveDays", "Активність картки в дайджесті (дні)")}
+              size="small"
+              type="number"
+              slotProps={{ htmlInput: { min: 1, max: 14 } }}
+              value={config.card_active_days}
+              onChange={(e) => setConfig({ ...config, card_active_days: parseInt(e.target.value) || 4 })}
+              helperText={t("staff.config.q27Helper", "Q-27: приховувати без реакції")}
+            />
+          </Box>
+
+          {/* Перемикач автоматичних опитувань */}
+          <Box sx={{ bgcolor: "#f8fafc", p: 2, borderRadius: 2, border: "1px solid #e2e8f0" }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={config.surveys_enabled}
+                  onChange={(e) => setConfig({ ...config, surveys_enabled: e.target.checked })}
+                  color="primary"
+                />
+              }
+              label={
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {t("staff.config.surveysToggle", "Увімкнути автоматичні опитування через 14 і 30 днів (SURVEYS_ENABLED)")}
+                </Typography>
+              }
+            />
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5, ml: 4 }}>
+              {t("staff.config.surveysHint", "Збирає оцінку цінності продукту обох сторін після успішного знайомства без прив'язки до особистості.")}
+            </Typography>
+          </Box>
+        </Box>
+
+
 
         {/* КНОПКА ЗБЕРЕЖЕННЯ */}
         <Box sx={{ pt: 1 }}>

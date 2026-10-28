@@ -13,6 +13,7 @@ import StaffUsersPage from "./staff/UsersPage";
 import StaffConsentsPage from "./staff/ConsentsPage";
 import StaffEventsPage from "./staff/EventsPage";
 import StaffModerationPage from "./staff/ModerationPage";
+import StaffLegalDocsPage from "./staff/StaffLegalDocsPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import CompanyPage from "./profile/CompanyPage";
 import ProfileLayout from "./profile/ProfileLayout";
@@ -51,6 +52,7 @@ export default function App() {
       <Route path="consents" element={<StaffConsentsPage />} />
       <Route path="events" element={<StaffEventsPage />} />
       <Route path="config" element={<StaffConfigPage />} />
+      <Route path="legal" element={<StaffLegalDocsPage />} />
     </Route>
 
         {/* 1. ПОТІК СТАРТАПУ: Анкета + Завантаження деку + Редактор тизера ШІ (все в ProfilePage) */}

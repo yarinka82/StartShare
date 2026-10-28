@@ -6,13 +6,14 @@ import {
 } from "@mui/material";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { Link as RouterLink } from "react-router-dom";
-
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useEmailVerifiedSignal } from "../hooks/useEmailVerifiedSignal";
 import { api } from "../api/client";
 import { errorText, parseError, type ParsedError } from "../api/errors";
 import FormCard from "../components/FormCard";
 import LegalDialog, { type LegalDoc } from "../components/LegalDialog";
 import PasswordField from "../components/PasswordField";
+import {useAuth} from "../auth/AuthContext";
 
 /** Opens the document in a dialog; the href keeps "open in new tab" and middle-click working. */
 function LegalLink({ doc, onOpen, children }: { doc: LegalDoc; onOpen: (d: LegalDoc) => void; children?: ReactNode }) {
@@ -44,6 +45,14 @@ export default function RegisterPage() {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [err, setErr] = useState<ParsedError | null>(null);
+  const { refresh } = useAuth();
+  const navigate = useNavigate();
+
+    // the link from the e-mail usually opens in a new tab; that tab tells this one
+  useEmailVerifiedSignal(() => {
+    if (!done) return;
+    void refresh().then(() => navigate("/", { replace: true }));
+  });
 
   const fieldError = (name: string) => err?.fields[name]?.map((c) => errorText(t, c)).join(" ");
   const mismatch = password2 !== "" && password !== password2;
@@ -70,6 +79,9 @@ export default function RegisterPage() {
         <Alert severity="success">{t("register.doneText")}</Alert>
         <Typography variant="body2" color="text.secondary">
           {t("register.doneEmail", { email: email.trim(), defaultValue: "Лист надіслано на {{email}}. Перевірте також папку «Спам»." })}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {t("register.doneWaiting", "Після підтвердження ця сторінка перейде до входу автоматично. Якщо ви відкрили лист на іншому пристрої, просто увійдіть.")}
         </Typography>
         <Button component={RouterLink} to="/login" variant="outlined" sx={{ textTransform: "none" }}>
           {t("common.backToLogin")}
