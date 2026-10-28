@@ -302,13 +302,15 @@ if APP_ENV == "production" and TEASER_AVV_SIGNED and not os.environ.get("AVV_CON
         
     )
 
-# --- Intro Workflow Parameters (ТЗ від 16.10.2026) ---
-INTRO_EXPIRE_DAYS = 7        # Q-01: термін на відповідь стартапу (Freigabe/Nein)
-INTRO_REMINDER_DAYS = 4      # Q-32: нагадування стартапу перед закінченням
-CARD_ACTIVE_DAYS = 4         # Q-27: картка без реакції зникає з активного списку
-SURVEY_DAYS = (14, 30)       # дні опитування
-SURVEYS_ENABLED = False      # прапорець опитувань
+if "test" in sys.argv or "pytest" in sys.modules:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+    EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
+if "test" in sys.argv or "pytest" in sys.modules:
+    PASSWORD_HASHERS = [
+        "django.contrib.auth.hashers.MD5PasswordHasher",
+    ]
 
 
 

@@ -52,10 +52,6 @@ def snapshot(data_or_instance) -> dict:
 
 
 def build_state(user) -> dict:
-    """Формирует текущее состояние инвестора: подтверждение Текста C, профиль и активный мандат."""
-    # импорт внутри функции: сериализатор профиля может импортировать этот модуль
-    from .serializers import InvestorProfileSerializer
-
     consent = (
         UserConsent.objects.filter(
             user=user,
@@ -65,7 +61,6 @@ def build_state(user) -> dict:
         .first()
     )
 
-    # Ищем профиль и его текущий активный мандат
     profile = getattr(user, "investor_profile", None)
     mandate = (
         Mandate.objects.filter(investor_profile=profile, is_current=True).first()
@@ -76,7 +71,6 @@ def build_state(user) -> dict:
     return {
         "status_confirmed": consent is not None,
         "status_confirmed_at": consent.accepted_at if consent else None,
-        "profile": InvestorProfileSerializer(profile).data if profile else None,
         "mandate": MandateOutSerializer(mandate).data if mandate else None,
     }
 

@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import TypedDict, Any
 
 from django.conf import settings
 from django.contrib.auth.password_validation import validate_password as run_password_validators
@@ -133,7 +133,7 @@ class AIProvider(TypedDict):
     models: list[AIModel]
 
 
-AI_PROVIDER_CATALOG: list[AIProvider] = [
+AI_PROVIDER_CATALOG: list[dict[str, Any]] = [
     {
         "id": "gemini",
         "label": "Google Gemini",
@@ -150,11 +150,12 @@ AI_PROVIDER_CATALOG: list[AIProvider] = [
     {
         "id": "azure_openai",
         "label": "Azure OpenAI",
-        "models": [],  # модель = AZURE_OPENAI_DEPLOYMENT
+        "models": [],  # Model comes from AZURE_OPENAI_DEPLOYMENT setting
     },
 ]
 
-_CATALOG_BY_ID: dict[str, AIProvider] = {p["id"]: p for p in AI_PROVIDER_CATALOG}
+# Явное str(p["id"]) убирает ошибку линтера
+_CATALOG_BY_ID: dict[str, dict[str, Any]] = {str(p["id"]): p for p in AI_PROVIDER_CATALOG}
 
 
 def _provider_configured(provider_id: str) -> bool:
@@ -212,63 +213,39 @@ class PlatformConfigSerializer(serializers.ModelSerializer):
 
     def get_ai_providers(self, obj):
         return AI_PROVIDER_CATALOG
-
+    
     def validate(self, attrs):
         inst = self.instance
-
-        # 1. Ваша існуюча перевірка AI провайдерів та AVV (REQ-39)
+        
         if "ai_provider" in attrs or "ai_model" in attrs:
-            provider_id = attrs.get("ai_provider", getattr(inst, "ai_provider", None))
-            if isinstance(provider_id, list):
-                provider_id = provider_id[0] if provider_id else None
-
+            provider_id = attrs.get("ai_provider", inst.ai_provider)
             provider = _CATALOG_BY_ID.get(provider_id)
             if provider is None:
                 raise serializers.ValidationError(
-                    {"ai_provider": f"Невідомий провайдер: {provider_id!r}."}
+                    {"ai_provider": f"Unknown provider: {provider_id!r}."}
                 )
             if not getattr(settings, "TEASER_AVV_SIGNED", False):
                 raise serializers.ValidationError(
-                    {"ai_provider": "Віддалений провайдер потребує підписаного AVV (REQ-39)."}
+                    {"ai_provider": "Remote provider requires a signed DPA/AVV (REQ-39)."}
                 )
             if not _provider_configured(provider_id):
                 raise serializers.ValidationError(
-                    {"ai_provider": "Для цього провайдера не задано ключі/налаштування на сервері."}
+                    {"ai_provider": "API keys or configuration missing for this provider on the server."}
                 )
-
-            if provider.get("models"):
-                model = attrs.get("ai_model", getattr(inst, "ai_model", ""))
-                if isinstance(model, list):
-                    model = model[0] if model else None
+            
+            if provider["models"]:
+                model = attrs.get("ai_model", inst.ai_model)
                 if model not in {m["id"] for m in provider["models"]}:
                     raise serializers.ValidationError(
-                        {"ai_model": "Ця модель недоступна для обраного провайдера."}
+                        {"ai_model": "This model is not available for the selected provider."}
                     )
             else:
                 attrs["ai_model"] = ""
-
-        # 2. Ваша перевірка лімітів дайджесту
-        lo = attrs.get("min_digest_cards", getattr(inst, "min_digest_cards", 3))
-        hi = attrs.get("max_digest_cards", getattr(inst, "max_digest_cards", 5))
+        
+        lo = attrs.get("min_digest_cards", inst.min_digest_cards)
+        hi = attrs.get("max_digest_cards", inst.max_digest_cards)
         if lo > hi:
             raise serializers.ValidationError(
-                {"min_digest_cards": "Мінімум карток не може бути більшим за максимум."}
+                {"min_digest_cards": "Minimum cannot be greater than maximum."}
             )
-
-        # 3. Логічна перевірка: нагадування стартапу має бути раніше за таймаут закриття запиту
-        reminder = attrs.get("intro_reminder_days", getattr(inst, "intro_reminder_days", 4))
-        expiry = attrs.get("intro_request_expiry_days", getattr(inst, "intro_request_expiry_days", 7))
-        if reminder >= expiry:
-            raise serializers.ValidationError(
-                {"intro_reminder_days": f"Дні нагадування ({reminder}) повинні бути меншими за термін закриття запиту ({expiry})."}
-            )
-
-        # 4. Перевірка порядку опитувань
-        s1 = attrs.get("survey_day_first", getattr(inst, "survey_day_first", 14))
-        s2 = attrs.get("survey_day_second", getattr(inst, "survey_day_second", 30))
-        if s1 >= s2:
-            raise serializers.ValidationError(
-                {"survey_day_first": "Перше опитування має відбутися раніше за друге."}
-            )
-
         return attrs
