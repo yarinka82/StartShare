@@ -2,7 +2,7 @@ import { Alert, Button, CircularProgress, Stack, Typography } from "@mui/materia
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import FormCard from "../components/FormCard";
@@ -11,6 +11,7 @@ export default function VerifyEmailPage() {
   const { t } = useTranslation();
   const { user, refresh } = useAuth();
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const token = params.get("token");
   const [state, setState] = useState<"loading" | "ok" | "failed">("loading");
   const [attempt, setAttempt] = useState(0);
@@ -26,17 +27,23 @@ export default function VerifyEmailPage() {
     setState("loading");
     api
       .verifyEmail(token)
-      .then(() => {
-        // tell the other tab (the one with "check your e-mail"), then close the channel
+      .then(async () => {
         const ch = new BroadcastChannel("auth");
         ch.postMessage("email_verified");
         ch.close();
-        // this tab shares the session cookie, so a logged-in user gets the fresh state too
-        void refresh();
+        await refresh();
         setState("ok");
       })
       .catch(() => setState("failed"));
   }, [token, attempt, refresh]);
+
+    useEffect(() => {
+      if (state !== "ok" || !user) return;
+      const id = window.setTimeout(() => navigate("/", { replace: true }), 1200);
+      return () => window.clearTimeout(id);
+    }, [state, user, navigate]);
+
+
 
   return (
     <FormCard title={t("verify.title", "Підтвердження e-mail")}>

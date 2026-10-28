@@ -164,42 +164,53 @@ class UserConsent(models.Model):
 
     def __str__(self):
         return f"{self.user_id}:{self.document_type}@{self.document_version}"
-    
-    
+
+
 
 class PlatformConfig(models.Model):
     """Глобальні системні налаштування платформи (Singleton: завжди ID=1)."""
-
+    
     # 1. ШІ та LLM
     ai_provider = models.CharField(max_length=32, default="gemini")
-    ai_model = models.CharField(max_length=64, default="gemini-2.0-flash")
+    ai_model = models.CharField(max_length=64, default="gemini-3.8-flash")
     ai_temperature = models.FloatField(default=0.2)
-
+    
     # 2. Ліміти файлів та TTL
     max_deck_size_mb = models.PositiveIntegerField(default=20)
     deck_retention_hours = models.PositiveIntegerField(default=24)
     draft_expiry_days = models.PositiveIntegerField(default=30)
-
-    # 3. Бізнес-правила матчингу та дайджесту
+    
+    # 3. Правила матчингу та тижневого дайджесту
     min_digest_cards = models.PositiveSmallIntegerField(default=3)
     max_digest_cards = models.PositiveSmallIntegerField(default=5)
-    intro_request_expiry_days = models.PositiveSmallIntegerField(default=7)
-
+    
+    # 4. Параметри знайомства
+    intro_request_expiry_days = models.PositiveSmallIntegerField(default=7,
+                                                                 help_text="Q-01: термін на відповідь Freigabe (дні)")
+    intro_reminder_days = models.PositiveSmallIntegerField(default=4,
+                                                           help_text="Q-32: нагадування стартапу перед закінченням (дні)")
+    card_active_days = models.PositiveSmallIntegerField(default=4,
+                                                        help_text="Q-27: картка зникає з активного списку інвестора (дні)")
+    
+    # 5. Опитування цінності продукту (14 і 30 днів)
+    surveys_enabled = models.BooleanField(default=False, help_text="Увімкнути автоматичні опитування")
+    survey_day_first = models.PositiveSmallIntegerField(default=14)
+    survey_day_second = models.PositiveSmallIntegerField(default=30)
+    
     updated_at = models.DateTimeField(auto_now=True)
-
+    
     class Meta:
         db_table = "platform_config"
         verbose_name = "Platform Configuration"
-
+    
     def save(self, *args, **kwargs):
-        # Гарантуємо, що запис завжди лише один (ID=1)
         self.pk = 1
         super().save(*args, **kwargs)
-
+    
     @classmethod
     def get_solo(cls):
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
-
+    
     def __str__(self):
-        return f"Config (Model: {self.ai_model}, Deck: {self.max_deck_size_mb}MB)"
+        return f"Config (Model: {self.ai_model}, Intro TTL: {self.intro_request_expiry_days}d)"

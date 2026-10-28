@@ -3,9 +3,9 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.accounts.serializers import PlatformConfigSerializer
 from apps.accounts.models import User, UserConsent, UserRole, LegalDocument, PlatformConfig
 from apps.analytics.models import Event
-from apps.documents.serializers import PlatformConfigSerializer
 from apps.investors.models import Mandate
 from apps.startups.models import Report, ReportDecision, ReportStatus
 
@@ -89,7 +89,7 @@ class StaffReportDecisionView(APIView):
         return Response({"status": "resolved", "decision": decision})
     
     
-# 1. ТАБ: КОРИСТУВАЧІ ТА ІНВЕСТОРИ
+# ТАБ: КОРИСТУВАЧІ ТА ІНВЕСТОРИ
 class StaffUsersListView(APIView):
     """GET /api/staff/users/ — список користувачів, їхні ролі, статус та мандати."""
     permission_classes = [IsStaff]
@@ -173,7 +173,7 @@ class StaffToggleUserActiveView(APIView):
         })
 
 
-# 2. ТАБ: ЖУРНАЛ АУДИТУ ЗГОД (Art. 7 DSGVO)
+# ТАБ: ЖУРНАЛ АУДИТУ ЗГОД (Art. 7 DSGVO)
 class StaffConsentsListView(APIView):
     """GET /api/staff/consents/ — журнал прийняття AGB, DSE та декларацій A і C."""
     permission_classes = [IsStaff]
@@ -218,21 +218,22 @@ class StaffEventsListView(APIView):
 
 class StaffPlatformConfigView(APIView):
     """
-    GET   /api/auth/staff/config/ — поточні налаштування + каталог провайдерів.
-    PATCH /api/auth/staff/config/ — часткове оновлення з валідацією.
+    GET /api/staff/config/ — віддає налаштування та каталог провайдерів.
+    PATCH /api/staff/config/ — валідує і зберігає через PlatformConfigSerializer.
     """
-    permission_classes = []  # [IsStaff]
-    
+    permission_classes = [IsStaff]
+
     def get(self, request):
-        cfg = PlatformConfig.get_solo()  # noqa: F821
-        return Response(PlatformConfigSerializer(cfg).data)
-    
+        cfg = PlatformConfig.get_solo()
+        serializer = PlatformConfigSerializer(cfg)
+        return Response(serializer.data)
+
     def patch(self, request):
-        cfg = PlatformConfig.get_solo()  # noqa: F821
+        cfg = PlatformConfig.get_solo()
         serializer = PlatformConfigSerializer(cfg, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
@@ -278,6 +279,80 @@ class StaffPublishLegalDocView(APIView):
             "code": new_doc.code,
             "version": new_doc.version,
             "valid_from": new_doc.valid_from.isoformat()
+        }, status=status.HTTP_201_CREATED)
+    
+
+    
+class StaffLegalDocumentsListView(APIView):
+    """
+    GET /api/auth/staff/legal-documents/ — список усіх версій текстів.
+    POST /api/auth/staff/legal-documents/ — публікація нової версії (v+1).
+    """
+    permission_classes = [IsStaff]
+
+    def get(self, request):
+        docs = LegalDocument.objects.all().order_by("code", "language", "-version")
+        data = [
+            {
+                "id": d.id,
+                "code": d.code,
+                "code_display": d.get_code_display() if hasattr(d, "get_code_display") else d.code,
+                "language": d.language,
+                "version": d.version,
+                "title": d.title,
+                "body": d.body,
+                "is_current": d.valid_to is None and d.valid_from is not None,
+                "valid_from": d.valid_from.isoformat() if d.valid_from else None,
+                "valid_to": d.valid_to.isoformat() if d.valid_to else None,
+                "created_at": d.created_at.isoformat() if hasattr(d, "created_at") else None,
+            }
+            for d in docs
+        ]
+        return Response(data)
+
+    def post(self, request):
+        code = request.data.get("code")
+        language = request.data.get("language", "de")
+        title = (request.data.get("title") or "").strip()
+        body = (request.data.get("body") or "").strip()
+
+        if not code or not body:
+            return Response(
+                {"detail": "Код документа та текст є обов'язковими."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        now = timezone.now()
+
+        # 1. Знаходимо поточну версію і архівуємо її (закриваємо valid_to)
+        current = (
+            LegalDocument.objects.filter(code=code, language=language, valid_to__isnull=True)
+            .order_by("-version")
+            .first()
+        )
+        new_version = 1
+        if current:
+            current.valid_to = now
+            current.save(update_fields=["valid_to"])
+            new_version = current.version + 1
+
+        # 2. Створюємо нову чинну версію
+        new_doc = LegalDocument.objects.create(
+            code=code,
+            language=language,
+            version=new_version,
+            title=title or (current.title if current else f"Dokument {code}"),
+            body=body,
+            legal_approved_at=now,
+            valid_from=now,
+        )
+
+        return Response({
+            "status": "published",
+            "id": new_doc.id,
+            "code": new_doc.code,
+            "version": new_doc.version,
+            "language": new_doc.language,
         }, status=status.HTTP_201_CREATED)
     
     

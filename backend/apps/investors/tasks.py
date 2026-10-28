@@ -148,7 +148,7 @@ def send_intro(self, introduction_id: int):
         if not inv_user.is_active or not sp_user.is_active or sp_profile.status == "REMOVED":
             return "Skipped: One of the accounts was removed or deactivated."
         
-        # 3. 🚀 Отримуємо Текст E з БД (якщо в базі нема — викидаємо помилку, лист не піде!)
+        # 3. Отримуємо Текст E з БД (якщо в базі нема — викидаємо помилку, лист не піде!)
         user_lang = getattr(inv_user, "preferred_language", "de")
         text_e = get_active_legal_text(code=LegalDocumentCode.E, language=user_lang)
         
@@ -243,7 +243,12 @@ def process_intro_timeouts_and_reminders():
         transition_introduction(intro.id, Introduction.Status.EXPIRED)
 
     # 2. Нагадування на 4-й день (без повторів)
-    reminder_days = getattr(settings, "INTRO_REMINDER_DAYS", 4)
+    try:
+        from apps.accounts.models import PlatformConfig
+        reminder_days = PlatformConfig.get_solo().intro_reminder_days
+    except Exception:
+        reminder_days = getattr(settings, "INTRO_REMINDER_DAYS", 4)
+    
     threshold = now - timedelta(days=reminder_days)
 
     need_reminder = Introduction.objects.filter(

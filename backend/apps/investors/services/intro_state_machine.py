@@ -2,6 +2,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
+from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.exceptions import APIException
 
@@ -41,6 +42,14 @@ ALLOWED_TRANSITIONS = {
 }
 
 
+def get_intro_expire_days() -> int:
+    try:
+        from apps.accounts.models import PlatformConfig
+        return PlatformConfig.get_solo().intro_request_expiry_days
+    except Exception:
+        return getattr(settings, "INTRO_EXPIRE_DAYS", 7)
+    
+
 def can_transition(current_status: str, target_status: str) -> bool:
     return target_status in ALLOWED_TRANSITIONS.get(current_status, set())
 
@@ -76,7 +85,7 @@ def transition_introduction(intro_id: int, target_status: str, user=None, **kwar
         # 2. Обробка специфічних переходів
         if target_status == Introduction.Status.INTERESTED:
             intro.interested_at = now
-            expire_days = getattr(settings, "INTRO_EXPIRE_DAYS", 7)
+            expire_days = get_intro_expire_days()
             intro.request_expires_at = now + timedelta(days=expire_days)
             intro.investor_message = kwargs.get("message", "")
             update_fields.extend(["interested_at", "request_expires_at", "investor_message"])
@@ -134,3 +143,7 @@ def transition_introduction(intro_id: int, target_status: str, user=None, **kwar
             pass
 
         return intro
+    
+
+
+

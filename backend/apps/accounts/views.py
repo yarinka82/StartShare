@@ -159,10 +159,12 @@ class VerifyEmailView(PublicPostView):
         ).first()
         if user is None:
             return Response({"detail": "invalid_or_expired_token"}, status=status.HTTP_400_BAD_REQUEST)
-
+        
         if user.email_verified_at is None:
             user.email_verified_at = timezone.now()
             user.save(update_fields=["email_verified_at"])
+            # first confirmation: the person has just registered, so continue in a session right away
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         return Response({"detail": "verified"})
 
 

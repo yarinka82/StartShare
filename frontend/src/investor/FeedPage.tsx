@@ -1,7 +1,6 @@
 import DynamicFeedOutlinedIcon from "@mui/icons-material/DynamicFeedOutlined";
-import HistoryIcon from "@mui/icons-material/History";
 import {
-  Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, FormControl,
+  Alert, Box, Button,  Dialog, DialogActions, DialogContent, DialogTitle, FormControl,
   InputLabel, MenuItem, Select, Skeleton, Snackbar, Stack, TextField, Typography,
 } from "@mui/material";
 import { Navigate } from "react-router-dom";
@@ -119,35 +118,6 @@ export default function FeedPage() {
           {t("investor.cabinetSubtitle", "Щотижневі підбірки 3–5 сліпих тизерів за вашим мандатом.")}
         </Typography>
 
-        {/* ЛІВИЙ БЛОК: Кількість карток + Історія мандату в один рядок */}
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", flexWrap: "wrap", mt: 1.5 }}>
-          {!loading && !loadError && cards.length > 0 && (
-            <Chip
-              label={t("investor.digestCount", { count: cards.length, defaultValue: "У поточному дайджесті: {{count}}" })}
-              color="primary"
-              variant="outlined"
-              sx={{ fontWeight: 700 }}
-            />
-          )}
-
-          {/* Кнопка історії зліва поруч із бейджем */}
-          <Button
-            variant="text"
-            size="small"
-            startIcon={<HistoryIcon />}
-            onClick={() => setHistoryOpen(true)}
-            sx={{
-              textTransform: "none",
-              color: "text.secondary",
-              fontWeight: 600,
-              fontSize: "0.85rem",
-              px: 1,
-              "&:hover": { color: "#17407a", bgcolor: "rgba(23, 64, 122, 0.05)" },
-            }}
-          >
-            {t("investor.mandateHistoryBtn", "Історія версій мандату")}
-          </Button>
-        </Stack>
       </Box>
 
       <Box sx={{ maxWidth: 720 }}>

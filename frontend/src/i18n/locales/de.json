@@ -211,7 +211,7 @@
     "saved": "Gespeichert",
     "saveError": "Speichern nicht möglich",
     "fields": {
-      "company_name": "Firmenname",
+      "company_name": "Name des Startups",
       "sector": "Branche",
       "stage": "Phase",
       "country": "Land",
@@ -333,11 +333,11 @@
     "text": "Ihr Investorenkonto ist bereit. Mandatseinstellungen und wöchentliche Teaser stehen zur Verfügung.",
     "goToFeed": "Zum Digest wechseln",
     "cabinetTitle": "Investoren-Kabinett",
-    "cabinetSubtitle": "Wöchentliche Auswahlen von 3–5 Blind-Teasern gemäß Ihrem Mandat.",
+    "cabinetSubtitle": "Wöchentlich kuratierte Blind-Teaser gemäß Ihrem Investitionsmandat.",
     "mandateHistoryBtn": "Mandatshistorie [B]",
     "editMandateBtn": "Mandat bearbeiten",
     "tabDigest": "Aktueller Digest (3–5 Teaser)",
-    "emptyFeedAlert": "Für diese Woche liegen keine neuen Teaser vor oder Sie haben bereits alle Profile bewertet. Der nächste Digest wird am Montag um 08:00 Uhr generiert (sofern 3–5 passende Startups vorliegen).",
+    "emptyFeedAlert": "Für diese Woche liegen keine neuen Teaser vor oder Sie haben bereits alle Profile bewertet. Der nächste Digest wird am Montag um 08:00 Uhr generiert, sobald passende Startups verfügbar sind.",
     "status": {
       "title": "Bestätigung des Investorenstatus",
       "intro": "Bitte bestätigen Sie vor dem Fortfahren, dass Sie als professioneller Investor handeln.",
@@ -453,7 +453,35 @@
     }
   },
   "staff": {
+      "legal": {
+        "title": "Rechtstexte & Versionen (A–G, AGB, DSE)",
+        "subtitle": "Verwaltung der Plattform-Rechtstexte. Jede Aktualisierung erstellt eine Version v+1 mit vollständigem Prüfpfad.",
+        "newVersionBtn": "Neue Fassung veröffentlichen",
+        "code": "Code",
+        "docTitle": "Dokumententitel",
+        "lang": "Sprache",
+        "version": "Version",
+        "status": "Status",
+        "validFrom": "Gültig ab",
+        "active": "Gültig",
+        "archived": "Archiv",
+        "createNextVersion": "Neue Fassung",
+        "modalTitle": "Veröffentlichung einer neuen Textfassung",
+        "modalNotice": "Das Speichern erstellt die nächste Version (v+1) und beendet die Gültigkeit der bisherigen Fassung. Historische Nutzerzustimmungen bleiben gemäß Art. 7 DSGVO unverändert bestehen.",
+        "bodyLabel": "Rechtstext (Markdown / Plain Text):",
+        "publishAction": "Fassung veröffentlichen",
+        "publishedToast": "Neue Dokumentenfassung erfolgreich veröffentlicht!"
+      },
       "config": {
+        "introSection": "Intro-Workflow & Umfrageparameter (Pflichtenheft)",
+        "introExpiryDays": "Frist für Freigabe (Tage)",
+        "q01Helper": "Q-01: Standard 7 Tage",
+        "introReminderDays": "Erinnerung an Startup (Tage)",
+        "q32Helper": "Q-32: Standard 4 Tage",
+        "cardActiveDays": "Kartensichtbarkeit im Feed (Tage)",
+        "q27Helper": "Q-27: Ausblenden ohne Reaktion",
+        "surveysToggle": "Automatische Feedback-Umfragen nach 14 und 30 Tagen aktivieren",
+        "surveysHint": "Erfasst die Produktwertschätzung nach erfolgreicher Kontaktvermittlung anonymisiert.",
         "aiSection": "KI-Parameter (AI Generator & Model)",
         "aiProvider": "KI-Anbieter",
         "aiModel": "KI-Modell",
@@ -474,7 +502,6 @@
         "minDigestHelper": "Gemäß Pflichtenheft: 3 Teaser",
         "maxDigestCards": "Max. Teaser im Digest",
         "maxDigestHelper": "Gemäß Pflichtenheft: 5 Teaser",
-        "introExpiryDays": "Intro-Timeout für Startups (Tage)",
         "introExpiryHelper": "Gemäß Pflichtenheft: 7 Tage",
         "saveBtn": "Einstellungen speichern",
         "savedSuccess": "Plattformeinstellungen erfolgreich aktualisiert!"
@@ -492,6 +519,7 @@
         "users": "Nutzer & Investoren",
         "consents": "Einwilligungsnachweis (DSGVO)",
         "events": "Ereignisprotokoll (Audit Log)",
+        "legal": "Rechtstexte (A–G, AGB)",
         "config": "Plattformeinstellungen"
       },
       "table": {

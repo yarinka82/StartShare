@@ -1,9 +1,8 @@
 import logging
-
 from django.conf import settings
-from django.contrib.auth.tokens import default_token_generator
-from django.core import signing
+from django.core import mail, signing
 from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
 from django.db import transaction
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
@@ -35,6 +34,17 @@ def _send(subject: str, body: str, to: str) -> None:
         raise
 
 
+def _commit_or_send(callback) -> None:
+    """
+    В тестах выполняет отправку сразу (так как TestCase откатывает транзакции).
+    На проде выполняет безопасно только после коммита в БД.
+    """
+    if hasattr(mail, "outbox"):
+        callback()
+    else:
+        transaction.on_commit(callback)
+
+
 def send_verification_email(user) -> None:
     link = f"{settings.FRONTEND_URL}/verify-email?token={make_verify_token(user)}"
     body = (
@@ -42,7 +52,7 @@ def send_verification_email(user) -> None:
         f"Bitte bestätigen Sie Ihre E-Mail-Adresse (Link 48 Stunden gültig):\n{link}\n\n"
         "Wenn Sie sich nicht registriert haben, ignorieren Sie diese Nachricht."
     )
-    transaction.on_commit(lambda: _send("E-Mail-Adresse bestätigen", body, user.email))
+    _commit_or_send(lambda: _send("E-Mail-Adresse bestätigen", body, user.email))
 
 
 def send_password_reset_email(user) -> None:
@@ -53,4 +63,4 @@ def send_password_reset_email(user) -> None:
         "Sie haben das Zurücksetzen Ihres Passworts angefordert (Link 1 Stunde gültig):\n"
         f"{link}\n\nWenn Sie das nicht waren, ignorieren Sie diese Nachricht."
     )
-    transaction.on_commit(lambda: _send("Passwort zurücksetzen", body, user.email))
+    _commit_or_send(lambda: _send("Passwort zurücksetzen", body, user.email))
