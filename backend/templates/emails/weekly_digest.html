@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; background-color: #f8fafc; padding: 24px; color: #0f172a;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; padding: 32px; border: 1px solid #e2e8f0;">
+
+    <h2 style="color: #0b2142; margin-top: 0;">Start Share — Wöchentlicher Digest</h2>
+    <p style="color: #475569;">Guten Tag,</p>
+    <p style="color: #475569;">
+      anhand Ihres Investitionsmandats haben wir diese Woche <strong>{{ digest.card_count }} passende Startups</strong> für Sie ausgewählt.
+    </p>
+
+    <!-- Перелік тизерів -->
+    {% for card in cards %}
+      <div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 16px; margin: 16px 0; background: #fdfdfd;">
+        <span style="background: #17407a; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">
+          {{ card.introduction.startup_profile.sector }}
+        </span>
+        <span style="background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-size: 11px;">
+          {{ card.introduction.startup_profile.stage }}
+        </span>
+
+        <h4 style="margin: 12px 0 6px 0; color: #0f172a;">
+          {{ card.introduction.teaser.content.headline }}
+        </h4>
+        <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.5;">
+          {{ card.introduction.teaser.content.problem }}
+        </p>
+
+        <!-- Рядок "Чому ви це бачите" -->
+        <p style="font-size: 11px; color: #64748b; margin-top: 10px;">
+          <strong>Passend zu Ihrem Mandat:</strong>
+            {% for code in card.match_reason_codes %}
+              {% if code == "sector" %}Branche
+              {% elif code == "stage" %}Finanzierungsphase
+              {% elif code == "region" %}Zielregion
+              {% elif code == "check_size" %}Ticketgröße
+              {% elif code == "business_model" %}Geschäftsmodell
+              {% else %}{{ code }}{% endif %}{% if not forloop.last %} &bull; {% endif %}
+            {% endfor %}
+        </p>
+      </div>
+    {% endfor %}
+
+    <!-- Кнопка переходу в кабінет -->
+    <div style="text-align: center; margin: 28px 0;">
+      <a href="{{ frontend_url }}/investor/feed" style="background: #17407a; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; display: inline-block;">
+        Profile im Kabinett ansehen & entscheiden
+      </a>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
+
+    <!-- Юридичний дисклеймер B (Обов'язковий) -->
+    <p style="font-size: 11px; color: #94a3b8; font-style: italic; line-height: 1.4; margin: 0;">
+      {{ disclaimer_b }}
+    </p>
+  </div>
+</body>
+</html>

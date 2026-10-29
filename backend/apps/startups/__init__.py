@@ -1,0 +1,1 @@
+# StartupProfile, статусы DRAFT/LIVE/PAUSED/REMOVED
