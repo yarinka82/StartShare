@@ -1,0 +1,345 @@
+{
+  "teaser": {
+    "statusLoadError": "Der Verarbeitungsstatus konnte nicht geladen werden.",
+    "timedOutMessage": "Die Verarbeitung dauert länger als gewöhnlich. Sie können diese Seite verlassen und später zurückkehren.",
+    "processing": "Die KI analysiert Ihr Pitch Deck…",
+    "queued": "Ihr Pitch Deck befindet sich in der Warteschlange zur Analyse…",
+    "processingEstimate": "Dies dauert in der Regel weniger als eine Minute.",
+    "loadingTeaser": "Ihr Teaser wird geladen…",
+    "approvedBanner": "Ihr Teaser ist freigegeben und kann nicht mehr bearbeitet werden.",
+    "imageSlidesBanner": "Folie(n) {{slides}} enthalten Grafiken/Bilder. Bitte prüfen Sie diese manuell auf Firmenlogos oder Klarnamen.",
+    "approveTitle": "Teaser freigeben",
+    "blockersHeader": "Vor der Freigabe müssen folgende Punkte behoben werden:",
+    "approveLiveButton": "Teaser freigeben und veröffentlichen (LIVE)",
+    "disclaimer": "Angaben des Startups, nicht von Start Share geprüft. Keine Anlageberatung, keine Empfehlung und kein Angebot zum Erwerb von Beteiligungen.",
+    "confirm": "Bestätigen",
+    "notFoundInDeck": "Die KI konnte hierzu nichts im Deck finden. Ergänzen Sie es selbst oder lassen Sie es leer.",
+    "empty": "Leer.",
+    "status": {
+      "confirmed": "Bestätigt",
+      "notConfirmed": "Nicht bestätigt"
+    },
+    "fields": {
+      "headline": "Headline (Kurzbeschreibung)",
+      "problem": "Problemstellung",
+      "solution": "Lösung & Produkt",
+      "traction": "Traktion & Kennzahlen",
+      "market": "Markt & Zielgruppe",
+      "team": "Team-Hintergrund"
+    },
+    "categories": {
+      "R01": "Unternehmensname / Marke",
+      "R02": "Gründer- / Teamname",
+      "R03": "URL / Website",
+      "R04": "Kontaktdaten (E-Mail / Tel)",
+      "R05": "Patentnummer / Marke",
+      "R06": "Kunden- / Partnername",
+      "R07": "Stadt / Genauer Standort",
+      "R08": "Social Media / Profil",
+      "R09": "Sensible Kennzahl",
+      "default": "Identifikationsmerkmal"
+    },
+    "advice": {
+      "R01": "Ersetzen Sie den Namen durch eine neutrale Umschreibung, z. B. 'Ein B2B-SaaS-Startup aus dem DACH-Raum'.",
+      "R02": "Beschreiben Sie Rolle und Erfahrung ohne Klarnamen (z. B. 'Erfahrener Tech-Lead mit 8 Jahren Branchenerfahrung').",
+      "R03": "Entfernen Sie Weblinks; der Datenaustausch erfolgt erst nach beidseitiger Freigabe.",
+      "R04": "Entfernen Sie Kontaktdaten; der Austausch erfolgt erst nach Freigabe.",
+      "R05": "Umschreiben Sie geschützte Technologien abstrakt ohne Patentnummern.",
+      "R06": "Ersetzen Sie konkrete Namen durch Branchenkategorien (z. B. 'Tier-1 Automobilhersteller').",
+      "R07": "Ersetzen Sie die Stadt durch eine Region (z. B. 'Süddeutschland' oder 'DACH').",
+      "default": "Formulieren Sie diesen Teil so um, dass keine Rückschlüsse auf das konkrete Unternehmen möglich sind."
+    },
+    "blockers": {
+      "required": "ist ein Pflichtfeld und darf nicht leer sein.",
+      "unconfirmed": "wurde noch nicht bestätigt (klicken Sie auf Bestätigen).",
+      "blocking_risk": "enthält ein kritisches Identifikationsmerkmal, das entfernt werden muss.",
+      "too_long": "überschreitet das Zeichenlimit."
+    }
+  },
+
+  "app": {
+    "name": "Start Share"
+  },
+
+  "nav": {
+    "logout": "Abmelden",
+    "language": "Sprache"
+  },
+
+  "common": {
+    "tryAgain": "Erneut versuchen",
+    "checkAgain": "Erneut prüfen",
+    "loading": "Wird geladen…",
+    "save": "Speichern",
+    "saving": "Wird gespeichert…",
+    "edit": "Bearbeiten",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "backToLogin": "Zurück zur Anmeldung",
+    "eur": "EUR",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen"
+  },
+
+  "roles": {
+    "startup": "Startup",
+    "investor": "Investor"
+  },
+
+  "register": {
+    "title": "Konto erstellen",
+    "iAm": "Ich registriere mich als",
+    "passwordHelper": "Mindestens 8 Zeichen.",
+    "agb": "Ich akzeptiere die <link>Allgemeinen Geschäftsbedingungen (AGB)</link>.",
+    "datenschutz": "Ich habe die <link>Datenschutzerklärung</link> zur Kenntnis genommen.",
+    "submit": "Registrieren",
+    "haveAccount": "Bereits ein Konto? Anmelden",
+    "doneTitle": "Bitte prüfen Sie Ihr Postfach",
+    "doneText": "Falls diese Adresse registriert werden kann, haben wir einen Bestätigungslink gesendet. Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich anmelden.",
+    "confirmPassword": "Passwort wiederholen",
+    "passwordMismatch": "Die Passwörter stimmen nicht überein."
+  },
+
+  "login": {
+    "title": "Anmelden",
+    "submit": "Anmelden",
+    "forgot": "Passwort vergessen?",
+    "noAccount": "Noch kein Konto? Registrieren",
+    "notVerified": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Den Link finden Sie in Ihrem Postfach.",
+    "resend": "Link erneut senden",
+    "resent": "Falls diese Adresse noch auf die Bestätigung wartet, wurde ein neuer Link gesendet."
+  },
+
+  "verify": {
+    "verifying": "Ihre E-Mail-Adresse wird bestätigt …",
+    "success": "Ihre E-Mail-Adresse ist bestätigt. Sie können sich jetzt anmelden.",
+    "failed": "Dieser Link ist ungültig oder abgelaufen. Melden Sie sich an, um einen neuen anzufordern."
+  },
+
+  "forgot": {
+    "title": "Passwort zurücksetzen",
+    "text": "Geben Sie Ihre E-Mail-Adresse ein, wir senden Ihnen einen Link.",
+    "submit": "Link senden",
+    "done": "Falls zu dieser Adresse ein Konto existiert, wurde ein Link gesendet."
+  },
+
+  "reset": {
+    "title": "Neues Passwort festlegen",
+    "newPassword": "Neues Passwort",
+    "submit": "Passwort speichern",
+    "done": "Ihr Passwort wurde geändert. Sie können sich jetzt anmelden."
+  },
+
+  "legal": {
+    "unavailable": "Rechtstext konnte nicht geladen werden.",
+    "consent": {
+      "confirm": "Ich bestätige diese Erklärung."
+    },
+    "agb": "Allgemeine Geschäftsbedingungen (AGB)",
+    "datenschutz": "Datenschutzerklärung",
+    "impressum": "Impressum",
+    "kriterien": "Profilauswahl (Kriterien)",
+    "close": "Schließen",
+    "back": "Zurück",
+    "placeholder": "Die rechtsverbindlichen Texte für dieses Dokument werden derzeit finalisiert."
+  },
+
+  "profile": {
+    "pausedAlert": "Ihr Profil ist pausiert. Investoren sehen Ihren Teaser nicht im wöchentlichen Digest.",
+    "removedAlert": "Ihr Profil wurde entfernt (REMOVED). Die Sichtbarkeit für Investoren ist deaktiviert.",
+
+    "actions": {
+      "pause": "Pausieren (PAUSE)",
+      "resume": "Aktivieren (LIVE)",
+      "remove": "Profil löschen"
+    },
+
+    "sections": {
+      "basics": "Basisangaben",
+      "metrics": "Kennzahlen & Wachstum",
+      "deck": "Pitch Deck (PDF)",
+      "teaser": "Blind-Teaser (KI-Entwurf & Freigabe)"
+    },
+
+    "growthPeriods": {
+      "mom": "MoM (Monatsvergleich)",
+      "qoq": "QoQ (Quartalsvergleich)",
+      "yoy": "YoY (Jahresvergleich)"
+    },
+
+    "deleteDialog": {
+      "title": "Startup-Profil löschen?",
+      "text": "Ihr Profil und der Blind-Teaser werden vollständig aus dem Investoren-Matching entfernt (Status REMOVED). Sie können es später reaktivieren.",
+      "confirm": "Löschen bestätigen"
+    },
+
+    "errors": {
+      "growth_period_required": "Bitte wählen Sie einen Zeitraum für die Wachstumsrate (z. B. MoM, YoY)."
+    },
+
+    "title": "Startup-Profil",
+    "intro": "Füllen Sie Ihr Profil aus und laden Sie Ihr Pitch Deck hoch. Alles wird automatisch als Entwurf gespeichert.",
+
+    "status": {
+      "DRAFT": "Entwurf",
+      "LIVE": "Live",
+      "PAUSED": "Pausiert",
+      "REMOVED": "Entfernt"
+    },
+
+    "saving": "Speichert …",
+    "saved": "Gespeichert",
+    "saveError": "Speichern nicht möglich",
+
+    "fields": {
+      "company_name": "Firmenname",
+      "sector": "Branche",
+      "stage": "Phase",
+      "country": "Land",
+      "amount_sought": "Gesuchte Summe",
+      "mrr": "MRR (monatlich wiederkehrender Umsatz)",
+      "growth_percent": "Wachstum",
+      "growth_period": "Wachstumszeitraum",
+      "team_size": "Teamgröße",
+      "deck": "Pitch Deck",
+      "business_model": "Geschäftsmodell"
+    },
+
+    "companyHelper": "Nur intern sichtbar. Wird Investoren nicht angezeigt.",
+    "optional": "optional",
+
+    "missing": "Für ein vollständiges Profil fehlt noch:",
+    "complete": "Ihr Profil ist vollständig. Die nächsten Schritte (Teaser und Veröffentlichung) folgen in einem späteren Release."
+  },
+
+  "deck": {
+    "lockedHint": "Ihr Teaser ist freigegeben (LIVE). Um das Deck zu ersetzen oder zu löschen, pausieren Sie bitte zuerst Ihr Profil.",
+    "lockedDeleteTooltip": "Löschen im LIVE-Status nicht möglich",
+    "dropHere": "PDF hierher ziehen oder",
+    "choose": "Datei auswählen",
+    "hint": "Nur PDF, bis zu {{max}} MB",
+    "uploading": "Wird hochgeladen …",
+    "replace": "Ersetzen",
+    "download": "Herunterladen",
+    "remove": "Entfernen",
+    "removeTitle": "Pitch Deck entfernen?",
+    "removeText": "Die Datei wird dauerhaft gelöscht.",
+    "uploaded": "Hochgeladen am {{date}}"
+  },
+
+  "errors": {
+    "teaser_approved": "Das Deck kann nicht gelöscht werden, da der Teaser bereits freigegeben ist. Bitte pausieren Sie zuerst Ihr Profil.",
+    "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+    "network": "Keine Verbindung zum Server.",
+    "throttled": "Zu viele Versuche. Bitte versuchen Sie es später erneut.",
+    "accept_agb_required": "Bitte akzeptieren Sie die AGB.",
+    "accept_datenschutz_required": "Bitte bestätigen Sie die Kenntnisnahme der Datenschutzerklärung.",
+    "growth_period_required": "Bitte wählen Sie einen Wachstumszeitraum.",
+    "deck_empty": "Die Datei ist leer.",
+    "deck_too_large": "Die Datei ist größer als {{max}} MB.",
+    "deck_not_pdf": "Es werden nur PDF-Dateien akzeptiert.",
+    "deck_password_protected": "Das PDF ist passwortgeschützt. Bitte laden Sie eine ungeschützte Datei hoch.",
+    "deck_corrupted": "Das PDF ist beschädigt und kann nicht gelesen werden.",
+    "invalid_credentials": "E-Mail oder Passwort ist falsch.",
+    "email_not_verified": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.",
+    "invalid_or_expired_token": "Dieser Link ist ungültig oder abgelaufen.",
+    "no_text": "Das Deck enthält nur Bilder oder Scans ohne lesbaren Text. Bitte füllen Sie das Profil manuell aus.",
+    "timeout": "Die Verarbeitung hat zu lange gedauert. Bitte laden Sie die Datei erneut hoch.",
+    "corrupted": "Die Datei ist beschädigt oder passwortgeschützt. Bitte laden Sie ein gültiges PDF hoch.",
+    "unexpected": "Ein unerwarteter Fehler ist bei der KI-Analyse aufgetreten. Bitte versuchen Sie es später erneut."
+  },
+
+  "footer": {
+    "agb": "AGB",
+    "datenschutz": "Datenschutz",
+    "impressum": "Impressum",
+    "kriterien": "Profilauswahl (DSA)"
+  },
+
+  "authPromo": {
+    "badge": "Regulierte B2B-Matching-Plattform",
+    "marketTag": "B2B Deutschland",
+    "heroTitle": "Diskrete Vernetzung von Startups und Investoren.",
+    "heroSubtitle": "KI erstellt einen Blind-Teaser ohne Namen und Marken. Kontaktdaten werden nur bei beidseitigem Einverständnis freigegeben.",
+    "featureDsa": "DSA-konform (Art. 16)",
+    "featureB2B": "Ausschließlich B2B-Investoren",
+    "featureServers": "Serverstandort Frankfurt",
+    "copyright": "Start Share Plattform. Alle Rechte vorbehalten."
+  },
+
+  "investor": {
+    "selectAll": "Alle auswählen",
+    "clear": "Zurücksetzen",
+
+    "title": "Willkommen",
+    "text": "Ihr Investor-Konto ist eingerichtet. Mandatskriterien und wöchentliche Teaser folgen im nächsten Release.",
+
+    "status": {
+      "title": "Bestätigung des Investorenstatus",
+      "intro": "Bitte bestätigen Sie vor dem Fortfahren, dass Sie als professioneller Investor handeln.",
+      "translationNote": "",
+      "translation": "",
+      "continue": "Weiter zum Mandat"
+    },
+
+    "mandate": {
+      "title": "Investitionsmandat",
+      "intro": "Definieren Sie Ihre Suchkriterien. Sie erhalten ausschließlich anonymisierte Teaser, die Ihrem Profil entsprechen.",
+      "hard": "Ausschlusskriterien (Hard Filters)",
+      "soft": "Präferenzen (Soft Filters)",
+      "sectors": "Branchen & Sektoren",
+      "stages": "Finanzierungsphasen",
+      "regions": "Zielregionen",
+      "ticket": "Ticketgröße",
+      "ticketMin": "Min. Ticket",
+      "ticketMax": "Max. Ticket",
+      "ticketHint": "Beträge in EUR. Angebote außerhalb dieser Spanne werden automatisch herausgefiltert.",
+      "businessModels": "Bevorzugte Geschäftsmodelle",
+      "businessModelsHint": "Wird verwendet, um passende Deals im wöchentlichen Digest zu priorisieren.",
+      "save": "Mandat speichern",
+      "saved": "Investitionsmandat erfolgreich gespeichert",
+      "lastSaved": "Zuletzt gespeichert: {{date}}"
+    }
+  },
+
+  "dict": {
+    "sectors": {
+      "B2B_SAAS": "B2B SaaS / Enterprise",
+      "FINTECH": "FinTech / InsurTech",
+      "HEALTHTECH": "HealthTech / MedTech",
+      "AI_DATA": "KI & Dateninfrastruktur",
+      "CLIMATETECH": "ClimateTech / CleanTech",
+      "ECOMMERCE": "E-Commerce / D2C",
+      "INDUSTRIAL": "Industrial Tech / Hardware",
+      "CYBERSECURITY": "Cybersecurity",
+      "PROPTECH": "PropTech / Immobilien",
+      "OTHER": "Sonstiges"
+    },
+
+    "stages": {
+      "pre-seed": "Pre-Seed (< 500k €)",
+      "seed": "Seed (500k € – 2M €)",
+      "series-a": "Series A (2M € – 5M €)",
+      "series-b": "Series B (5M € – 15M €)",
+      "series-c-plus": "Series C+ (> 15 Mio. €)"
+    },
+
+    "regions": {
+      "DACH": "DACH (DE, AT, CH)",
+      "DE_ONLY": "Nur Deutschland",
+      "EU_WIDE": "Europäische Union",
+      "GLOBAL": "Global / Remote"
+    },
+
+    "businessModels": {
+      "SUBSCRIPTION": "Abonnement / SaaS",
+      "TRANSACTIONAL": "Transaktionsbasiert / Marktplatz",
+      "USAGE_BASED": "Nutzungsbasiert (API / Usage)",
+      "HARDWARE": "Hardware / Lizenz",
+      "HYBRID": "Hybrid / Sonstiges"
+    }
+  }
+}
+
