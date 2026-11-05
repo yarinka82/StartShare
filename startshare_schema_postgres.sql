@@ -1,11 +1,26 @@
 -- =====================================================================
 -- Start Share — схема бази даних PostgreSQL (MVP)
--- Версія: 2026-10-05 (варіант A; підписки з безкоштовною фазою, рахунки з ПДВ; аналітика в цьому ж файлі)
+-- Версія: 2026-11-05 (варіант A; підписки з безкоштовною фазою, рахунки з ПДВ; аналітика в цьому ж файлі)
+-- Зміни 2026-11-05 (звірка з документами бізнес-аналітика BA-02, BA-04, BA-05, BA-06, BA-07 від 07–16.10.2026
+--   і рішення Project Manager від 05.11.2026). Нових таблиць немає, змінено лише наявні:
+--   * users: канал сповіщень e-mail або SMS і телефон для SMS (REQ-43, REQ-44, Q-48);
+--   * startup_profiles: місто, вибір «місто чи лише країна» в тизері, країна «Інше» зі своїм текстом (REQ-11);
+--     «свій варіант» сектора і моделі бізнесу зберігається поруч із підтвердженим пунктом списку (REQ-48, Q-24);
+--     стартап обирає ОДИН сектор (Q-59, рішення PM 05.11.2026: кілька секторів не вводимо);
+--   * teaser_fields: поле «що шукає стартап» (seeking) замість опису бізнесу (REQ-13, REQ-21, Q-36);
+--   * introductions: момент нагадування стартапу через 4 дні (REQ-45) і причина EXPIRED (BA-04, Q-14);
+--   * email_notifications: канал (e-mail / SMS) і листи N-06, N-08, N-09, N-11 (BA-07);
+--   * platform_parameters: 4 дні до нагадування, 4 дні життя картки, 5 відхилень до підказки стартапу, канали.
+--   * Регіон: тестова версія одразу DACH (DE, AT, CH); інші країни ЄС уже можна обирати в мандаті
+--     (рішення PM 05.11.2026, замінює «тестова версія спочатку лише Німеччина» з BA-02 REQ-24).
+-- Зміни 2026-10-26 (рішення Project Manager): регіон = лише країна; таблицю regions (федеральні землі)
+--   прибрано разом із startup_profiles.region_code і mandates.region_codes; до countries додано Швейцарію (CH),
+--   щоб підтримати DACH (DE, AT, CH).
 -- СУБД: PostgreSQL 16+ (gen_random_uuid() вбудована з PG 13)
 -- Сервер і дані: ЄС (Німеччина), NFR-01
 --
--- Джерела: Логіка_Start_Share.docx (головний документ), BA-02, BA-04, BA-TP,
---          BA-AI-01, BA-AI-02, рішення від 05.10.2026.
+-- Джерела: Логіка_Start_Share.docx (головний документ), BA-02, BA-02-value-lists, BA-04, BA-05, BA-06,
+--          BA-07, BA-TP, BA-AI-01, BA-AI-02, рішення від 05.10.2026, 26.10.2026 і 05.11.2026.
 --
 -- ВАЖЛИВО: у робочому проєкті таблиці створюють міграції Django (models.py).
 -- Схема відтворює саме те, що створює Django 5.2:
@@ -19,7 +34,7 @@
 -- Один файл: таблиці, тригери, функції обслуговування, довідники та аналітичний шар (схема analytics).
 -- Обслуговування (щоночі): SELECT ensure_event_partitions(); SELECT * FROM purge_expired_data();
 --                          SELECT * FROM analytics.refresh_all(); SELECT analytics.take_daily_snapshot();
--- Таблиць: 32.
+-- Таблиць: 31.
 -- =====================================================================
 
 BEGIN;
@@ -49,6 +64,8 @@ CREATE TABLE users (
     password VARCHAR(128) NOT NULL,
     role VARCHAR(16) NOT NULL,
     preferred_language VARCHAR(2) NOT NULL DEFAULT 'de',
+    notification_channel VARCHAR(5) NOT NULL DEFAULT 'email',
+    phone VARCHAR(16),
     email_verified_at TIMESTAMPTZ,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     is_staff BOOLEAN NOT NULL DEFAULT FALSE,
@@ -62,7 +79,11 @@ CREATE TABLE users (
     CONSTRAINT chk_users_role CHECK (role IN ('startup', 'investor', 'staff')),
     CONSTRAINT chk_users_language CHECK (preferred_language IN ('de', 'en', 'uk')),
     CONSTRAINT chk_users_staff_role CHECK (NOT is_staff OR role = 'staff'),
-    CONSTRAINT chk_users_deleted_inactive CHECK (deleted_at IS NULL OR is_active = FALSE)
+    CONSTRAINT chk_users_deleted_inactive CHECK (deleted_at IS NULL OR is_active = FALSE),
+    CONSTRAINT chk_users_channel CHECK (notification_channel IN ('email', 'sms')),
+    CONSTRAINT chk_users_phone_format CHECK (phone IS NULL OR phone ~ '^\+[1-9][0-9]{6,14}$'),
+    CONSTRAINT chk_users_sms_phone CHECK (notification_channel <> 'sms' OR phone IS NOT NULL),
+    CONSTRAINT chk_users_deleted_phone CHECK (deleted_at IS NULL OR phone IS NULL)
 );
 COMMENT ON TABLE users IS 'Користувачі (акаунти). Визначити структуру акаунта користувача платформи Start Share (стартап, інвестор, співробітник платформи) як основу автентифікації Django, розподілу ролей, мови інтерфейсу та GDPR-видалення.';
 COMMENT ON COLUMN users.id IS 'Ідентифікатор. Технічний первинний ключ запису користувача.';
@@ -70,6 +91,8 @@ COMMENT ON COLUMN users.email IS 'E-mail (логін). Логін і адрес�
 COMMENT ON COLUMN users.password IS 'Хеш пароля. Хеш пароля у форматі Django (алгоритм$ітерації$сіль$хеш).';
 COMMENT ON COLUMN users.role IS 'Роль. Бізнес-роль користувача на платформі.';
 COMMENT ON COLUMN users.preferred_language IS 'Мова інтерфейсу. Мова інтерфейсу і листів. Визначає, якою мовою інвестор бачить тизер.';
+COMMENT ON COLUMN users.notification_channel IS 'Канал сповіщень. Як користувач отримує службові сповіщення: e-mail або SMS (REQ-43, REQ-44). Дайджест та інтро-лист завжди надсилаються e-mail незалежно від вибору.';
+COMMENT ON COLUMN users.phone IS 'Телефон для SMS. Номер у форматі E.164 (+491701234567), обов''язковий при каналі SMS (REQ-43). Персональні дані: не показується іншій стороні (контактний телефон для інтро — у startup_private_details / investor_profiles); очищається при видаленні акаунта.';
 COMMENT ON COLUMN users.email_verified_at IS 'E-mail підтверджено. Момент підтвердження e-mail за посиланням. На цю адресу надсилаються контакти після знайомства, тому вона має бути перевірена.';
 COMMENT ON COLUMN users.is_active IS 'Активний. Стандартний прапорець Django: чи може користувач увійти.';
 COMMENT ON COLUMN users.is_staff IS 'Доступ до адмінки. Стандартний прапорець Django: доступ до Django admin.';
@@ -137,7 +160,7 @@ CREATE INDEX idx_user_consents_legal_document_id ON user_consents (legal_documen
 -- Довідники
 -- =====================================================================
 
--- 04. countries — Країни (ЄС-27)
+-- 04. countries — Країни (ЄС-27 + Швейцарія)
 CREATE TABLE countries (
     code VARCHAR(2) PRIMARY KEY,
     name_de VARCHAR(120) NOT NULL,
@@ -146,31 +169,14 @@ CREATE TABLE countries (
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT chk_countries_code CHECK (code ~ '^[A-Z]{2}$')
 );
-COMMENT ON TABLE countries IS 'Країни (ЄС-27). Довідник країн, з яких можуть бути стартапи та інвестори, і в яких інвестор шукає стартапи.';
+COMMENT ON TABLE countries IS 'Країни (ЄС-27 + Швейцарія). Довідник країн, з яких можуть бути стартапи та інвестори, і в яких інвестор шукає стартапи. Регіон у матчингу = країна (рішення 26.10.2026); DACH = DE, AT, CH; поділу на федеральні землі немає. Тестова версія одразу працює в DACH, інші країни ЄС уже можна обирати в мандаті (рішення PM 05.11.2026). Країни поза довідником стартап вказує як «Інше» (startup_profiles.country_other_text).';
 COMMENT ON COLUMN countries.code IS 'Код країни. Код країни ISO 3166-1 alpha-2.';
 COMMENT ON COLUMN countries.name_de IS 'Назва німецькою. Назва значення для німецького інтерфейсу.';
 COMMENT ON COLUMN countries.name_en IS 'Назва англійською. Назва значення для англійського інтерфейсу.';
 COMMENT ON COLUMN countries.sort_order IS 'Порядок сортування. Порядок показу значення у списку форми.';
 COMMENT ON COLUMN countries.is_active IS 'Активне значення. Чи можна обрати значення в нових формах. Вимкнене значення лишається в старих записах.';
 
--- 05. regions — Федеральні землі Німеччини
-CREATE TABLE regions (
-    code VARCHAR(6) PRIMARY KEY,
-    name_de VARCHAR(120) NOT NULL,
-    name_en VARCHAR(120) NOT NULL,
-    country_code VARCHAR(2) NOT NULL REFERENCES countries (code) DEFERRABLE INITIALLY DEFERRED,
-    sort_order SMALLINT NOT NULL DEFAULT 0,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    CONSTRAINT chk_regions_code_country CHECK (LEFT(code, 2) = country_code)
-);
-COMMENT ON TABLE regions IS 'Федеральні землі Німеччини. Довідник регіонів усередині країни. У MVP — 16 федеральних земель Німеччини; стартап з DE обирає одну землю, інвестор у мандаті — одну або кілька.';
-COMMENT ON COLUMN regions.code IS 'Код регіону. Код ISO 3166-2.';
-COMMENT ON COLUMN regions.name_de IS 'Назва німецькою. Назва значення для німецького інтерфейсу.';
-COMMENT ON COLUMN regions.name_en IS 'Назва англійською. Назва значення для англійського інтерфейсу.';
-COMMENT ON COLUMN regions.country_code IS 'Країна. Країна, до якої належить регіон. On delete (Django): PROTECT.';
-COMMENT ON COLUMN regions.sort_order IS 'Порядок сортування. Порядок показу значення у списку форми.';
-COMMENT ON COLUMN regions.is_active IS 'Активне значення. Чи можна обрати значення в нових формах. Вимкнене значення лишається в старих записах.';
-CREATE INDEX idx_regions_country_code ON regions (country_code);  -- індекс FK (Django створює автоматично)
+-- 05. regions — прибрано 26.10.2026 (Німеччина не ділиться на федеральні землі; регіон = країна)
 
 -- 06. sectors — Сектори
 CREATE TABLE sectors (
@@ -311,7 +317,9 @@ CREATE TABLE startup_profiles (
     business_model_code VARCHAR(32) REFERENCES business_models (code) DEFERRABLE INITIALLY DEFERRED,
     business_model_other_text VARCHAR(100),
     country_code VARCHAR(2) REFERENCES countries (code) DEFERRABLE INITIALLY DEFERRED,
-    region_code VARCHAR(6) REFERENCES regions (code) DEFERRABLE INITIALLY DEFERRED,
+    country_other_text VARCHAR(100),
+    city VARCHAR(100),
+    teaser_location VARCHAR(7),
     round_amount_eur NUMERIC(14,2),
     mrr_eur NUMERIC(14,2),
     growth_pct NUMERIC(7,2),
@@ -326,28 +334,31 @@ CREATE TABLE startup_profiles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT statement_timestamp(),
     CONSTRAINT uq_startup_profiles_user UNIQUE (user_id),
     CONSTRAINT chk_startup_profiles_status CHECK (status IN ('DRAFT', 'LIVE', 'PAUSED', 'REMOVED')),
-    CONSTRAINT chk_startup_profiles_sector_other CHECK (sector_other_text IS NULL OR sector_code = 'other'),
-    CONSTRAINT chk_startup_profiles_bm_other CHECK (business_model_other_text IS NULL OR business_model_code = 'other'),
-    CONSTRAINT chk_startup_profiles_region_country CHECK (region_code IS NULL OR LEFT(region_code, 2) = country_code),
+    CONSTRAINT chk_startup_profiles_sector_other CHECK (sector_other_text IS NULL OR sector_code IS NOT NULL),
+    CONSTRAINT chk_startup_profiles_bm_other CHECK (business_model_other_text IS NULL OR business_model_code IS NOT NULL),
+    CONSTRAINT chk_startup_profiles_country_one CHECK (country_code IS NULL OR country_other_text IS NULL),
+    CONSTRAINT chk_startup_profiles_teaser_location CHECK ((city IS NULL) = (teaser_location IS NULL) AND (teaser_location IS NULL OR teaser_location IN ('city', 'country'))),
     CONSTRAINT chk_startup_profiles_amounts CHECK ((round_amount_eur IS NULL OR round_amount_eur > 0) AND (mrr_eur IS NULL OR mrr_eur >= 0)),
     CONSTRAINT chk_startup_profiles_team CHECK (team_size IS NULL OR team_size >= 1),
-    CONSTRAINT chk_startup_profiles_live_complete CHECK (status IN ('DRAFT', 'REMOVED') OR (sector_code IS NOT NULL AND stage_code IS NOT NULL AND business_model_code IS NOT NULL AND country_code IS NOT NULL AND round_amount_eur IS NOT NULL AND team_size IS NOT NULL AND went_live_at IS NOT NULL AND (country_code <> 'DE' OR region_code IS NOT NULL))),
+    CONSTRAINT chk_startup_profiles_live_complete CHECK (status IN ('DRAFT', 'REMOVED') OR (sector_code IS NOT NULL AND stage_code IS NOT NULL AND business_model_code IS NOT NULL AND (country_code IS NOT NULL OR country_other_text IS NOT NULL) AND round_amount_eur IS NOT NULL AND team_size IS NOT NULL AND went_live_at IS NOT NULL)),
     CONSTRAINT chk_startup_profiles_paused CHECK ((status = 'PAUSED') = (paused_at IS NOT NULL)),
     CONSTRAINT chk_startup_profiles_removed CHECK ((status = 'REMOVED' AND removed_at IS NOT NULL AND removed_by IS NOT NULL) OR (status <> 'REMOVED' AND removed_at IS NULL AND removed_by IS NULL)),
     CONSTRAINT chk_startup_profiles_removed_by CHECK (removed_by IS NULL OR removed_by IN ('startup', 'system', 'staff'))
 );
-COMMENT ON TABLE startup_profiles IS 'Профілі стартапів. Визначити структуру профілю стартапу: дані форми (сектор, стадія, країна/земля, сума раунду, метрики), статус життєвого циклу DRAFT → LIVE → PAUSED/REMOVED і дані, за якими працює матчинг і будується сліпа картка для інвестора.';
+COMMENT ON TABLE startup_profiles IS 'Профілі стартапів. Визначити структуру профілю стартапу: дані форми (один сектор, стадія, країна, місто, сума раунду, метрики), статус життєвого циклу DRAFT → LIVE → PAUSED/REMOVED і дані, за якими працює матчинг і будується сліпа картка для інвестора.';
 COMMENT ON COLUMN startup_profiles.id IS 'Ідентифікатор. Технічний первинний ключ запису профілю стартапу.';
 COMMENT ON COLUMN startup_profiles.public_id IS 'Публічний ідентифікатор. Ідентифікатор профілю стартапу для API, посилань і e-mail. Не дає вгадати кількість записів чи перебрати сусідні ID (важливо для анонімності стартапів).';
 COMMENT ON COLUMN startup_profiles.user_id IS 'Власник. Користувач-власник профілю. On delete (Django): PROTECT.';
 COMMENT ON COLUMN startup_profiles.status IS 'Статус профілю. Статус життєвого циклу профілю (BA-04).';
-COMMENT ON COLUMN startup_profiles.sector_code IS 'Сектор. Сектор стартапу — жорсткий фільтр. On delete (Django): PROTECT.';
-COMMENT ON COLUMN startup_profiles.sector_other_text IS 'Сектор: свій варіант. Текст «свого варіанта», якщо обрано «Інше».';
+COMMENT ON COLUMN startup_profiles.sector_code IS 'Сектор. Один сектор стартапу (REQ-48; Q-59: кілька секторів не вводимо, рішення PM 05.11.2026) — жорсткий фільтр. On delete (Django): PROTECT.';
+COMMENT ON COLUMN startup_profiles.sector_other_text IS 'Сектор: свій варіант. Текст, який стартап вписав сам. ШІ пропонує найближчий пункт списку, стартап підтверджує: у sector_code — підтверджений пункт (у матчингу бере участь лише він), тут — свій текст окремо (REQ-48, Q-24).';
 COMMENT ON COLUMN startup_profiles.stage_code IS 'Стадія. Стадія стартапу — жорсткий фільтр. On delete (Django): PROTECT.';
 COMMENT ON COLUMN startup_profiles.business_model_code IS 'Модель бізнесу. Модель бізнесу — м''який критерій сортування. On delete (Django): PROTECT.';
-COMMENT ON COLUMN startup_profiles.business_model_other_text IS 'Модель бізнесу: свій варіант. Текст «свого варіанта», якщо обрано «Інше».';
-COMMENT ON COLUMN startup_profiles.country_code IS 'Країна. Країна стартапу (ЄС-27) — частина жорсткого фільтра «регіон». On delete (Django): PROTECT.';
-COMMENT ON COLUMN startup_profiles.region_code IS 'Федеральна земля. Федеральна земля для стартапів з Німеччини. On delete (Django): PROTECT.';
+COMMENT ON COLUMN startup_profiles.business_model_other_text IS 'Модель бізнесу: свій варіант. Текст, який стартап вписав сам; у business_model_code — підтверджений пункт списку (REQ-48, Q-24).';
+COMMENT ON COLUMN startup_profiles.country_code IS 'Країна. Країна стартапу зі списку (ЄС-27 + Швейцарія) — жорсткий фільтр «регіон» (регіон = країна). NULL, якщо стартап обрав «Інше». On delete (Django): PROTECT.';
+COMMENT ON COLUMN startup_profiles.country_other_text IS 'Країна: «Інше». Назва країни, якої немає в списку (REQ-11). Такий стартап не збігається з жодним мандатом, бо мандат містить лише країни зі списку.';
+COMMENT ON COLUMN startup_profiles.city IS 'Місто. Необов''язкове поле форми (REQ-11). Персональних даних не містить, але разом з іншими полями може допомогти впізнати компанію — тому стартап сам обирає, чи показувати його (teaser_location).';
+COMMENT ON COLUMN startup_profiles.teaser_location IS 'Що показувати в тизері. city — місто, country — лише країна (REQ-11, US-02 AC-07). Обов''язкове, якщо заповнено місто; без міста тизер показує країну.';
 COMMENT ON COLUMN startup_profiles.round_amount_eur IS 'Сума раунду, EUR. Сума, яку стартап шукає в поточному раунді.';
 COMMENT ON COLUMN startup_profiles.mrr_eur IS 'MRR, EUR. Щомісячний регулярний дохід (Monthly Recurring Revenue).';
 COMMENT ON COLUMN startup_profiles.growth_pct IS 'Ріст, %. Показник росту, вказаний стартапом.';
@@ -360,12 +371,11 @@ COMMENT ON COLUMN startup_profiles.removed_by IS 'Хто видалив. Іні�
 COMMENT ON COLUMN startup_profiles.moderation_hidden_at IS 'Приховано після скарг. Момент автоматичного приховування профілю після 3 скарг «Melden» (REQ-32).';
 COMMENT ON COLUMN startup_profiles.created_at IS 'Створено. Технічне поле аудиту: момент створення рядка.';
 COMMENT ON COLUMN startup_profiles.updated_at IS 'Оновлено. Технічне поле аудиту: момент останньої зміни рядка.';
-CREATE INDEX idx_startup_matching ON startup_profiles (sector_code, stage_code, country_code, region_code) WHERE status = 'LIVE' AND moderation_hidden_at IS NULL;
+CREATE INDEX idx_startup_matching ON startup_profiles (sector_code, stage_code, country_code) WHERE status = 'LIVE' AND moderation_hidden_at IS NULL;
 CREATE INDEX idx_startup_draft_expiry ON startup_profiles (draft_expires_at) WHERE status = 'DRAFT';
 CREATE INDEX idx_startup_profiles_stage_code ON startup_profiles (stage_code);  -- індекс FK (Django створює автоматично)
 CREATE INDEX idx_startup_profiles_business_model_code ON startup_profiles (business_model_code);  -- індекс FK (Django створює автоматично)
 CREATE INDEX idx_startup_profiles_country_code ON startup_profiles (country_code);  -- індекс FK (Django створює автоматично)
-CREATE INDEX idx_startup_profiles_region_code ON startup_profiles (region_code);  -- індекс FK (Django створює автоматично)
 CREATE TRIGGER trg_startup_profiles_updated_at BEFORE UPDATE ON startup_profiles FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- 14. startup_private_details — Конфіденційні дані стартапу
@@ -502,15 +512,15 @@ CREATE TABLE teaser_fields (
     created_at TIMESTAMPTZ NOT NULL DEFAULT statement_timestamp(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT statement_timestamp(),
     CONSTRAINT uq_teaser_fields UNIQUE (teaser_id, field_name, language),
-    CONSTRAINT chk_teaser_fields_name CHECK (field_name IN ('team_description', 'business_description')),
+    CONSTRAINT chk_teaser_fields_name CHECK (field_name IN ('team_description', 'seeking')),
     CONSTRAINT chk_teaser_fields_language CHECK (language IN ('de', 'en')),
     CONSTRAINT chk_teaser_fields_approved CHECK (approved_at IS NULL OR final_text IS NOT NULL),
     CONSTRAINT chk_teaser_fields_risk_array CHECK (jsonb_typeof(risk_phrases) = 'array')
 );
-COMMENT ON TABLE teaser_fields IS 'Поля тизера за мовами. Зберігати текстові поля тизера (опис команди, опис бізнесу) окремо для кожної мови: варіант ШІ, фінальний текст стартапу, прапорець редагування, ризикові фрази і час затвердження кожного поля.';
+COMMENT ON TABLE teaser_fields IS 'Поля тизера за мовами. Зберігати текстові поля тизера (опис команди без імен і «що шукає стартап» без чисел; опису бізнесу немає — REQ-13, Q-36) окремо для кожної мови: варіант ШІ, фінальний текст стартапу, прапорець редагування, ризикові фрази і час затвердження кожного поля.';
 COMMENT ON COLUMN teaser_fields.id IS 'Ідентифікатор. Технічний первинний ключ запису поля тизера.';
 COMMENT ON COLUMN teaser_fields.teaser_id IS 'Тизер. Версія тизера, до якої належить поле. On delete (Django): CASCADE.';
-COMMENT ON COLUMN teaser_fields.field_name IS 'Поле. Яке текстове поле тизера.';
+COMMENT ON COLUMN teaser_fields.field_name IS 'Поле. Яке текстове поле тизера: team_description — опис команди без імен (NFR-05); seeking — що шукає стартап, без чисел (BA-AI-01, REQ-13). Решта картки (сектор, стадія, місто або країна, сума, метрики) береться з форми, не з тизера (REQ-21).';
 COMMENT ON COLUMN teaser_fields.language IS 'Мова. Мова тексту.';
 COMMENT ON COLUMN teaser_fields.ai_text IS 'Текст ШІ. Анонімізований текст, запропонований ШІ.';
 COMMENT ON COLUMN teaser_fields.final_text IS 'Фінальний текст. Текст після редагування стартапом; саме його бачить інвестор.';
@@ -549,7 +559,7 @@ COMMENT ON COLUMN investor_profiles.public_id IS 'Публічний ідент�
 COMMENT ON COLUMN investor_profiles.user_id IS 'Користувач. Користувач-власник профілю. On delete (Django): PROTECT.';
 COMMENT ON COLUMN investor_profiles.organization_name IS 'Назва інвестора. Назва фонду / family office або ім''я business angel — показується стартапу в запиті (текст D).';
 COMMENT ON COLUMN investor_profiles.investor_type_code IS 'Тип інвестора. Тип інвестора — показується стартапу в запиті. On delete (Django): PROTECT.';
-COMMENT ON COLUMN investor_profiles.country_code IS 'Країна інвестора. Країна розташування інвестора (ЄС-27). On delete (Django): PROTECT.';
+COMMENT ON COLUMN investor_profiles.country_code IS 'Країна інвестора. Країна розташування інвестора (ЄС-27 + Швейцарія). On delete (Django): PROTECT.';
 COMMENT ON COLUMN investor_profiles.contact_person_name IS 'Контактна особа. Ім''я людини для листа-інтро.';
 COMMENT ON COLUMN investor_profiles.contact_email IS 'Контактний e-mail. E-mail для листа-інтро.';
 COMMENT ON COLUMN investor_profiles.contact_phone IS 'Контактний телефон. Телефон для листа-інтро.';
@@ -571,7 +581,6 @@ CREATE TABLE mandates (
     sector_codes VARCHAR(32)[] NOT NULL,
     stage_codes VARCHAR(32)[] NOT NULL,
     country_codes VARCHAR(2)[] NOT NULL,
-    region_codes VARCHAR(6)[] NOT NULL DEFAULT '{}'::varchar(6)[],
     business_model_codes VARCHAR(32)[] NOT NULL DEFAULT '{}'::varchar(32)[],
     source VARCHAR(24) NOT NULL DEFAULT 'manual',
     criterion_suggestion_id BIGINT,
@@ -582,10 +591,9 @@ CREATE TABLE mandates (
     CONSTRAINT chk_mandates_check CHECK (check_min_eur > 0 AND check_max_eur >= check_min_eur),
     CONSTRAINT chk_mandates_source CHECK (source IN ('manual', 'criterion_suggestion')),
     CONSTRAINT chk_mandates_suggestion CHECK ((source = 'criterion_suggestion') = (criterion_suggestion_id IS NOT NULL)),
-    CONSTRAINT chk_mandates_hard_filters CHECK (cardinality(sector_codes) >= 1 AND cardinality(stage_codes) >= 1 AND cardinality(country_codes) >= 1),
-    CONSTRAINT chk_mandates_regions_de CHECK (cardinality(region_codes) = 0 OR 'DE' = ANY (country_codes))
+    CONSTRAINT chk_mandates_hard_filters CHECK (cardinality(sector_codes) >= 1 AND cardinality(stage_codes) >= 1 AND cardinality(country_codes) >= 1)
 );
-COMMENT ON TABLE mandates IS 'Мандати інвесторів (версії). Зберігати версії мандату інвестора — критерії, за якими відбираються стартапи: розмір чека, сектори, стадії, країни, федеральні землі й моделі бізнесу.';
+COMMENT ON TABLE mandates IS 'Мандати інвесторів (версії). Зберігати версії мандату інвестора — критерії, за якими відбираються стартапи: розмір чека, сектори, стадії, країни й моделі бізнесу.';
 COMMENT ON COLUMN mandates.id IS 'Ідентифікатор. Технічний первинний ключ запису версії мандату.';
 COMMENT ON COLUMN mandates.investor_profile_id IS 'Інвестор. Чий мандат. On delete (Django): PROTECT.';
 COMMENT ON COLUMN mandates.version IS 'Версія. Номер версії мандату інвестора.';
@@ -594,8 +602,7 @@ COMMENT ON COLUMN mandates.check_min_eur IS 'Мінімальний чек, EUR.
 COMMENT ON COLUMN mandates.check_max_eur IS 'Максимальний чек, EUR. Верхня межа суми.';
 COMMENT ON COLUMN mandates.sector_codes IS 'Сектори. Сектори, обрані інвестором (коди довідника sectors).';
 COMMENT ON COLUMN mandates.stage_codes IS 'Стадії. Стадії, обрані інвестором (коди довідника stages).';
-COMMENT ON COLUMN mandates.country_codes IS 'Країни. Країни, обрані інвестором (коди довідника countries).';
-COMMENT ON COLUMN mandates.region_codes IS 'Федеральні землі. Федеральні землі, обрані інвестором (коди довідника regions).';
+COMMENT ON COLUMN mandates.country_codes IS 'Країни. Країни, обрані інвестором (коди довідника countries) — жорсткий фільтр «регіон». DACH = DE, AT, CH; тестова версія одразу DACH, інші країни ЄС теж можна обрати (рішення PM 05.11.2026).';
 COMMENT ON COLUMN mandates.business_model_codes IS 'Моделі бізнесу. Моделі бізнесу, обрані інвестором (коди довідника business_models).';
 COMMENT ON COLUMN mandates.source IS 'Джерело версії. Чому створено версію.';
 COMMENT ON COLUMN mandates.criterion_suggestion_id IS 'Пропозиція критерію. Пропозиція, прийняття якої створило версію. On delete (Django): PROTECT.';
@@ -604,7 +611,6 @@ CREATE UNIQUE INDEX uq_mandates_current ON mandates (investor_profile_id) WHERE 
 CREATE INDEX gin_mandates_sectors ON mandates USING gin (sector_codes);
 CREATE INDEX gin_mandates_stages ON mandates USING gin (stage_codes);
 CREATE INDEX gin_mandates_countries ON mandates USING gin (country_codes);
-CREATE INDEX gin_mandates_regions ON mandates USING gin (region_codes);
 
 
 -- =====================================================================
@@ -661,6 +667,8 @@ CREATE TABLE introductions (
     declined_by VARCHAR(8),
     decline_reason_code VARCHAR(32) REFERENCES decline_reasons (code) DEFERRABLE INITIALLY DEFERRED,
     expired_at TIMESTAMPTZ,
+    expired_reason VARCHAR(16),
+    reminder_sent_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT statement_timestamp(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT statement_timestamp(),
     CONSTRAINT uq_introductions_pair UNIQUE (investor_profile_id, startup_profile_id),
@@ -673,6 +681,8 @@ CREATE TABLE introductions (
     CONSTRAINT chk_introductions_declined CHECK (((status = 'DECLINED' AND declined_at IS NOT NULL AND declined_by IS NOT NULL) OR (status <> 'DECLINED' AND declined_at IS NULL AND declined_by IS NULL)) AND (declined_by IS NULL OR declined_by IN ('investor', 'startup'))),
     CONSTRAINT chk_introductions_reason CHECK (decline_reason_code IS NULL OR COALESCE(declined_by, '') = 'investor'),
     CONSTRAINT chk_introductions_expired CHECK ((status = 'EXPIRED') = (expired_at IS NOT NULL)),
+    CONSTRAINT chk_introductions_expired_reason CHECK ((status = 'EXPIRED') = (expired_reason IS NOT NULL) AND (expired_reason IS NULL OR expired_reason IN ('timer', 'profile_paused', 'profile_removed'))),
+    CONSTRAINT chk_introductions_reminder CHECK (reminder_sent_at IS NULL OR (interested_at IS NOT NULL AND reminder_sent_at >= interested_at)),
     CONSTRAINT chk_introductions_response CHECK ((startup_responded_at IS NOT NULL) = (accepted_at IS NOT NULL OR COALESCE(declined_by, '') = 'startup') AND (startup_responded_at IS NULL OR startup_responded_at <= request_expires_at))
 );
 COMMENT ON TABLE introductions IS 'Знайомства (інвестор × стартап). Зберігати зв''язку «один інвестор — один стартап» від першого показу картки до кінцевого результату (INTRODUCED, DECLINED, EXPIRED): статус, реакції сторін, причину відмови, таймер 7 днів і часові мітки воронки.';
@@ -694,11 +704,14 @@ COMMENT ON COLUMN introductions.declined_at IS 'Відхилено. Момент
 COMMENT ON COLUMN introductions.declined_by IS 'Хто відхилив. Сторона, що відхилила (одна назва DECLINED для обох — Q-18/Q-19).';
 COMMENT ON COLUMN introductions.decline_reason_code IS 'Причина відхилення. Причина «Ні» зі списку (необов''язкова, REQ-22). On delete (Django): PROTECT.';
 COMMENT ON COLUMN introductions.expired_at IS 'Прострочено. Момент переходу в EXPIRED.';
+COMMENT ON COLUMN introductions.expired_reason IS 'Причина EXPIRED. timer — стартап не відповів за 7 днів (REQ-30); profile_paused / profile_removed — стартап поставив профіль на паузу або видалив його, інвестор отримує лист N-08 (Q-14, BA-04). Поле причини закриття для події status_changed (BA-TP).';
+COMMENT ON COLUMN introductions.reminder_sent_at IS 'Нагадування надіслано. Момент єдиного нагадування стартапу про запит, через introduction_reminder_days (4) днів після «Цікаво» (REQ-45, лист N-06). NULL — нагадування ще не було.';
 COMMENT ON COLUMN introductions.created_at IS 'Створено. Технічне поле аудиту: момент створення рядка.';
 COMMENT ON COLUMN introductions.updated_at IS 'Оновлено. Технічне поле аудиту: момент останньої зміни рядка.';
 CREATE INDEX idx_intro_startup_status ON introductions (startup_profile_id, status);
 CREATE INDEX idx_intro_investor_status ON introductions (investor_profile_id, status);
 CREATE INDEX idx_intro_expiry_due ON introductions (request_expires_at) WHERE status = 'INTERESTED';
+CREATE INDEX idx_intro_reminder_due ON introductions (interested_at) WHERE status = 'INTERESTED' AND reminder_sent_at IS NULL;
 CREATE INDEX idx_introductions_teaser_id ON introductions (teaser_id);  -- індекс FK (Django створює автоматично)
 CREATE INDEX idx_introductions_mandate_id ON introductions (mandate_id);  -- індекс FK (Django створює автоматично)
 CREATE INDEX idx_introductions_decline_reason_code ON introductions (decline_reason_code);  -- індекс FK (Django створює автоматично)
@@ -1005,32 +1018,38 @@ CREATE TRIGGER trg_subscription_payments_updated_at BEFORE UPDATE ON subscriptio
 -- Системні таблиці
 -- =====================================================================
 
--- 29. email_notifications — Журнал e-mail-сповіщень
+-- 29. email_notifications — Журнал сповіщень (e-mail і SMS)
 CREATE TABLE email_notifications (
     id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users (id) DEFERRABLE INITIALLY DEFERRED,
     type VARCHAR(32) NOT NULL,
+    channel VARCHAR(5) NOT NULL DEFAULT 'email',
     language VARCHAR(2) NOT NULL,
     introduction_id BIGINT REFERENCES introductions (id) DEFERRABLE INITIALLY DEFERRED,
     digest_id BIGINT REFERENCES digests (id) DEFERRABLE INITIALLY DEFERRED,
     startup_profile_id BIGINT REFERENCES startup_profiles (id) DEFERRABLE INITIALLY DEFERRED,
     status VARCHAR(8) NOT NULL DEFAULT 'QUEUED',
+    attempt_count SMALLINT NOT NULL DEFAULT 0,
     provider_message_id VARCHAR(200),
     sent_at TIMESTAMPTZ,
     error_code VARCHAR(100),
     created_at TIMESTAMPTZ NOT NULL DEFAULT statement_timestamp(),
-    CONSTRAINT chk_email_type CHECK (type IN ('email_verification', 'password_reset', 'draft_ready', 'draft_deletion_reminder', 'digest', 'digest_empty', 'introduction_request', 'introduction', 'survey_invite')),
+    CONSTRAINT chk_email_type CHECK (type IN ('email_verification', 'password_reset', 'draft_ready', 'draft_deletion_reminder', 'digest', 'digest_empty', 'introduction_request', 'introduction_reminder', 'introduction', 'startup_unavailable', 'introduction_closed', 'survey_invite', 'data_export_ready')),
+    CONSTRAINT chk_email_channel CHECK (channel IN ('email', 'sms') AND (channel = 'email' OR type IN ('draft_ready', 'draft_deletion_reminder', 'introduction_request', 'introduction_reminder', 'startup_unavailable'))),
+    CONSTRAINT chk_email_attempts CHECK (attempt_count >= 0),
     CONSTRAINT chk_email_language CHECK (language IN ('de', 'en', 'uk')),
     CONSTRAINT chk_email_status CHECK (status IN ('QUEUED', 'SENT', 'FAILED')),
     CONSTRAINT chk_email_sent CHECK ((status = 'SENT') = (sent_at IS NOT NULL) AND (status <> 'FAILED' OR error_code IS NOT NULL)),
-    CONSTRAINT chk_email_links CHECK ((type NOT IN ('introduction_request', 'introduction') OR introduction_id IS NOT NULL) AND (type NOT IN ('digest', 'digest_empty') OR digest_id IS NOT NULL) AND (type NOT IN ('draft_ready', 'draft_deletion_reminder') OR startup_profile_id IS NOT NULL))
+    CONSTRAINT chk_email_links CHECK ((type NOT IN ('introduction_request', 'introduction_reminder', 'introduction', 'startup_unavailable', 'introduction_closed') OR introduction_id IS NOT NULL) AND (type NOT IN ('digest', 'digest_empty') OR digest_id IS NOT NULL) AND (type NOT IN ('draft_ready', 'draft_deletion_reminder') OR startup_profile_id IS NOT NULL))
 );
-COMMENT ON TABLE email_notifications IS 'Журнал e-mail-сповіщень. Фіксувати кожен службовий лист платформи: тип, мову, отримувача, пов''язану сутність і результат відправки — без тексту листа.';
+COMMENT ON TABLE email_notifications IS 'Журнал сповіщень (e-mail і SMS). Фіксувати кожне службове сповіщення платформи N-01…N-11 (BA-07): тип, канал, мову, отримувача, пов''язану сутність і результат відправки — без тексту повідомлення. Назву таблиці залишено (db_table у Django), хоча вона містить і SMS (REQ-44).';
 COMMENT ON COLUMN email_notifications.id IS 'Ідентифікатор. Технічний первинний ключ запису листа.';
 COMMENT ON COLUMN email_notifications.user_id IS 'Отримувач. Кому надіслано лист (адреса береться з профілю на момент відправки і не копіюється). On delete (Django): PROTECT.';
-COMMENT ON COLUMN email_notifications.type IS 'Тип листа. Призначення листа.';
+COMMENT ON COLUMN email_notifications.type IS 'Тип сповіщення (BA-07): draft_ready N-01, draft_deletion_reminder N-02, digest N-03, digest_empty N-04, introduction_request N-05, introduction_reminder N-06 (через 4 дні, REQ-45), introduction N-07, startup_unavailable N-08 (стартап поставив профіль на паузу або видалив, Q-14), introduction_closed N-09 («Nein» або EXPIRED для інвестора), survey_invite N-10, data_export_ready N-11; email_verification і password_reset — службові листи акаунта.';
+COMMENT ON COLUMN email_notifications.channel IS 'Канал. email або sms за вибором користувача (users.notification_channel, REQ-43, REQ-44). Дайджест, інтро-лист і службові листи акаунта — лише e-mail. Для N-09, N-10 і N-11 канал ще не визначено (BA-07, Q-42) — поки лише e-mail.';
+COMMENT ON COLUMN email_notifications.attempt_count IS 'Кількість спроб. Скільки разів сповіщення намагались надіслати (повтор при помилці, BA-06).';
 COMMENT ON COLUMN email_notifications.language IS 'Мова листа. Мова, якою надіслано.';
-COMMENT ON COLUMN email_notifications.introduction_id IS 'Знайомство. Для листів запиту та інтро. On delete (Django): PROTECT.';
+COMMENT ON COLUMN email_notifications.introduction_id IS 'Знайомство. Для сповіщень N-05…N-09 (запит, нагадування, інтро, стартап більше не шукає, закриття запиту). On delete (Django): PROTECT.';
 COMMENT ON COLUMN email_notifications.digest_id IS 'Дайджест. Для листів дайджесту. On delete (Django): PROTECT.';
 COMMENT ON COLUMN email_notifications.startup_profile_id IS 'Профіль стартапу. Для листів про чернетку. On delete (Django): PROTECT.';
 COMMENT ON COLUMN email_notifications.status IS 'Статус відправки. Результат відправки.';
@@ -1197,7 +1216,6 @@ BEGIN
     PERFORM assert_codes_exist(NEW.sector_codes::text[], 'sectors', 'mandates.sector_codes');
     PERFORM assert_codes_exist(NEW.stage_codes::text[], 'stages', 'mandates.stage_codes');
     PERFORM assert_codes_exist(NEW.country_codes::text[], 'countries', 'mandates.country_codes');
-    PERFORM assert_codes_exist(NEW.region_codes::text[], 'regions', 'mandates.region_codes');
     PERFORM assert_codes_exist(NEW.business_model_codes::text[], 'business_models', 'mandates.business_model_codes');
     RETURN NEW;
 END;
@@ -1390,7 +1408,8 @@ $$;
 
 INSERT INTO countries (code, name_de, name_en, sort_order, is_active) VALUES
     ('DE', 'Deutschland', 'Germany', 1, TRUE),
-    ('AT', 'Österreich', 'Austria', 10, TRUE),
+    ('AT', 'Österreich', 'Austria', 2, TRUE),
+    ('CH', 'Schweiz', 'Switzerland', 3, TRUE),
     ('BE', 'Belgien', 'Belgium', 10, TRUE),
     ('BG', 'Bulgarien', 'Bulgaria', 10, TRUE),
     ('HR', 'Kroatien', 'Croatia', 10, TRUE),
@@ -1416,24 +1435,6 @@ INSERT INTO countries (code, name_de, name_en, sort_order, is_active) VALUES
     ('SI', 'Slowenien', 'Slovenia', 10, TRUE),
     ('ES', 'Spanien', 'Spain', 10, TRUE),
     ('SE', 'Schweden', 'Sweden', 10, TRUE);
-
-INSERT INTO regions (code, country_code, name_de, name_en, sort_order, is_active) VALUES
-    ('DE-BW', 'DE', 'Baden-Württemberg', 'Baden-Württemberg', 10, TRUE),
-    ('DE-BY', 'DE', 'Bayern', 'Bavaria', 20, TRUE),
-    ('DE-BE', 'DE', 'Berlin', 'Berlin', 30, TRUE),
-    ('DE-BB', 'DE', 'Brandenburg', 'Brandenburg', 40, TRUE),
-    ('DE-HB', 'DE', 'Bremen', 'Bremen', 50, TRUE),
-    ('DE-HH', 'DE', 'Hamburg', 'Hamburg', 60, TRUE),
-    ('DE-HE', 'DE', 'Hessen', 'Hesse', 70, TRUE),
-    ('DE-MV', 'DE', 'Mecklenburg-Vorpommern', 'Mecklenburg-Western Pomerania', 80, TRUE),
-    ('DE-NI', 'DE', 'Niedersachsen', 'Lower Saxony', 90, TRUE),
-    ('DE-NW', 'DE', 'Nordrhein-Westfalen', 'North Rhine-Westphalia', 100, TRUE),
-    ('DE-RP', 'DE', 'Rheinland-Pfalz', 'Rhineland-Palatinate', 110, TRUE),
-    ('DE-SL', 'DE', 'Saarland', 'Saarland', 120, TRUE),
-    ('DE-SN', 'DE', 'Sachsen', 'Saxony', 130, TRUE),
-    ('DE-ST', 'DE', 'Sachsen-Anhalt', 'Saxony-Anhalt', 140, TRUE),
-    ('DE-SH', 'DE', 'Schleswig-Holstein', 'Schleswig-Holstein', 150, TRUE),
-    ('DE-TH', 'DE', 'Thüringen', 'Thuringia', 160, TRUE);
 
 INSERT INTO sectors (code, name_de, name_en, sort_order, is_other, is_active) VALUES
     ('fintech', 'FinTech', 'FinTech', 10, FALSE, TRUE),
@@ -1527,6 +1528,10 @@ INSERT INTO platform_parameters (key, value, description) VALUES
     ('digest_max_cards', '5'::jsonb, 'Максимум карток у дайджесті (REQ-20)'),
     ('digest_min_cards', '3'::jsonb, 'Бажаний мінімум карток; якщо менше — надсилається скільки є (REQ-20)'),
     ('decline_suggestion_threshold', '3'::jsonb, 'Однакових відхилень до пропозиції змінити критерій (REQ-23, Q-18)'),
+    ('startup_hint_decline_threshold', '5'::jsonb, 'Однакових причин відхилення до підказки стартапу додати інформацію в профіль; хто відхилив, не показується (REQ-47)'),
+    ('introduction_reminder_days', '4'::jsonb, 'Днів після «Цікаво» до єдиного нагадування стартапу, лист N-06 (REQ-45)'),
+    ('card_inactive_days', '4'::jsonb, 'Днів життя картки без реакції інвестора: потім зникає з активного списку і не повторюється в наступних дайджестах (REQ-46, Q-27)'),
+    ('notification_channels', '["email", "sms"]'::jsonb, 'Доступні канали сповіщень; пізніше можливі Telegram і WhatsApp (REQ-44)'),
     ('draft_auto_delete_days', '30'::jsonb, 'Днів до автовидалення чернетки (REQ-41)'),
     ('draft_reminder_days_before', '3'::jsonb, 'За скільки днів до видалення чернетки надіслати нагадування (REQ-42)'),
     ('deck_retention_hours', '24'::jsonb, 'Годин до видалення оригіналу деку після ai_draft_created (REQ-16)'),
@@ -1786,13 +1791,6 @@ seg AS (
            (SELECT count(*) FROM active a WHERE c.code = ANY (a.country_codes))
     FROM countries c
     UNION ALL
-    SELECT 'region', r.code, r.name_de,
-           (SELECT count(*) FROM live l WHERE l.region_code = r.code),
-           -- мандати з цією землею + мандати з DE без земель (= уся Німеччина)
-           (SELECT count(*) FROM active a WHERE r.code = ANY (a.region_codes)
-                OR ('DE' = ANY (a.country_codes) AND cardinality(a.region_codes) = 0))
-    FROM regions r
-    UNION ALL
     SELECT 'business_model', b.code, b.name_de,
            (SELECT count(*) FROM live l WHERE l.business_model_code = b.code),
            (SELECT count(*) FROM active a WHERE b.code = ANY (a.business_model_codes))
@@ -1801,7 +1799,7 @@ SELECT dimension, code, name_de, live_startups, active_mandates,
        round(active_mandates::numeric / NULLIF(live_startups, 0), 2) AS mandates_per_startup
 FROM seg;
 CREATE UNIQUE INDEX uq_mv_market_segments ON analytics.mv_market_segments (dimension, code);
-COMMENT ON MATERIALIZED VIEW analytics.mv_market_segments IS 'Попит і пропозиція за сегментами (поточний стан). Скільки LIVE-стартапів і чинних мандатів у кожному секторі, стадії, країні, землі, моделі бізнесу — де бракує стартапів, а де інвесторів.';
+COMMENT ON MATERIALIZED VIEW analytics.mv_market_segments IS 'Попит і пропозиція за сегментами (поточний стан). Скільки LIVE-стартапів і чинних мандатів у кожному секторі, стадії, країні, моделі бізнесу — де бракує стартапів, а де інвесторів.';
 
 -- Розподіл сум раундів і чеків | KPI: «Що шукають інвестори» (розміри чеків) і «Що пропонують стартапи» (суми раундів)
 -- Гранулярність: Ряд × діапазон суми

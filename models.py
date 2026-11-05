@@ -1,7 +1,20 @@
 """
 Start Share — Django-моделі бази даних (MVP).
 
-Відповідають startshare_schema_postgres.sql (еталонна DDL) і описам таблиць у docs/. Версія: 2026-10-05.
+Відповідають startshare_schema_postgres.sql (еталонна DDL) і описам таблиць у docs/. Версія: 2026-11-05.
+
+Зміни 2026-11-05 (документи бізнес-аналітика від 07–16.10.2026 і рішення Project Manager від 05.11.2026), без нових моделей:
+  * User: notification_channel (email / sms) і phone для SMS (REQ-43, REQ-44);
+  * StartupProfile: city, teaser_location (місто чи лише країна в тизері), country_other_text (країна «Інше», REQ-11);
+    свій варіант сектора / моделі бізнесу зберігається поруч із підтвердженим пунктом списку (REQ-48);
+    стартап обирає один сектор (Q-59, рішення PM 05.11.2026);
+  * TeaserField: поле seeking («що шукає стартап») замість business_description (REQ-13, Q-36);
+  * Introduction: reminder_sent_at (нагадування через 4 дні, REQ-45), expired_reason (Q-14);
+  * EmailNotification: channel (email / sms), attempt_count, типи N-06, N-08, N-09, N-11 (BA-07);
+  * регіон: тестова версія одразу DACH, інші країни ЄС можна обирати в мандаті (рішення PM 05.11.2026).
+
+Зміни 2026-10-26 (рішення Project Manager): регіон = лише країна. Модель Region (федеральні землі) прибрано
+разом із StartupProfile.region і Mandate.region_codes; до countries додано Швейцарію (CH) для DACH.
 
 Вимоги: Django 5.2+, PostgreSQL 16+ (ArrayField, JSONField/JSONB, BrinIndex, RandomUUID).
 
@@ -46,7 +59,7 @@ from django.contrib.postgres.functions import RandomUUID
 from django.contrib.postgres.indexes import BrinIndex, GinIndex
 from django.db import models
 from django.db.models import F, Func, Q, Value
-from django.db.models.functions import Coalesce, Left, Lower, Now
+from django.db.models.functions import Coalesce, Lower, Now
 from django.db.models.lookups import Exact
 from django.utils import timezone
 
@@ -115,16 +128,29 @@ class UserRole(models.TextChoices):
     STAFF = "staff", "Staff"
 
 
+class NotificationChannel(models.TextChoices):
+    """Канал сповіщень (REQ-43, REQ-44). Дайджест та інтро-лист — завжди e-mail."""
+
+    EMAIL = "email", "E-mail"
+    SMS = "sms", "SMS"
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     """users — акаунт: стартап, інвестор або співробітник платформи."""
 
     Role = UserRole
+    Channel = NotificationChannel
 
     email = models.EmailField(max_length=254, unique=True)
     role = models.CharField(max_length=16, choices=Role.choices)
     preferred_language = models.CharField(
         max_length=2, choices=InterfaceLanguage.choices, default=InterfaceLanguage.DE, db_default=InterfaceLanguage.DE
     )
+    notification_channel = models.CharField(
+        max_length=5, choices=Channel.choices, default=Channel.EMAIL, db_default=Channel.EMAIL
+    )
+    # Номер для SMS у форматі E.164; не показується іншій стороні; очищається при видаленні акаунта.
+    phone = models.CharField(max_length=16, null=True, blank=True)
     email_verified_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True, db_default=True)
     is_staff = models.BooleanField(default=False, db_default=False)
@@ -149,6 +175,18 @@ class User(AbstractBaseUser, PermissionsMixin):
             models.CheckConstraint(condition=Q(is_staff=False) | Q(role="staff"), name="chk_users_staff_role"),
             models.CheckConstraint(
                 condition=Q(deleted_at__isnull=True) | Q(is_active=False), name="chk_users_deleted_inactive"
+            ),
+            models.CheckConstraint(
+                condition=Q(notification_channel__in=NotificationChannel.values), name="chk_users_channel"
+            ),
+            models.CheckConstraint(
+                condition=Q(phone__isnull=True) | Q(phone__regex=r"^\+[1-9][0-9]{6,14}$"), name="chk_users_phone_format"
+            ),
+            models.CheckConstraint(
+                condition=~Q(notification_channel="sms") | Q(phone__isnull=False), name="chk_users_sms_phone"
+            ),
+            models.CheckConstraint(
+                condition=Q(deleted_at__isnull=True) | Q(phone__isnull=True), name="chk_users_deleted_phone"
             ),
         ]
         indexes = [models.Index(fields=["role", "created_at"], name="idx_users_role_created")]
@@ -253,26 +291,13 @@ class ReferenceModel(models.Model):
 
 
 class Country(ReferenceModel):
-    """countries — 27 країн ЄС (ISO 3166-1 alpha-2)."""
+    """countries — 27 країн ЄС + Швейцарія (ISO 3166-1 alpha-2). Регіон у матчингу = країна; DACH = DE, AT, CH."""
 
     code = models.CharField(max_length=2, primary_key=True)
 
     class Meta(ReferenceModel.Meta):
         db_table = "countries"
         constraints = [models.CheckConstraint(condition=Q(code__regex=r"^[A-Z]{2}$"), name="chk_countries_code")]
-
-
-class Region(ReferenceModel):
-    """regions — федеральні землі Німеччини (ISO 3166-2, DE-BY)."""
-
-    code = models.CharField(max_length=6, primary_key=True)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT, db_column="country_code", related_name="regions")
-
-    class Meta(ReferenceModel.Meta):
-        db_table = "regions"
-        constraints = [
-            models.CheckConstraint(condition=Q(Exact(Left("code", 2), F("country"))), name="chk_regions_code_country")
-        ]
 
 
 class Sector(ReferenceModel):
@@ -411,6 +436,13 @@ class StartupProfileStatus(models.TextChoices):
     REMOVED = "REMOVED", "Removed"
 
 
+class StartupProfileTeaserLocation(models.TextChoices):
+    """Що показувати в тизері, якщо заповнено місто (REQ-11, US-02 AC-07)."""
+
+    CITY = "city", "City"
+    COUNTRY = "country", "Country only"
+
+
 class StartupProfileRemovedBy(models.TextChoices):
     STARTUP = "startup", "Startup"
     SYSTEM = "system", "System (30 days)"
@@ -422,6 +454,7 @@ class StartupProfile(models.Model):
 
     Status = StartupProfileStatus
     RemovedBy = StartupProfileRemovedBy
+    TeaserLocation = StartupProfileTeaserLocation
 
     public_id = public_id_field()
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name="startup_profile")
@@ -435,6 +468,8 @@ class StartupProfile(models.Model):
         related_name="+",
         db_index=False,
     )
+    # Один сектор (REQ-48, Q-59). Свій текст зберігається поруч із підтвердженим пунктом списку;
+    # у матчингу бере участь лише sector (Q-24).
     sector_other_text = models.CharField(max_length=100, null=True, blank=True)
     stage = models.ForeignKey(
         Stage, on_delete=models.PROTECT, null=True, blank=True, db_column="stage_code", related_name="+"
@@ -451,9 +486,10 @@ class StartupProfile(models.Model):
     country = models.ForeignKey(
         Country, on_delete=models.PROTECT, null=True, blank=True, db_column="country_code", related_name="+"
     )
-    region = models.ForeignKey(
-        Region, on_delete=models.PROTECT, null=True, blank=True, db_column="region_code", related_name="+"
-    )
+    # Країна «Інше» (REQ-11): country = NULL, назва країни тут; такий стартап не матчиться.
+    country_other_text = models.CharField(max_length=100, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    teaser_location = models.CharField(max_length=7, choices=TeaserLocation.choices, null=True, blank=True)
     round_amount_eur = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
     mrr_eur = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
     growth_pct = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
@@ -474,16 +510,21 @@ class StartupProfile(models.Model):
                 condition=Q(status__in=StartupProfileStatus.values), name="chk_startup_profiles_status"
             ),
             models.CheckConstraint(
-                condition=Q(sector_other_text__isnull=True) | Q(sector="other"),
+                condition=Q(sector_other_text__isnull=True) | Q(sector__isnull=False),
                 name="chk_startup_profiles_sector_other",
             ),
             models.CheckConstraint(
-                condition=Q(business_model_other_text__isnull=True) | Q(business_model="other"),
+                condition=Q(business_model_other_text__isnull=True) | Q(business_model__isnull=False),
                 name="chk_startup_profiles_bm_other",
             ),
             models.CheckConstraint(
-                condition=Q(region__isnull=True) | Q(Exact(Left("region", 2), F("country"))),
-                name="chk_startup_profiles_region_country",
+                condition=Q(country__isnull=True) | Q(country_other_text__isnull=True),
+                name="chk_startup_profiles_country_one",
+            ),
+            models.CheckConstraint(
+                condition=iff(Q(city__isnull=True), Q(teaser_location__isnull=True))
+                & (Q(teaser_location__isnull=True) | Q(teaser_location__in=StartupProfileTeaserLocation.values)),
+                name="chk_startup_profiles_teaser_location",
             ),
             models.CheckConstraint(
                 condition=(Q(round_amount_eur__isnull=True) | Q(round_amount_eur__gt=0))
@@ -500,12 +541,11 @@ class StartupProfile(models.Model):
                         sector__isnull=False,
                         stage__isnull=False,
                         business_model__isnull=False,
-                        country__isnull=False,
                         round_amount_eur__isnull=False,
                         team_size__isnull=False,
                         went_live_at__isnull=False,
                     )
-                    & (~Q(country="DE") | Q(region__isnull=False))
+                    & (Q(country__isnull=False) | Q(country_other_text__isnull=False))
                 ),
                 name="chk_startup_profiles_live_complete",
             ),
@@ -524,7 +564,7 @@ class StartupProfile(models.Model):
         ]
         indexes = [
             models.Index(
-                fields=["sector", "stage", "country", "region"],
+                fields=["sector", "stage", "country"],
                 name="idx_startup_matching",
                 condition=Q(status="LIVE", moderation_hidden_at__isnull=True),
             ),
@@ -725,8 +765,10 @@ class Teaser(models.Model):
 
 
 class TeaserFieldFieldName(models.TextChoices):
+    """Опис команди без імен і «що шукає стартап» без чисел; опису бізнесу немає (REQ-13, Q-36)."""
+
     TEAM_DESCRIPTION = "team_description", "Team description"
-    BUSINESS_DESCRIPTION = "business_description", "Business description"
+    SEEKING = "seeking", "What the startup is looking for"
 
 
 class TeaserField(models.Model):
@@ -827,11 +869,6 @@ class Mandate(models.Model):
     sector_codes = ArrayField(models.CharField(max_length=32))
     stage_codes = ArrayField(models.CharField(max_length=32))
     country_codes = ArrayField(models.CharField(max_length=2))
-    region_codes = ArrayField(
-        models.CharField(max_length=6),
-        default=list,
-        db_default=Value([], output_field=ArrayField(models.CharField(max_length=6))),
-    )
     business_model_codes = ArrayField(
         models.CharField(max_length=32),
         default=list,
@@ -858,15 +895,11 @@ class Mandate(models.Model):
                 condition=Q(sector_codes__len__gte=1, stage_codes__len__gte=1, country_codes__len__gte=1),
                 name="chk_mandates_hard_filters",
             ),
-            models.CheckConstraint(
-                condition=Q(region_codes__len=0) | Q(country_codes__contains=["DE"]), name="chk_mandates_regions_de"
-            ),
         ]
         indexes = [
             GinIndex(fields=["sector_codes"], name="gin_mandates_sectors"),
             GinIndex(fields=["stage_codes"], name="gin_mandates_stages"),
             GinIndex(fields=["country_codes"], name="gin_mandates_countries"),
-            GinIndex(fields=["region_codes"], name="gin_mandates_regions"),
         ]
 
 
@@ -924,6 +957,14 @@ class IntroductionStatus(models.TextChoices):
     EXPIRED = "EXPIRED", "Expired"
 
 
+class IntroductionExpiredReason(models.TextChoices):
+    """Причина EXPIRED (BA-04, Q-14): таймер 7 днів або пауза / видалення профілю стартапу."""
+
+    TIMER = "timer", "Timer"
+    PROFILE_PAUSED = "profile_paused", "Startup profile paused"
+    PROFILE_REMOVED = "profile_removed", "Startup profile removed"
+
+
 class IntroductionDeclinedBy(models.TextChoices):
     INVESTOR = "investor", "Investor"
     STARTUP = "startup", "Startup"
@@ -934,6 +975,7 @@ class Introduction(models.Model):
 
     Status = IntroductionStatus
     DeclinedBy = IntroductionDeclinedBy
+    ExpiredReason = IntroductionExpiredReason
 
     public_id = public_id_field()
     investor_profile = models.ForeignKey(
@@ -965,6 +1007,9 @@ class Introduction(models.Model):
         related_name="+",
     )
     expired_at = models.DateTimeField(null=True, blank=True)
+    expired_reason = models.CharField(max_length=16, choices=ExpiredReason.choices, null=True, blank=True)
+    # Єдине нагадування стартапу через introduction_reminder_days (4) днів після «Цікаво» (REQ-45, лист N-06).
+    reminder_sent_at = models.DateTimeField(null=True, blank=True)
     created_at = created_at_field()
     updated_at = updated_at_field()
 
@@ -1017,6 +1062,16 @@ class Introduction(models.Model):
                 condition=iff(Q(status="EXPIRED"), Q(expired_at__isnull=False)), name="chk_introductions_expired"
             ),
             models.CheckConstraint(
+                condition=iff(Q(status="EXPIRED"), Q(expired_reason__isnull=False))
+                & (Q(expired_reason__isnull=True) | Q(expired_reason__in=IntroductionExpiredReason.values)),
+                name="chk_introductions_expired_reason",
+            ),
+            models.CheckConstraint(
+                condition=Q(reminder_sent_at__isnull=True)
+                | Q(interested_at__isnull=False, reminder_sent_at__gte=F("interested_at")),
+                name="chk_introductions_reminder",
+            ),
+            models.CheckConstraint(
                 condition=iff(
                     Q(startup_responded_at__isnull=False),
                     Q(accepted_at__isnull=False) | Q(Exact(Coalesce("declined_by", Value("")), "startup")),
@@ -1029,6 +1084,11 @@ class Introduction(models.Model):
             models.Index(fields=["startup_profile", "status"], name="idx_intro_startup_status"),
             models.Index(fields=["investor_profile", "status"], name="idx_intro_investor_status"),
             models.Index(fields=["request_expires_at"], name="idx_intro_expiry_due", condition=Q(status="INTERESTED")),
+            models.Index(
+                fields=["interested_at"],
+                name="idx_intro_reminder_due",
+                condition=Q(status="INTERESTED", reminder_sent_at__isnull=True),
+            ),
         ]
 
 
@@ -1443,8 +1503,29 @@ class EmailNotificationType(models.TextChoices):
     DIGEST = "digest", "Digest"
     DIGEST_EMPTY = "digest_empty", "Empty digest"
     INTRODUCTION_REQUEST = "introduction_request", "Introduction request (D)"
+    INTRODUCTION_REMINDER = "introduction_reminder", "Introduction request reminder (N-06)"
     INTRODUCTION = "introduction", "Introduction (E)"
+    STARTUP_UNAVAILABLE = "startup_unavailable", "Startup no longer looking (N-08)"
+    INTRODUCTION_CLOSED = "introduction_closed", "Nein or EXPIRED for investor (N-09)"
     SURVEY_INVITE = "survey_invite", "Survey invite"
+    DATA_EXPORT_READY = "data_export_ready", "Data export ready (N-11)"
+
+
+# Типи, які можна надсилати SMS за вибором користувача (BA-07); решта — лише e-mail.
+SMS_NOTIFICATION_TYPES = [
+    "draft_ready",
+    "draft_deletion_reminder",
+    "introduction_request",
+    "introduction_reminder",
+    "startup_unavailable",
+]
+INTRODUCTION_NOTIFICATION_TYPES = [
+    "introduction_request",
+    "introduction_reminder",
+    "introduction",
+    "startup_unavailable",
+    "introduction_closed",
+]
 
 
 class EmailNotificationStatus(models.TextChoices):
@@ -1454,13 +1535,20 @@ class EmailNotificationStatus(models.TextChoices):
 
 
 class EmailNotification(models.Model):
-    """email_notifications — журнал службових листів без тексту листа."""
+    """email_notifications — журнал службових сповіщень N-01…N-11 (e-mail і SMS) без тексту повідомлення.
+
+    Назву таблиці залишено (db_table), хоча вона містить і SMS (REQ-44).
+    """
 
     Type = EmailNotificationType
     Status = EmailNotificationStatus
 
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="email_notifications", db_index=False)
     type = models.CharField(max_length=32, choices=Type.choices)
+    channel = models.CharField(
+        max_length=5, choices=NotificationChannel.choices, default=NotificationChannel.EMAIL,
+        db_default=NotificationChannel.EMAIL,
+    )
     language = models.CharField(max_length=2, choices=InterfaceLanguage.choices)
     introduction = models.ForeignKey(
         Introduction,
@@ -1477,6 +1565,7 @@ class EmailNotification(models.Model):
         StartupProfile, on_delete=models.PROTECT, null=True, blank=True, related_name="email_notifications"
     )
     status = models.CharField(max_length=8, choices=Status.choices, default=Status.QUEUED, db_default=Status.QUEUED)
+    attempt_count = models.SmallIntegerField(default=0, db_default=0)
     provider_message_id = models.CharField(max_length=200, null=True, blank=True)
     sent_at = models.DateTimeField(null=True, blank=True)
     error_code = models.CharField(max_length=100, null=True, blank=True)
@@ -1486,6 +1575,12 @@ class EmailNotification(models.Model):
         db_table = "email_notifications"
         constraints = [
             models.CheckConstraint(condition=Q(type__in=EmailNotificationType.values), name="chk_email_type"),
+            models.CheckConstraint(
+                condition=Q(channel__in=NotificationChannel.values)
+                & (Q(channel="email") | Q(type__in=SMS_NOTIFICATION_TYPES)),
+                name="chk_email_channel",
+            ),
+            models.CheckConstraint(condition=Q(attempt_count__gte=0), name="chk_email_attempts"),
             models.CheckConstraint(condition=Q(language__in=["de", "en", "uk"]), name="chk_email_language"),
             models.CheckConstraint(condition=Q(status__in=EmailNotificationStatus.values), name="chk_email_status"),
             models.CheckConstraint(
@@ -1494,7 +1589,7 @@ class EmailNotification(models.Model):
                 name="chk_email_sent",
             ),
             models.CheckConstraint(
-                condition=(~Q(type__in=["introduction_request", "introduction"]) | Q(introduction__isnull=False))
+                condition=(~Q(type__in=INTRODUCTION_NOTIFICATION_TYPES) | Q(introduction__isnull=False))
                 & (~Q(type__in=["digest", "digest_empty"]) | Q(digest__isnull=False))
                 & (~Q(type__in=["draft_ready", "draft_deletion_reminder"]) | Q(startup_profile__isnull=False)),
                 name="chk_email_links",
