@@ -9,6 +9,7 @@
     "approvedBanner": "Your teaser has been approved and can no longer be edited.",
     "imageSlidesBanner": "Slide(s) {{slides}} contain graphics/images. Please manually check them for company logos or real names.",
     "approveTitle": "Approve teaser",
+    "uploadAnother": "Upload another deck",
     "blockersHeader": "The following issues must be resolved before approval:",
     "approveLiveButton": "Approve and publish teaser (LIVE)",
     "disclaimer": "Information provided by the startup, not reviewed by Start Share. Not investment advice, a recommendation, or an offer to acquire equity.",
