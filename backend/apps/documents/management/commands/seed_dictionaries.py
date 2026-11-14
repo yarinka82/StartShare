@@ -9,7 +9,7 @@ Seeds all reference dictionaries into the database (idempotent):
 """
 
 from django.core.management.base import BaseCommand
-from common.models import BusinessModel, Country, InvestorType, Region, Sector, Stage
+from common.models import BusinessModel, Country, InvestorType, Region, Sector, Stage, DeclineReason
 
 # ------------------ 1. COUNTRIES ------------------
 COUNTRIES_INITIAL = [
@@ -90,6 +90,22 @@ INVESTOR_TYPES_INITIAL = [
     ("other", "Sonstiges", "Other", 99),
 ]
 
+DECLINE_REASONS_INITIAL = [
+    # code, name_de, name_en, sort_order
+    ("sector", "Branche passt nicht", "Sector does not fit", 10),
+    ("stage", "Phase passt nicht", "Stage does not fit", 20),
+    ("region", "Region passt nicht", "Region does not fit", 30),
+    ("ticket", "Ticketgröße passt nicht", "Ticket size does not fit", 40),
+    ("team", "Team überzeugt nicht", "Team is not convincing", 50),
+    ("metrics", "Kennzahlen überzeugen nicht", "Metrics are not convincing", 60),
+    ("other", "Sonstiges", "Other", 70),
+]
+
+for code, name_de, name_en, sort_order in DECLINE_REASONS_INITIAL:
+    DeclineReason.objects.update_or_create(
+        code=code,
+        defaults={"name_de": name_de, "name_en": name_en, "sort_order": sort_order, "is_active": True},
+    )
 
 class Command(BaseCommand):
     help = "Seeds all reference dictionaries (idempotent)."

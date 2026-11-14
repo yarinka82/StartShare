@@ -76,6 +76,11 @@ export default function FeedPage() {
       setActiveCardId(null);
       setToast({ severity: "success", message: t("matching.interestSent", "Запит надіслано стартапу.") });
     } catch (e) {
+      if ((e as { status?: number })?.status === 409) {
+        removeCard(activeCardId);          // the server already has an answer for this card
+        setInterestedModalOpen(false);     // or setDeclineModalOpen(false)
+        setActiveCardId(null);
+      }
       failToast(e);
     } finally {
       setBusy(false);
@@ -100,6 +105,11 @@ export default function FeedPage() {
       setActiveCardId(null);
       setToast({ severity: "success", message: t("matching.declineSent", "Проєкт відхилено.") });
     } catch (e) {
+      if ((e as { status?: number })?.status === 409) {
+        removeCard(activeCardId);          // the server already has an answer for this card
+        setInterestedModalOpen(false);     // or setDeclineModalOpen(false)
+        setActiveCardId(null);
+      }
       failToast(e);
     } finally {
       setBusy(false);

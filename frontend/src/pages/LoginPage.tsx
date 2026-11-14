@@ -2,7 +2,7 @@ import { Alert, Button, CircularProgress, Stack, TextField } from "@mui/material
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
-
+import TestNoticeDialog from "../components/TestNoticeDialog";
 import { api } from "../api/client";
 import { errorText, parseError, type ParsedError } from "../api/errors";
 import { resolveLanding } from "../auth/guards";
@@ -86,6 +86,7 @@ export default function LoginPage() {
 
   return (
     <FormCard title={t("login.title")} subtitle={t("login.subtitle", "Увійдіть до свого кабінету")}>
+      <TestNoticeDialog />
       <form onSubmit={submit} noValidate>
         <Stack spacing={2}>
           {justVerified && !err && (
