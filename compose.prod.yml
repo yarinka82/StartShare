@@ -1,3 +1,20 @@
+x-backend-common: &backend-common
+  build: { context: ., dockerfile: Dockerfile }
+  restart: unless-stopped
+  env_file:
+    - path: .env
+      format: raw
+  environment: &backend-env
+    DJANGO_DEBUG: "0"
+    DJANGO_ALLOWED_HOSTS: "crm.moomdoom.com,localhost,127.0.0.1"
+    APP_ENV: "production"
+    REDIS_URL: "redis://redis:6379/0"
+    TEASER_AVV_SIGNED: "false"
+    FRONTEND_URL: "https://crm.moomdoom.com"
+    CSRF_TRUSTED_ORIGINS: "https://crm.moomdoom.com"
+  depends_on: [redis]
+  networks: [startshare]
+
 services:
   redis:
     image: redis:7-alpine
@@ -9,74 +26,17 @@ services:
       - startshare
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    env_file:
-      - path: .env
-        format: raw
-    environment:
-      DJANGO_DEBUG: "0"
-      DJANGO_ALLOWED_HOSTS: "crm.moomdoom.com,localhost,127.0.0.1"
-      APP_ENV: "production"
-      REDIS_URL: "redis://redis:6379/0"
-      TEASER_AVV_SIGNED: "false"
-      FRONTEND_URL: "https://crm.moomdoom.com"
-      CSRF_TRUSTED_ORIGINS: "https://crm.moomdoom.com"
-    ports:
-      - "127.0.0.1:8000:8000"
-    depends_on:
-      - redis
+    <<: *backend-common
+    ports: ["127.0.0.1:8000:8000"]
     command: >
       sh -c "python manage.py migrate &&
-             gunicorn config.wsgi:application --bind 0.0.0.0:8000"
-    networks:
-      - startshare
-
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --timeout 60"
   worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    env_file:
-      - path: .env
-        format: raw
-    environment:
-      DJANGO_DEBUG: "0"
-      DJANGO_ALLOWED_HOSTS: "crm.moomdoom.com,localhost,127.0.0.1"
-      APP_ENV: "production"
-      REDIS_URL: "redis://redis:6379/0"
-      TEASER_AVV_SIGNED: "false"
-      FRONTEND_URL: "https://crm.moomdoom.com"
-      CSRF_TRUSTED_ORIGINS: "https://crm.moomdoom.com"
-    depends_on:
-      - redis
+    <<: *backend-common
     command: celery -A config worker --loglevel=info
-    networks:
-      - startshare
-
   beat:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    env_file:
-      - path: .env
-        format: raw
-    environment:
-      DJANGO_DEBUG: "0"
-      DJANGO_ALLOWED_HOSTS: "crm.moomdoom.com,localhost,127.0.0.1"
-      APP_ENV: "production"
-      REDIS_URL: "redis://redis:6379/0"
-      TEASER_AVV_SIGNED: "false"
-      FRONTEND_URL: "https://crm.moomdoom.com"
-      CSRF_TRUSTED_ORIGINS: "https://crm.moomdoom.com"
-    depends_on:
-      - redis
+    <<: *backend-common
     command: celery -A config beat --loglevel=info
-    networks:
-      - startshare
 
   frontend:
     build:

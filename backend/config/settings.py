@@ -12,15 +12,32 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+def env_bool(name: str, default: bool = False) -> bool:
+    return os.environ.get(name, "1" if default else "0").strip().lower() in ("1", "true", "yes")
+
+
 # --- Runtime environment -----------------------------------------------------
 APP_ENV = os.environ.get("APP_ENV", "local")  # local | staging | production
-DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
-RUNNING_TESTS = "test" in sys.argv or os.environ.get("DJANGO_TEST") == "1"
+DEBUG = env_bool("DJANGO_DEBUG", False)
+# ONE definition, used everywhere below (pytest used to be recognised only at the very end of the file)
+RUNNING_TESTS = (
+    "test" in sys.argv
+    or "pytest" in sys.modules
+    or os.environ.get("DJANGO_TEST") == "1"
+)
 
-SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
+if not SECRET_KEY:
+    if RUNNING_TESTS:
+        SECRET_KEY = "test-only-secret-key"
+    else:
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY is not set")
+
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if host.strip()
 ]
 
 # --- Applications ------------------------------------------------------------
@@ -81,7 +98,8 @@ if _use_db_url:
             _db_url,
             conn_max_age=60,
             conn_health_checks=True,
-            ssl_require=True,
+            # set DATABASE_SSL_REQUIRE=0 for a local Postgres without TLS
+            ssl_require=env_bool("DATABASE_SSL_REQUIRE", True),
         )
     }
 else:
@@ -101,7 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
 ]
-PASSWORD_RESET_TIMEOUT = 60 * 60  # 1 hour
+PASSWORD_RESET_TIMEOUT = 60 * 60  # 1 hour, used by default_token_generator (was declared twice)
 
 # --- i18n / timezone ---------------------------------------------------------
 LANGUAGE_CODE = "en"  # admin UI language; DRF messages follow Accept-Language
@@ -119,9 +137,23 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
-CSRF_TRUSTED_ORIGINS = os.environ.get(
-    "CSRF_TRUSTED_ORIGINS", "http://localhost:5173"
-).split(",")
+# The CSRF cookie must stay readable by the SPA (it sends it back as X-CSRFToken): do NOT make it HttpOnly.
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost:5173").split(",")
+    if origin.strip()
+]
+
+# --- Production hardening (all switchable by env, so a test stand named "production" can opt out) ---
+if APP_ENV == "production":
+    SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", True)
+    # only if the reverse proxy really sets X-Forwarded-Proto (otherwise the redirect loops)
+    if env_bool("TRUST_PROXY_SSL_HEADER", False):
+        SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    # start with a month; raise to a year once everything is confirmed to work over HTTPS
+    SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", str(60 * 60 * 24 * 30)))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", True)
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # --- DRF ---------------------------------------------------------------------
 REST_FRAMEWORK = {
@@ -139,14 +171,16 @@ REST_FRAMEWORK = {
 }
 
 # --- Celery ------------------------------------------------------------------
-CELERY_BROKER_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+REDIS_URL = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/0")
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", REDIS_URL)
 CELERY_TASK_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_ACKS_LATE = True            # don't lose tasks when a worker dies mid-run
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1   # long AI calls: don't prefetch
 CELERY_TASK_TIME_LIMIT = 600            # hard limit
 CELERY_TASK_SOFT_TIME_LIMIT = 570       # soft limit, 30s before hard
-CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_ALWAYS_EAGER = env_bool("CELERY_TASK_ALWAYS_EAGER", False)
+CELERY_TASK_EAGER_PROPAGATES = CELERY_TASK_ALWAYS_EAGER
 
 CELERY_BEAT_SCHEDULE = {
     "purge-expired-decks": {
@@ -177,16 +211,16 @@ else:
     # no credentials (tests, a fresh clone): the letter is printed to the console
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+# Gmail has daily sending limits and needs an app password: fine for a test stand,
+# switch to a transactional mail service before real users (only these three values change).
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
 EMAIL_TIMEOUT = 10  # otherwise a hanging SMTP blocks the request indefinitely
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
 
-EMAIL_VERIFY_MAX_AGE = 60 * 60 * 48          # 48 h
-PASSWORD_RESET_TIMEOUT = 60 * 60             # 1 h, used by default_token_generator
-
+EMAIL_VERIFY_MAX_AGE = 60 * 60 * 48  # 48 h
 
 # --- Legal documents: bump a version to require re-acceptance ---------------
 LEGAL_DOCUMENT_VERSIONS = {
@@ -196,13 +230,18 @@ LEGAL_DOCUMENT_VERSIONS = {
 }
 
 # --- Pitch deck uploads ------------------------------------------------------
+# Fallback when PlatformConfig.max_deck_size_mb is empty (the real value is set in the admin).
 DECK_MAX_MB_DEFAULT = int(os.environ.get("DECK_MAX_MB", "20"))
 DECK_MAX_BYTES = DECK_MAX_MB_DEFAULT * 1024 * 1024
+# The highest value an admin may set. nginx client_max_body_size must be at least this + ~2 MB.
+# Also use it as MaxValueValidator on PlatformConfig.max_deck_size_mb.
+DECK_MAX_MB_CEILING = int(os.environ.get("DECK_MAX_MB_CEILING", "50"))
+if DECK_MAX_MB_DEFAULT > DECK_MAX_MB_CEILING:
+    raise ImproperlyConfigured("DECK_MAX_MB must not be larger than DECK_MAX_MB_CEILING")
 
-# nginx client_max_body_size must be slightly above DECK_MAX_MB.
-
-# --- Storage: Cloudflare R2 (production) or local FS (dev/tests) ------------
-USE_R2 = os.environ.get("USE_R2", "true").lower() in ("1", "true", "yes") and not RUNNING_TESTS
+# --- Storage: Cloudflare R2 (staging/production) or local FS (local dev / tests) ---
+# Local runs use the file system by default; staging/production use R2 unless USE_R2=false is set explicitly.
+USE_R2 = env_bool("USE_R2", APP_ENV != "local") and not RUNNING_TESTS
 
 CLOUDFLARE_R2_BUCKET = os.environ.get("CLOUDFLARE_R2_BUCKET", "")
 CLOUDFLARE_R2_ACCOUNT_ID = os.environ.get("CLOUDFLARE_R2_ACCOUNT_ID", "")
@@ -260,13 +299,10 @@ STORAGES = {
 # Active provider/model is normally read from PlatformConfig (admin); these are fallbacks.
 # Values: "gemini" (paid, with signed AVV) | "gemini_free" | "openai" (with DPA) | "azure_openai"
 TEASER_LLM_PROVIDER = os.environ.get("TEASER_LLM_PROVIDER", "gemini")
-TEASER_MAX_RETRIES = 2  # retries after an invalid AI answer
+TEASER_MAX_RETRIES = 2  # retries after an invalid AI answer (temporary 503/429 are retried separately, llm_retry.py)
 
-# Free tiers have no data processing agreement: only for local development.
-AI_ALLOW_FREE_TIER = (
-    APP_ENV != "production"
-    and os.environ.get("AI_ALLOW_FREE_TIER", "0") == "1"
-)
+# Free tiers have no data processing agreement: only for development / test stands.
+AI_ALLOW_FREE_TIER = APP_ENV != "production" and env_bool("AI_ALLOW_FREE_TIER", False)
 
 # One AI call must finish well inside CELERY_TASK_SOFT_TIME_LIMIT (see Celery above).
 AI_REQUEST_TIMEOUT = float(os.environ.get("AI_REQUEST_TIMEOUT", "60"))
@@ -275,8 +311,14 @@ AI_REQUEST_TIMEOUT = float(os.environ.get("AI_REQUEST_TIMEOUT", "60"))
 # Example: {"gpt-4o-mini": {"in": "0.00", "out": "0.00"}}
 AI_PRICING_EUR_PER_MTOK: dict = {}
 
+# Models the admin page may offer, e.g. {"openai": ["gpt-4o-mini"], "gemini": ["<a model from your models list>"]}.
+# Empty -> only the default model of each provider is offered. Use model names you have verified.
+AI_MODEL_CATALOG: dict = {}
+
 # Google Gemini
 TEASER_GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+# VERIFY this name (curl https://generativelanguage.googleapis.com/v1beta/models?key=...):
+# it was the model behind the 503 errors. Better to set it in .env than to keep a default here.
 TEASER_GEMINI_MODEL = os.environ.get("TEASER_GEMINI_MODEL", "gemini-3.8-flash")
 
 # OpenAI
@@ -290,27 +332,32 @@ AZURE_OPENAI_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "")
 AZURE_OPENAI_API_VERSION = os.environ.get("AZURE_OPENAI_API_VERSION", "")
 
 # --- Feature flags / guardrails ---------------------------------------------
-TEASER_AVV_SIGNED = os.environ.get("TEASER_AVV_SIGNED", "false").lower() in (
-    "1",
-    "true",
-    "yes",
-)
+# Not used yet: the platform runs with test data only. When real data arrives, set APP_ENV=production
+# and make factory.get_client() require this flag (see the notes in the conversation).
+TEASER_AVV_SIGNED = env_bool("TEASER_AVV_SIGNED", False)
 
 if APP_ENV == "production" and TEASER_AVV_SIGNED and not os.environ.get("AVV_CONFIRMED_BY_LEGAL"):
     raise ImproperlyConfigured(
         "TEASER_AVV_SIGNED нельзя включать в production без подтверждения AVV."
-        
     )
 
-if "test" in sys.argv or "pytest" in sys.modules:
+# --- Logging: make warnings of our own modules visible (provider fallbacks, AI retries, limits) ---
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {"simple": {"format": "%(asctime)s %(levelname)s %(name)s: %(message)s"}},
+    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "simple"}},
+    "loggers": {
+        "apps": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "common": {"handlers": ["console"], "level": "INFO", "propagate": False},
+    },
+}
+
+# --- Tests (one block; pytest is recognised through RUNNING_TESTS) ----------
+if RUNNING_TESTS:
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
     EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
-
-if "test" in sys.argv or "pytest" in sys.modules:
-    PASSWORD_HASHERS = [
-        "django.contrib.auth.hashers.MD5PasswordHasher",
-    ]
-
+    PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]  # fast tests only
 
 

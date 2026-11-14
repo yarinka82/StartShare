@@ -5,18 +5,19 @@ from django.conf import settings
 from pydantic import ValidationError
 
 from anonymizer import detect
-from .gemini import GeminiClient
 
 from ..pdf_extract import DeckContent, DeckExtractionError, extract_deck
 from .contract import DraftResponse, check_response, response_schema, unsupported_fields, valid_phrases
+from .factory import LLMNotConfigured, get_client
 from .leak_check import ForbiddenTerm, terms_from_profile
-from .llm import LLMClient, LLMError, get_client
+from .llm import LLMClient, LLMError
+from .llm_retry import LLMUnavailable, generate_with_retries
 from .phrases import final_checks, make_phrase, merge_phrases
 from .prompt import build_system_prompt, build_user_prompt
 
 
 class PipelineError(Exception):
-    """code: deck_deleted | encrypted | corrupted | too_many_pages | empty | no_text | invalid_response | llm_error"""
+    """code: deck_deleted | encrypted | corrupted | too_many_pages | empty | no_text | invalid_response | llm_error | llm_unavailable | llm_not_configured"""
 
     def __init__(self, code: str, message: str = ""):
         super().__init__(f"{code}: {message}" if message else code)
@@ -58,11 +59,15 @@ def run_pipeline(
     for attempt in range(max_retries + 1):
         attempts += 1
         try:
-            result = client.generate_json(
+            # temporary provider errors (503, 429, timeouts) are retried with backoff inside
+            result = generate_with_retries(
+                client,
                 system=system,
                 user=build_user_prompt(slides, form, feedback),
                 schema=schema,
             )
+        except LLMUnavailable as exc:
+            raise PipelineError("llm_unavailable", str(exc)) from exc
         except LLMError as exc:
             raise PipelineError("llm_error", str(exc)) from exc
         if result.cost_eur is not None:
@@ -107,14 +112,11 @@ def run_pipeline(
     return PipelineResult(draft, unique, total_cost, attempts)
 
 
-
 def build_draft(pitch_deck):
     """
     Обёртка для tasks.process_deck: возвращает (draft, risk_phrases, cost_eur).
     Принимает объект PitchDeck.
     """
-    from django.conf import settings
-
     # 1. Проверяем, существует ли файл и не был ли дек удалён
     if getattr(pitch_deck, "deleted_at", None) or not pitch_deck.file:
         raise PipelineError("deck_deleted")
@@ -142,53 +144,22 @@ def build_draft(pitch_deck):
         "country": get_ref_name(getattr(profile, "country", None)),
     }
 
-    # 4. Запускаем LLM пайплайн генерации через ДИНАМІЧНИЙ клієнт
+    # 4. Провайдер выбирает единая фабрика (PlatformConfig из админки, иначе settings)
+    try:
+        client = get_client()
+    except LLMNotConfigured as exc:
+        raise PipelineError("llm_not_configured", str(exc)) from exc
+
     result = run_pipeline(
         content,
         form,
         terms_from_profile(profile) if profile else [],
-        get_active_llm_client(),  # 🚀 ВИПРАВЛЕНО: викликаємо динамічний клієнт із налаштувань адмінки!
-        max_retries=getattr(settings, "TEASER_LLM_MAX_RETRIES", 2),
+        client,
+        max_retries=settings.TEASER_MAX_RETRIES,
     )
     return result.draft, result.risk_phrases, result.cost_eur
 
 
-
-def get_active_llm_client():
-    """
-    Визначає активного провайдера та модель:
-    спочатку дивиться у динамічний PlatformConfig, якщо немає — бере з settings.
-    """
-    provider = "gemini"
-    model = None
-    temperature = 0.2
-
-    try:
-        from apps.accounts.models import PlatformConfig
-        cfg = PlatformConfig.get_solo()
-        provider = cfg.ai_provider or "gemini"
-        model = cfg.ai_model
-        temperature = cfg.ai_temperature
-    except Exception:
-        provider = getattr(settings, "TEASER_LLM_PROVIDER", "gemini_free")
-        model = getattr(settings, "TEASER_GEMINI_MODEL", "gemini-2.0-flash")
-
-    # Якщо обрано Gemini (Free або з підписаним AVV)
-    if provider in ("gemini", "gemini_free"):
-        free_tier = (provider == "gemini_free" or getattr(settings, "TEASER_LLM_PROVIDER", "") == "gemini_free")
-        return GeminiClient(
-            api_key=settings.TEASER_GEMINI_API_KEY,
-            model=model or "gemini-2.0-flash",
-            free_tier=free_tier,
-        )
-
-    # Якщо для продакшну обрано OpenAI
-    if provider == "openai":
-        from .openai_client import OpenAIClient
-        return OpenAIClient(
-            api_key=getattr(settings, "OPENAI_API_KEY", ""),
-            model=model or "gpt-4o-mini",
-            temperature=temperature,
-        )
-
-    raise ValueError(f"Невідомий або ненадійний AI провайдер: {provider}")
+# Backwards compatibility: other modules may still import the old name from here.
+# New code should use factory.get_client.
+get_active_llm_client = get_client

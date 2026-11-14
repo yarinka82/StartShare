@@ -139,7 +139,7 @@ AI_PROVIDER_CATALOG: list[dict[str, Any]] = [
         "label": "Google Gemini",
         "models": [
             {"id": "gemini-3.8-flash", "label": "Gemini 3.8 Flash (Fast / Recommended)"},
-            {"id": "gemini-3.7-flash", "label": "Gemini 3.7 Flash"},
+            {"id": "gemini-3.5-flash-lite", "label": "Gemini 3.5 Flash-Lite (High Quota Workhorse)"},
         ],
     },
     {
