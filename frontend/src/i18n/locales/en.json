@@ -136,6 +136,7 @@
     "done": "Your password has been changed. You can now log in."
   },
   "legal": {
+    "germanOnly": "This document is currently available in German only",
     "unavailable": "Legal text could not be loaded.",
     "openInNewTab": "Open in new tab",
     "consent": {

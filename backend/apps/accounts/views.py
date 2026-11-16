@@ -370,6 +370,10 @@ class DeleteAccountView(APIView):
             inv_profile = getattr(user, "investor_profile", None)
             if inv_profile:
                 inv_profile.mandates.all().update(is_current=False)
+                inv_profile.contact_person_name = "Gelöscht"
+                inv_profile.contact_email = f"deleted_{user.id}@anonymized.invalid"
+                inv_profile.contact_phone = ""
+                inv_profile.save(update_fields=["contact_person_name", "contact_email", "contact_phone"])
 
             # 3. Анонімізуємо самого користувача (Art. 17 DSGVO)
             # Замінюємо реальний e-mail на знеособлений хеш, вимикаємо вхід

@@ -154,7 +154,6 @@ class StartupProfile(models.Model):
             ),
         ]
         indexes = [
-            # Виправлено: прибрано 'region'
             models.Index(
                 fields=["sector", "stage", "country"],
                 name="idx_startup_matching",
