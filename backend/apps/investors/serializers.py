@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from common.models import BusinessModel, Country, Region, Sector, Stage, InvestorType
+from common.models import BusinessModel, Country, Sector, Stage, InvestorType
 from .models import Mandate, InvestorProfile
 
 
@@ -48,12 +48,7 @@ class MandateSerializer(serializers.Serializer):
     )
 
     # Опциональные критерии (Soft filters)
-    region_codes = serializers.ListField(
-        child=serializers.CharField(max_length=32),
-        allow_empty=True,
-        required=False,
-        default=list,
-    )
+
     business_model_codes = serializers.ListField(
         child=serializers.CharField(max_length=32),
         allow_empty=True,
@@ -78,8 +73,6 @@ class MandateSerializer(serializers.Serializer):
     def validate_country_codes(self, v):
         return _validate_and_canonicalize(Country, v, required=True)
 
-    def validate_region_codes(self, v):
-        return _validate_and_canonicalize(Region, v, required=False)
 
     def validate_business_model_codes(self, v):
         return _validate_and_canonicalize(BusinessModel, v, required=False)
@@ -104,7 +97,6 @@ class MandateOutSerializer(serializers.ModelSerializer):
             "sector_codes",
             "stage_codes",
             "country_codes",
-            "region_codes",
             "business_model_codes",
             "check_min_eur",
             "check_max_eur",

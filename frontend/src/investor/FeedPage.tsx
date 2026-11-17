@@ -159,7 +159,7 @@ export default function FeedPage() {
                 id={card.id}
                 sector={card.sector}
                 stage={card.stage}
-                region={card.region}
+                country={card.country}
                 targetAmountEur={card.target_amount}
                 mrrEur={card.mrr}
                 teamSize={card.team_size}

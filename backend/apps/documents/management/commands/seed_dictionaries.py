@@ -4,24 +4,48 @@ Seeds all reference dictionaries into the database (idempotent):
 - Sectors
 - Stages
 - Business Models
-- Regions
 - Investor Types
 """
 
 from django.core.management.base import BaseCommand
-from common.models import BusinessModel, Country, InvestorType, Region, Sector, Stage, DeclineReason
+from common.models import BusinessModel, Country, InvestorType, Sector, Stage, DeclineReason
 
 # ------------------ 1. COUNTRIES ------------------
 COUNTRIES_INITIAL = [
     # (code, name_de, name_en, sort_order)
-    ("de", "Deutschland", "Germany", 1),
-    ("at", "Österreich", "Austria", 2),
-    ("ch", "Schweiz", "Switzerland", 3),
-    ("eu", "Andere EU-Länder", "Other EU Countries", 4),
-    ("gb", "Großbritannien", "United Kingdom", 5),
-    ("us", "Vereinigte Staaten", "United States", 6),
-    ("other", "Sonstiges", "Other", 99),
+    # DACH
+    ("DE", "Deutschland", "Germany", 1),
+    ("AT", "Österreich", "Austria", 2),
+    ("CH", "Schweiz", "Switzerland", 3),
+    # Остальные страны ЕС (по алфавиту, англ. названия)
+    ("BE", "Belgien", "Belgium", 4),
+    ("BG", "Bulgarien", "Bulgaria", 5),
+    ("HR", "Kroatien", "Croatia", 6),
+    ("CY", "Zypern", "Cyprus", 7),
+    ("CZ", "Tschechien", "Czechia", 8),
+    ("DK", "Dänemark", "Denmark", 9),
+    ("EE", "Estland", "Estonia", 10),
+    ("FI", "Finnland", "Finland", 11),
+    ("FR", "Frankreich", "France", 12),
+    ("GR", "Griechenland", "Greece", 13),
+    ("HU", "Ungarn", "Hungary", 14),
+    ("IE", "Irland", "Ireland", 15),
+    ("IT", "Italien", "Italy", 16),
+    ("LV", "Lettland", "Latvia", 17),
+    ("LT", "Litauen", "Lithuania", 18),
+    ("LU", "Luxemburg", "Luxembourg", 19),
+    ("MT", "Malta", "Malta", 20),
+    ("NL", "Niederlande", "Netherlands", 21),
+    ("PL", "Polen", "Poland", 22),
+    ("PT", "Portugal", "Portugal", 23),
+    ("RO", "Rumänien", "Romania", 24),
+    ("SK", "Slowakei", "Slovakia", 25),
+    ("SI", "Slowenien", "Slovenia", 26),
+    ("ES", "Spanien", "Spain", 27),
+    ("SE", "Schweden", "Sweden", 28),
 ]
+
+assert len(COUNTRIES_INITIAL) == 28
 
 # ------------------ 2. SECTORS ------------------
 SECTORS_INITIAL = [
@@ -71,14 +95,7 @@ BUSINESS_MODELS_INITIAL = [
     ("other", "Sonstiges", "Other", 99, True),
 ]
 
-# ------------------ 5. REGIONS (INVESTOR GEO SCOPE) ------------------
-REGIONS_INITIAL = [
-    # (code, name_de, name_en, sort_order)
-    ("dach", "DACH (Deutschland, Österreich, Schweiz)", "DACH (Germany, Austria, Switzerland)", 1),
-    ("eu", "Europäische Union (EU)", "European Union (EU)", 2),
-    ("europe", "Europa (inkl. UK, Schweiz)", "Europe (incl. UK, Switzerland)", 3),
-    ("worldwide", "Weltweit", "Worldwide", 4),
-]
+
 
 # ------------------ 6. INVESTOR TYPES ------------------
 INVESTOR_TYPES_INITIAL = [
@@ -94,7 +111,7 @@ DECLINE_REASONS_INITIAL = [
     # code, name_de, name_en, sort_order
     ("sector", "Branche passt nicht", "Sector does not fit", 10),
     ("stage", "Phase passt nicht", "Stage does not fit", 20),
-    ("region", "Region passt nicht", "Region does not fit", 30),
+    ("country", "Country passt nicht", "Country does not fit", 30),
     ("ticket", "Ticketgröße passt nicht", "Ticket size does not fit", 40),
     ("team", "Team überzeugt nicht", "Team is not convincing", 50),
     ("metrics", "Kennzahlen überzeugen nicht", "Metrics are not convincing", 60),
@@ -165,18 +182,7 @@ class Command(BaseCommand):
             )
         self.stdout.write(self.style.SUCCESS(f"✓ Seeded {len(BUSINESS_MODELS_INITIAL)} Business Models"))
 
-        # 5. Regions
-        for code, name_de, name_en, sort_order in REGIONS_INITIAL:
-            Region.objects.update_or_create(
-                code=code,
-                defaults={
-                    "name_de": name_de,
-                    "name_en": name_en,
-                    "sort_order": sort_order,
-                    "is_active": True,
-                },
-            )
-        self.stdout.write(self.style.SUCCESS(f"✓ Seeded {len(REGIONS_INITIAL)} Regions"))
+
 
         # 6. Investor Types
         for code, name_de, name_en, sort_order in INVESTOR_TYPES_INITIAL:

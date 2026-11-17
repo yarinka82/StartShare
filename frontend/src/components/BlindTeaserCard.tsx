@@ -16,7 +16,7 @@ function formatMatchReasons(codes: string[] | undefined, t: TFunction): string[]
     sector: t("matching.matchLabels.sector"),
     stage: t("matching.matchLabels.stage"),
     check_size: t("matching.matchLabels.ticket"),
-    region: t("matching.matchLabels.region"),
+    country: t("matching.matchLabels.country"),
     business_model: t("matching.matchLabels.businessModel"),
   };
   return (codes ?? []).map((c) => labels[c] || c);
@@ -26,21 +26,21 @@ interface BlindTeaserProps {
   id: string;
   sector: string;
   stage: string;
-  region: string;
+  country: string;
   targetAmountEur: number;
   mrrEur?: number;
   teamSize?: number;
   headline: string;
   problemSolution: string;
   teamSummary: string;
-  /** raw reason codes, e.g. ["sector", "stage", "region"]; the card translates them itself */
+  /** raw reason codes, e.g. ["sector", "stage", "country"]; the card translates them itself */
   matchReasons: string[];
   onInterested: (id: string) => void;
   onDecline: (id: string) => void;
 }
 
 export default function BlindTeaserCard({
-  id, sector, stage, region, targetAmountEur, mrrEur, teamSize,
+  id, sector, stage, country, targetAmountEur, mrrEur, teamSize,
   headline, problemSolution, teamSummary, matchReasons, onInterested, onDecline,
 }: BlindTeaserProps) {
   const { t, i18n } = useTranslation();
@@ -64,7 +64,7 @@ export default function BlindTeaserCard({
         <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
           <Chip label={sector} color="primary" variant="filled" size="small" sx={{ fontWeight: 600 }} />
           <Chip label={stage} variant="outlined" size="small" />
-          <Chip label={region} variant="outlined" size="small" />
+          <Chip label={country} variant="outlined" size="small" />
         </Stack>
 
         <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>

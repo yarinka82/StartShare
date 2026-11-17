@@ -31,7 +31,6 @@ import {DigestCardDto} from "../api/types";
 const DECLINE_REASONS = [
   { code: "sector", labelKey: "matching.reasons.sector" },
   { code: "stage", labelKey: "matching.reasons.stage" },
-  { code: "region", labelKey: "matching.reasons.region" },
   { code: "ticket", labelKey: "matching.reasons.ticket" },
   { code: "team", labelKey: "matching.reasons.team" },
   { code: "metrics", labelKey: "matching.reasons.metrics" },
@@ -131,7 +130,7 @@ export default function InvestorFeedPage() {
     const mapping: Record<string, string> = {
       sector: t("matching.tags.sector", "Сектор"),
       stage: t("matching.tags.stage", "Стадія"),
-      region: t("matching.tags.region", "Регіон"),
+      country: t("matching.tags.country", "Регіон"),
       check_size: t("matching.tags.ticket", "Розмір чека"),
       business_model: t("matching.tags.businessModel", "Бажана бізнес-модель"),
     };
@@ -198,7 +197,7 @@ export default function InvestorFeedPage() {
               id={card.id}
               sector={card.sector}
               stage={card.stage}
-              region={card.region}
+              country={card.country}
               targetAmountEur={card.target_amount}
               mrrEur={card.mrr}
               teamSize={card.team_size}

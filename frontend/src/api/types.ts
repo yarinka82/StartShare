@@ -19,7 +19,6 @@ export interface Dictionaries {
   stages: Option[];
   business_models: Option[];
   countries: Option[];
-  regions: Option[];
   investor_types: Option[];
   growth_periods: Option[];
 }
@@ -65,7 +64,6 @@ export interface Mandate {
   sector_codes: string[];
   stage_codes: string[];
   country_codes: string[];
-  region_codes: string[];
   business_model_codes: string[];
   check_min_eur: string;
   check_max_eur: string;
@@ -77,7 +75,6 @@ export interface MandateInput {
   sector_codes: string[];
   stage_codes: string[];
   country_codes: string[];
-  region_codes: string[];
   business_model_codes: string[];
   check_min_eur: string;
   check_max_eur: string;
@@ -105,14 +102,14 @@ export interface DigestCardDto {
   position: number;
   sector: string;
   stage: string;
-  region: string;
+  country: string;
   target_amount: number;
   mrr?: number;
   team_size?: number;
   headline: string;
   problem_solution: string;
   team_summary: string;
-  match_reasons: string[]; // ['sector', 'stage', 'region', 'check_size', 'business_model']
+  match_reasons: string[]; // ['sector', 'stage', 'country', 'check_size', 'business_model']
   action: "none" | "interested" | "declined";
 }
 

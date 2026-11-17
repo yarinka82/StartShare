@@ -76,7 +76,6 @@ class Mandate(models.Model):
     sector_codes = models.JSONField(default=list)
     stage_codes = models.JSONField(default=list)
     country_codes = models.JSONField(default=list)
-    region_codes = models.JSONField(default=list, blank=True)
     business_model_codes = models.JSONField(default=list, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -114,7 +113,6 @@ class Mandate(models.Model):
         self.sector_codes = list(dict.fromkeys(self.sector_codes or []))
         self.stage_codes = list(dict.fromkeys(self.stage_codes or []))
         self.country_codes = list(dict.fromkeys(self.country_codes or []))
-        self.region_codes = list(dict.fromkeys(self.region_codes or []))
         self.business_model_codes = list(dict.fromkeys(self.business_model_codes or []))
     
     def __str__(self):
@@ -140,7 +138,7 @@ class CriterionSuggestion(models.Model):
         on_delete=models.PROTECT,
         related_name="+",
     )
-    # Например: "region", "stage", "ticket_size"
+    # Например:  "stage", "ticket_size"
     criterion = models.CharField(max_length=32)
     decline_count = models.PositiveSmallIntegerField(default=1)
 
@@ -356,7 +354,7 @@ class DigestCard(models.Model):
     
     match_reason_codes = models.JSONField(
         default=list,
-        help_text="Коды причин совпадения: sector, stage, region, check_size, business_model",
+        help_text="Коды причин совпадения: sector, stage, country, check_size, business_model",
     )
     soft_match_count = models.PositiveSmallIntegerField(default=0)
     profile_age_days = models.PositiveIntegerField(default=0)
@@ -377,9 +375,7 @@ class DigestCard(models.Model):
                 name="uq_digest_cards_intro",
             ),
         ]
-        indexes = [
-            models.Index(fields=["introduction"], name="idx_digest_cards_intro"),
-        ]
+ 
     
     def clean(self):
         super().clean()

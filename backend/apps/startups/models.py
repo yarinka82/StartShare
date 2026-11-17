@@ -153,18 +153,7 @@ class StartupProfile(models.Model):
                 name="chk_startup_profiles_removed_by",
             ),
         ]
-        indexes = [
-            models.Index(
-                fields=["sector", "stage", "country"],
-                name="idx_startup_matching",
-                condition=Q(status="LIVE", moderation_hidden_at__isnull=True),
-            ),
-            models.Index(
-                fields=["draft_expires_at"],
-                name="idx_startup_draft_expiry",
-                condition=Q(status="DRAFT"),
-            ),
-        ]
+
 
     def __str__(self):
         return f"Startup #{self.pk} ({self.status})"

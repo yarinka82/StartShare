@@ -23,7 +23,6 @@ MANDATE_FIELDS = (
     "sector_codes",
     "stage_codes",
     "country_codes",
-    "region_codes",
     "business_model_codes",
     "check_min_eur",
     "check_max_eur",
@@ -252,10 +251,15 @@ class InvestorFeedView(APIView):
             digest.first_opened_at = timezone.now()
             digest.first_open_channel = Digest.Channel.CABINET
             digest.save(update_fields=["first_opened_at", "first_open_channel"])
-        
+
         cards = (
             digest.cards.filter(introduction__status=Introduction.Status.SUGGESTED)
-            .select_related("introduction__startup_profile", "introduction__teaser")
+            .select_related(
+                "introduction__startup_profile__country",
+                "introduction__startup_profile__sector",
+                "introduction__startup_profile__stage",
+                "introduction__teaser",
+            )
             .prefetch_related("introduction__teaser__fields")
             .order_by("position")
         )
@@ -264,7 +268,7 @@ class InvestorFeedView(APIView):
         for c in cards:
             sp = c.introduction.startup_profile
             teaser = c.introduction.teaser
-            
+
             teaser_content = {
                 field.field_name: field.final_text or field.ai_text or ""
                 for field in teaser.fields.all()
@@ -275,19 +279,19 @@ class InvestorFeedView(APIView):
                 "position": c.position,
                 "sector": sp.sector.code if sp.sector else "",
                 "stage": sp.stage.code if sp.stage else "",
-                "region": getattr(sp.country, "name", "DACH"),
+                "country": sp.country_id or "",  # код ISO (DE, AT, ...), перевод на фронті
                 "target_amount": int(sp.round_amount_eur or 0),
-                "mrr": int(sp.mrr_eur or 0) if sp.mrr_eur else None,
+                "mrr": int(sp.mrr_eur) if sp.mrr_eur else None,
                 "team_size": sp.team_size,
 
                 "headline": teaser_content.get("headline", ""),
-                "problem_solution": f"{teaser_content.get('problem', '')} {teaser_content.get('solution', '')}",
+                "problem_solution": f"{teaser_content.get('problem', '')} {teaser_content.get('solution', '')}".strip(),
                 "team_summary": teaser_content.get("team", ""),
-                
+
                 "match_reasons": c.match_reason_codes,
                 "action": c.introduction.status,
             })
-        
+
         return Response(data)
 
 

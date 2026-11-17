@@ -13,7 +13,7 @@ from rest_framework.test import APIClient, APITestCase
 from apps.accounts.models import User
 from apps.documents.models import PitchDeck
 from apps.startups.models import StartupProfile
-from common.models import Sector, Stage, BusinessModel, Country, Region
+from common.models import Sector, Stage, BusinessModel, Country
 
 
 

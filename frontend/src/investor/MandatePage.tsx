@@ -8,7 +8,7 @@ import HistoryIcon from "@mui/icons-material/History";
 import MandateHistoryModal from "../components/MandateHistoryModal";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import {
-  Alert, Box, Button, CircularProgress, InputAdornment, Paper, Snackbar, Stack, TextField, Typography,
+    Alert, Box, Button, Chip, CircularProgress, InputAdornment, Paper, Snackbar, Stack, TextField, Typography,
 } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,9 +24,10 @@ import SectionCard from "../components/SectionCard";
 
 
 const trimDecimal = (v: string) => v.replace(/\.00$/, "");
+const DACH = ["DE", "AT", "CH"];
 
 const emptyForm = (): MandateInput => ({
-  sector_codes: [], stage_codes: [], country_codes: [], region_codes: [], business_model_codes: [],
+  sector_codes: [], stage_codes: [], country_codes: [], business_model_codes: [],
   check_min_eur: "", check_max_eur: "",
 });
 
@@ -36,7 +37,6 @@ const toForm = (m: Mandate | null): MandateInput =>
         sector_codes: m.sector_codes,
         stage_codes: m.stage_codes,
         country_codes: m.country_codes,
-        region_codes: m.region_codes,
         business_model_codes: m.business_model_codes,
         check_min_eur: trimDecimal(m.check_min_eur),
         check_max_eur: trimDecimal(m.check_max_eur),
@@ -63,11 +63,21 @@ export default function MandatePage() {
     setErr((e) => (e ? { ...e, fields: { ...e.fields, [key]: [] } } : e));
   };
 
+  const dachSelected = DACH.every((c) => form.country_codes.includes(c));
+
+  const toggleDach = () =>
+  set(
+    "country_codes",
+    dachSelected
+      ? form.country_codes.filter((c) => !DACH.includes(c))
+      : [...new Set([...form.country_codes, ...DACH])],
+  );
+
   const money = (key: "check_min_eur" | "check_max_eur", raw: string) => {
     if (/^\d{0,12}[.,]?\d{0,2}$/.test(raw)) set(key, raw);
   };
 
-  const label = (kind: "sectors" | "stages" | "countries" | "regions" | "businessModels") => (o: Option) =>
+  const label = (kind: "sectors" | "stages" | "countries" |  "businessModels") => (o: Option) =>
     t(`dict.${kind}.${o.code}`, { defaultValue: o.name });
 
   async function save() {
@@ -155,16 +165,23 @@ export default function MandatePage() {
             value={form.stage_codes} onChange={(v) => set("stage_codes", v)} optionLabel={label("stages")}
             error={!!fieldError("stage_codes")} helperText={fieldError("stage_codes")}
           />
-          <ChipSelect
-            required label={t("investor.mandate.countries", "Länder")} options={dicts.countries}
-            value={form.country_codes} onChange={(v) => set("country_codes", v)} optionLabel={label("countries")}
-            error={!!fieldError("country_codes")} helperText={fieldError("country_codes")}
-          />
-          <ChipSelect
-            label={t("investor.mandate.regions")} options={dicts.regions}
-            value={form.region_codes} onChange={(v) => set("region_codes", v)} optionLabel={label("regions")}
-            error={!!fieldError("region_codes")} helperText={fieldError("region_codes")}
-          />
+            <Box>
+              <Stack direction="row" spacing={1} sx={{ mb: 1, alignItems: "center" }}>
+                <Chip
+                  label="DACH"
+                  onClick={toggleDach}
+                  color={dachSelected ? "primary" : "default"}
+                  variant={dachSelected ? "filled" : "outlined"}
+                  title="DE, AT, CH"
+                />
+              </Stack>
+              <ChipSelect
+                required label={t("investor.mandate.countries")} options={dicts.countries}
+                value={form.country_codes} onChange={(v) => set("country_codes", v)} optionLabel={label("countries")}
+                error={!!fieldError("country_codes")} helperText={fieldError("country_codes")}
+              />
+            </Box>
+
 
           <Box>
             <Typography variant="subtitle2" gutterBottom>{t("investor.mandate.ticket")} *</Typography>
@@ -221,7 +238,7 @@ export default function MandatePage() {
             <>
               <FiberManualRecordIcon sx={{ fontSize: 12 }} color="warning" />
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {t("investor.mandate.unsaved", "Є незбережені зміни")}
+                {t("common.unsavedTitle", "Є незбережені зміни")}
               </Typography>
             </>
           ) : baseline && createdAt ? (

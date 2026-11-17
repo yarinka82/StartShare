@@ -146,7 +146,7 @@ Start Share, Sitz in Deutschland.
         LegalDocumentCode.F,
         Language.DE,
         "Kriterien zur Profilauswahl",
-        "Wir wählen Profile ausschließlich anhand der von Ihnen angegebenen Kriterien (Branche, Stadium, Region, Volumen). Es gibt keine bezahlten Platzierungen und keine Bewertung durch einen Score.",
+        "Wir wählen Profile ausschließlich anhand der von Ihnen angegebenen Kriterien (Branche, Stadium, Country, Volumen). Es gibt keine bezahlten Platzierungen und keine Bewertung durch einen Score.",
         "2026-10-01",
     ),
 

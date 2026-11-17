@@ -69,6 +69,10 @@
     "language": "Мова"
   },
   "common": {
+    "unsavedTitle": "Є незбережені зміни",
+    "unsavedText": "Якщо піти зараз, внесені зміни буде втрачено.",
+    "stay": "Залишитись",
+    "leaveWithoutSaving": "Піти без збереження",
     "tryAgain": "Спробувати ще раз",
     "checkAgain": "Перевірити ще раз",
     "loading": "Завантаження…",
@@ -283,6 +287,16 @@
     "copyright": "Платформа Start Share. Усі права захищено."
   },
   "dict": {
+      "countries": {
+    "DE": "Germany", "AT": "Austria", "CH": "Switzerland", "BE": "Belgium",
+    "BG": "Bulgaria", "HR": "Croatia", "CY": "Cyprus", "CZ": "Czechia",
+    "DK": "Denmark", "EE": "Estonia", "FI": "Finland", "FR": "France",
+    "GR": "Greece", "HU": "Hungary", "IE": "Ireland", "IT": "Italy",
+    "LV": "Latvia", "LT": "Lithuania", "LU": "Luxembourg", "MT": "Malta",
+    "NL": "Netherlands", "PL": "Poland", "PT": "Portugal", "RO": "Romania",
+    "SK": "Slovakia", "SI": "Slovenia", "ES": "Spain", "SE": "Sweden"
+  },
+
     "investorTypes": {
       "business-angel": "Бізнес-ангел",
       "vc": "Венчурний фонд (VC)",
@@ -311,12 +325,7 @@
       "series-b": "Series B (5 млн € – 15 млн €)",
       "series-c-plus": "Series C+ (> 15 млн €)"
     },
-    "regions": {
-      "DACH": "DACH (DE, AT, CH)",
-      "DE_ONLY": "Лише Німеччина",
-      "EU_WIDE": "Європейський Союз",
-      "GLOBAL": "Глобально / віддалено"
-    },
+
     "businessModels": {
       "SUBSCRIPTION": "Підписка / SaaS",
       "TRANSACTIONAL": "Транзакційна модель / маркетплейс",
@@ -366,6 +375,7 @@
       "continue": "Перейти до мандата"
     },
     "mandate": {
+      "reset": "Скасувати зміни",
       "unsaved": "Є незбережені зміни",
       "notSavedYet": "Мандат ще не збережено",
       "historyModalTitle": "Історія інвестиційного мандата",
@@ -382,7 +392,6 @@
       "softHint": "Ці переваги впливають на порядок стартапів у дайджесті, але не виключають жодного профілю",
       "sectors": "Галузі та сектори",
       "stages": "Стадії фінансування",
-      "regions": "Цільові регіони",
       "countries": "Країни",
       "ticket": "Розмір тікета",
       "ticketMin": "Мін. тікет",
@@ -399,7 +408,7 @@
     "tags": {
       "sector": "Галузь",
       "stage": "Стадія фінансування",
-      "region": "Цільовий регіон",
+      "region": "Країна",
       "ticket": "Розмір тікета",
       "businessModel": "Бажана бізнес-модель"
     },
@@ -407,13 +416,13 @@
       "sector": "Збіг за сектором",
       "stage": "Збіг за стадією фінансування",
       "ticket": "Відповідний розмір чека",
-      "region": "Цільовий регіон",
+      "country": "Збіг за країною",
       "businessModel": "Бажана бізнес-модель"
     },
     "reasons": {
       "sector": "Галузь не відповідає",
       "stage": "Неправильна стадія",
-      "region": "Регіон не відповідає",
+      "region": "Країна не відповідає",
       "ticket": "Невідповідний розмір тікета",
       "team": "Недостатній досвід команди",
       "metrics": "Недостатні показники / тракція",
@@ -631,6 +640,7 @@
       "cancel": "Скасувати"
     }
   }
+
 }
 
 

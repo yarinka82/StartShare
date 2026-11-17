@@ -69,6 +69,10 @@
     "language": "Sprache"
   },
   "common": {
+    "unsavedTitle": "Es gibt ungespeicherte Änderungen",
+    "unsavedText": "Wenn Sie jetzt gehen, gehen Ihre Änderungen verloren.",
+    "stay": "Bleiben",
+    "leaveWithoutSaving": "Ohne Speichern verlassen",
     "retry": "Erneut versuchen",
     "tryAgain": "Erneut versuchen",
     "checkAgain": "Erneut prüfen",
@@ -365,6 +369,7 @@
       "saved": "Profil gespeichert"
     },
     "mandate": {
+      "reset": "Änderungen verwerfen",
       "unsaved": "Es gibt ungespeicherte Änderungen",
       "notSavedYet": "Mandat noch nicht gespeichert",
       "historyModalTitle": "Historie des Investitionsmandats",
@@ -406,13 +411,13 @@
       "sector": "Passende Branche",
       "stage": "Passende Finanzierungsphase",
       "ticket": "Passende Ticketgröße",
-      "region": "Passende Zielregion",
+      "country": "Übereinstimmung beim Land",
       "businessModel": "Passendes Geschäftsmodell"
     },
     "reasons": {
       "sector": "Branche passt nicht",
       "stage": "Falsche Phase",
-      "region": "Region passt nicht",
+      "region": "Land passt nicht",
       "ticket": "Ticketgröße unpassend",
       "team": "Teamerfahrung unzureichend",
       "metrics": "Kennzahlen / Traktion unzureichend",

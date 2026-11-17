@@ -22,7 +22,6 @@ def save_or_update_mandate(investor_profile: InvestorProfile, data: dict, source
         sectors = sorted(list(dict.fromkeys(data.get("sector_codes") or [])))
         stages = sorted(list(dict.fromkeys(data.get("stage_codes") or [])))
         countries = sorted(list(dict.fromkeys(data.get("country_codes") or [])))
-        regions = sorted(list(dict.fromkeys(data.get("region_codes") or [])))
         b_models = sorted(list(dict.fromkeys(data.get("business_model_codes") or [])))
 
         # 1. Перевірка: чи змінилися дані порівняно з поточною версією?
@@ -33,7 +32,6 @@ def save_or_update_mandate(investor_profile: InvestorProfile, data: dict, source
                 and sorted(current.sector_codes) == sectors
                 and sorted(current.stage_codes) == stages
                 and sorted(current.country_codes) == countries
-                and sorted(current.region_codes or []) == regions
                 and sorted(current.business_model_codes or []) == b_models
             )
             # Якщо нічого не змінилося — повертаємо поточний без створення нової версії
@@ -58,7 +56,6 @@ def save_or_update_mandate(investor_profile: InvestorProfile, data: dict, source
             sector_codes=sectors,
             stage_codes=stages,
             country_codes=countries,
-            region_codes=regions,
             business_model_codes=b_models,
         )
         new_mandate.full_clean()

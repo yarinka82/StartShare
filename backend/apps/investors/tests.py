@@ -9,14 +9,13 @@ from apps.accounts.models import User, UserConsent
 from apps.analytics.models import Event, EventName
 # Импортируем новые модели
 from apps.investors.models import InvestorProfile, Mandate
-from common.models import BusinessModel, Country, InvestorType, Region, Sector, Stage
+from common.models import BusinessModel, Country, InvestorType, Sector, Stage
 
 # Актуальная структура мандата с новыми именами полей
 MANDATE = {
     "sector_codes": ["fintech", "ai-data"],
     "stage_codes": ["seed", "series-a"],
     "country_codes": ["de"],
-    "region_codes": ["dach"],
     "business_model_codes": ["saas-subscription"],
     "check_min_eur": "100000",
     "check_max_eur": "500000",
@@ -134,7 +133,6 @@ class MandateTests(InvestorBase):
         e = events.get()
         self.assertEqual(e.user, self.user)
         self.assertEqual(e.properties["check_min_eur"], "100000.00")
-        self.assertEqual(e.properties["region_codes"], ["dach"])
 
         state = self.client.get("/api/investor/").data
         self.assertEqual(state["mandate"]["stage_codes"], ["seed", "series-a"])
@@ -149,13 +147,13 @@ class MandateTests(InvestorBase):
 
     def test_real_change_emits_mandate_changed_with_source_and_fields(self):
         self.put()
-        r = self.put(region_codes=["dach", "eu"], check_max_eur="900000")
+        r =  check_max_eur="900000"
         self.assertIn(r.status_code, (200, 201))
         self.assertEqual(r.data["version"], 2)
 
         e = Event.objects.get(name=EventName.MANDATE_CHANGED)
         self.assertEqual(e.properties["source"], "self")
-        self.assertEqual(sorted(e.properties["changed"]), ["check_max_eur", "region_codes"])
+        self.assertEqual(sorted(e.properties["changed"]), ["check_max_eur"])
         self.assertEqual(e.properties["check_max_eur"], "900000.00")
         self.assertEqual(Event.objects.filter(name=EventName.MANDATE_SAVED).count(), 1)
 

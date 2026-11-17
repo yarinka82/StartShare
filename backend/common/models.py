@@ -18,27 +18,12 @@ class ReferenceModel(models.Model):
 
 
 class Country(ReferenceModel):
-    code = models.CharField(max_length=10, primary_key=True)
+    '''27 країн ЄС + CH(ISO 3166 - 1 alpha - 2) '''
+    code = models.CharField(max_length=2, primary_key=True)
 
     class Meta(ReferenceModel.Meta):
         db_table = "countries"
-        constraints = [
-            models.CheckConstraint(
-                condition=Q(code__regex=r"^[a-z]{2,10}$"),
-                name="chk_countries_code",
-            )
-        ]
 
-
-
-class Region(ReferenceModel):
-    """regions — географічний фокус інвестора (DACH, EU, Europe, Worldwide)."""
-
-    code = models.CharField(max_length=32, primary_key=True)
-
-    class Meta(ReferenceModel.Meta):
-        db_table = "regions"
-        
         
 
 class Sector(ReferenceModel):
@@ -91,7 +76,7 @@ class InvestorType(ReferenceModel):
 class DeclineReasonCriterion(models.TextChoices):
     SECTOR = "sector", "Sector"
     STAGE = "stage", "Stage"
-    REGION = "region", "Region"
+    COUNTRY = "country", "Country"
     CHECK_SIZE = "check_size", "Check size"
 
 
